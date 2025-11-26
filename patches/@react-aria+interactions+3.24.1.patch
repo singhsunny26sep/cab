@@ -1,0 +1,13 @@
+diff --git a/node_modules/@react-aria/interactions/dist/usePress.main.js b/node_modules/@react-aria/interactions/dist/usePress.main.js
+index bfdef46..01677c8 100644
+--- a/node_modules/@react-aria/interactions/dist/usePress.main.js
++++ b/node_modules/@react-aria/interactions/dist/usePress.main.js
+@@ -5,7 +5,7 @@ var $bBqCQ$swchelperscjs_class_private_field_getcjs = require("@swc/helpers/cjs/
+ var $bBqCQ$swchelperscjs_class_private_field_initcjs = require("@swc/helpers/cjs/_class_private_field_init.cjs");
+ var $bBqCQ$swchelperscjs_class_private_field_setcjs = require("@swc/helpers/cjs/_class_private_field_set.cjs");
+ var $bBqCQ$reactariautils = require("@react-aria/utils");
+-var $bBqCQ$reactdom = require("react-dom");
++var $bBqCQ$reactdom = {};
+ var $bBqCQ$react = require("react");
+ 
+ 

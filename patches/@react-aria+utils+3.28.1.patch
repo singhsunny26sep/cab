@@ -1,0 +1,11 @@
+diff --git a/node_modules/@react-aria/utils/dist/animation.main.js b/node_modules/@react-aria/utils/dist/animation.main.js
+index f2a8b2a..25f7e34 100644
+--- a/node_modules/@react-aria/utils/dist/animation.main.js
++++ b/node_modules/@react-aria/utils/dist/animation.main.js
+@@ -1,5 +1,5 @@
+ var $78605a5d7424e31b$exports = require("./useLayoutEffect.main.js");
+-var $bsryd$reactdom = require("react-dom");
++var $bsryd$reactdom = {};
+ var $bsryd$react = require("react");
+ 
+ 
