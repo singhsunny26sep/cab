@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const BASE_URL = 'http://192.168.31.250:5000/api'
+export const BASE_URL = 'https://dharma-cab.onrender.com/api'
 // export const BASE_URL = 'https://48cb-2401-4900-51e0-1730-29ae-bd3a-55b4-939c.ngrok-free.app/api'
 // export const BASE_URL = 'https://cabdriverserver-a3cdd048fc7c.herokuapp.com/api'
 
