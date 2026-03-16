@@ -1,10 +1,9 @@
 import React from 'react'
-import { createNativeStackNavigator, NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { StackRoute } from '../navigationRoutes';
 import { NavigationString } from '../navigationStrings';
-import { colors } from '../../constants/colors';
-import BottomTabStack from './BottomTabStack';
+
 import DrawerStack from './DrawerStack';
 
 
@@ -29,7 +28,6 @@ const MainNavigation = () => {
       <Stack.Screen name={NavigationString.OtpVerify} component={StackRoute.OtpVerify} />
       <Stack.Screen name={NavigationString.SetPassword} component={StackRoute.SetPassword} />
       <Stack.Screen name={NavigationString.CompleteProfile} component={StackRoute.CompleteProfile} />
-
       <Stack.Screen name={NavigationString.Login} component={StackRoute.Login} />
       <Stack.Screen name={NavigationString.DrawerStacks} component={DrawerStack} />
       <Stack.Screen name={NavigationString.SelectPath} component={StackRoute.SelectPath} />
