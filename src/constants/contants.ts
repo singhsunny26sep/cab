@@ -7,7 +7,7 @@ export const deviceHeight = viewportHeight;
 
 export const serverBaseURL = 'https://api2.finactive.net'
 export const serverIMGBaseURL = 'https://phrryt.s3.ap-southeast-2.amazonaws.com/uploads/'
-export const GOOGLE_API_KEY = 'AIzaSyD7u-bDQzuzqgRxHkT9fRd6xyMsRmtgLEY'
+export const GOOGLE_API_KEY = 'AIzaSyBjOyQJKvI37gg2PKY7HJmdJohZbdqYZq4'
 export const GEOAPIFY_API_KEY = 'AIzaSyBjOyQJKvI37gg2PKY7HJmdJohZbdqYZq4'
 export const GOMAPS_API_KEY = 'AIzaSyBjOyQJKvI37gg2PKY7HJmdJohZbdqYZq4'
 let sampleHeight = 800;
