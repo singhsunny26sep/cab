@@ -2,7 +2,7 @@ import { PermissionsAndroid, Platform, Linking, Alert } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import axios from 'axios';
-import { GEOAPIFY_API_KEY } from "../constants/contants";
+import { GOOGLE_API_KEY } from "../constants/contants";
 
 // Common location permission types for Android and iOS
 const LOCATION_PERMISSIONS = {
@@ -15,24 +15,33 @@ const LOCATION_PERMISSIONS = {
 
 const fetchAddress = async (latitude: number, longitude: number) => {
   try {
-    const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=${GEOAPIFY_API_KEY}`;
+    // Using Google Geocoding API instead of Geoapify
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}`;
     const response = await axios.get(url);
 
-    const addressData = response.data?.features?.[0]?.properties;
-    if (addressData) {
-    //   console.log('✅ Address Found:', addressData);
+    if (response.data?.status === 'OK' && response.data?.results?.[0]) {
+      const addressData = response.data.results[0];
+      const addressComponents = addressData.address_components;
+      
+      const getComponent = (types: string[]) => {
+        const component = addressComponents.find((c: any) => 
+          c.types.some((t: string) => types.includes(t))
+        );
+        return component?.long_name || '';
+      };
+
       return {
-        formatted: addressData.formatted,
-        street: addressData.street,
-        houseNumber: addressData.housenumber,
-        postalCode: addressData.postcode,
-        city: addressData.city,
-        state: addressData.state,
-        country: addressData.country,
+        formatted: addressData.formatted_address,
+        street: getComponent(['street_number', 'route']),
+        houseNumber: getComponent(['street_number']),
+        postalCode: getComponent(['postal_code']),
+        city: getComponent(['locality', 'administrative_area_level_2']),
+        state: getComponent(['administrative_area_level_1']),
+        country: getComponent(['country']),
       };
     }
 
-    console.log('Address not found');
+    console.log('Address not found, status:', response.data?.status);
     return null;
   } catch (error) {
     console.log('❌ Address Fetch Error:', error);

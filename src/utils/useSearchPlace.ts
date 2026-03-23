@@ -12,18 +12,14 @@ const useSearchPlace = () => {
       setPlaces([]);
       return;
     }
-    
     const encodedQuery = encodeURIComponent(query);
     const apiUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodedQuery}&key=${GOOGLE_API_KEY}`;
-    
     console.log('[useSearchPlace] Searching for:', query);
     console.log('[useSearchPlace] API URL:', apiUrl);
-
     try {
       setLoading(true);
       const response = await fetch(apiUrl);
       const data = await response.json();
-      
       console.log('[useSearchPlace] API Response status:', data.status);
       console.log('[useSearchPlace] API Response:', JSON.stringify(data).substring(0, 500));
 

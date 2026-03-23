@@ -534,8 +534,8 @@ const Home = () => {
         provider={
           Platform.OS === 'android' ? PROVIDER_GOOGLE : PROVIDER_DEFAULT
         }
-        showsUserLocation={false}
-        showsMyLocationButton={false}
+        showsUserLocation={true}
+        showsMyLocationButton={true}
         initialRegion={{
           ...state?.curLoc,
           latitudeDelta: LATITUDE_DELTA,

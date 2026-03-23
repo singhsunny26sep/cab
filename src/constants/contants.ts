@@ -4,17 +4,13 @@ import { Dimensions } from "react-native";
 const {width: viewportWidth, height: viewportHeight} = Dimensions.get('screen');
 export const deviceWidth = viewportWidth;
 export const deviceHeight = viewportHeight;
-
 export const serverBaseURL = 'https://api2.finactive.net'
 export const serverIMGBaseURL = 'https://phrryt.s3.ap-southeast-2.amazonaws.com/uploads/'
 export const GOOGLE_API_KEY = 'AIzaSyBjOyQJKvI37gg2PKY7HJmdJohZbdqYZq4'
 export const GEOAPIFY_API_KEY = 'AIzaSyBjOyQJKvI37gg2PKY7HJmdJohZbdqYZq4'
 export const GOMAPS_API_KEY = 'AIzaSyBjOyQJKvI37gg2PKY7HJmdJohZbdqYZq4'
-let sampleHeight = 800;
-let sampleWidth = 360;
 
 const scale = viewportWidth / 375;
-
 //Responsive size function
 export function moderateScale(size: number) {
   const newSize = size * scale;
