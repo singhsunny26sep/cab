@@ -1,76 +1,127 @@
 export const colors = {
-  themePrimary : '#FEC400',
-  themeSecondary : '#EDAE10',
+  // Primary Theme Colors - Vibrant Purple-Blue Gradient Style
+  themePrimary: '#6C5CE7', // Vibrant Purple
+  themeSecondary: '#A29BFE', // Light Purple
+  themeTertiary: '#00CEC9', // Teal/Cyan accent
+
+  // Legacy/Missing Colors
+  mediumLightGray: '#A0A0A0',
+
+  // White & Black
   white: '#ffffff',
   whiteOpacity0: 'rgba(255,255,255, 0)',
   whiteOpacity10: 'rgba(255,255,255, 0.1)',
-  themeBlue: '#007aff',
   black: '#000000',
-  black2: '#323232',
-  primary: '#30B0C5',
-  primary2: '#1B8192',
-  primary3: '#B7ECF5',
-  success: '#80B644',
-  gray: '#565353',
-  gray2: '#413F3F',
-  gray3: '#D8D4D4',
-  gray4: '#9C9C9C',
-  gray5: '#F1EFEF',
-  gray6: '#9E9E9E',
-  gray7: '#656363',
-  gray8: '#f1f1f1',
-  gray10: '#fafafa',
-  mediumLightGray  : '#A0A0A0',
-  dimGray : '#5A5A5A',
-  silverGray : '#B8B8B8',
-  paleYellow : '#FFF1B1',
-  ivoryYellow : '#FFFBE7',
-  charcoalGray : '#2A2A2A',
-  borderColor: '#979797',
-  textColor: '#1E1E1E',
-  placeHolderColor: '#9B9696',
-  inputFocusColor: '#e1fbff66',
-  alertColor: '#F75555',
-  bColor: '#ffffff',
-  lightBlue: '#DFF9FD',
-  lightPink: '#FFF3F3',
-  white1: '#FFFDFD',
-  white2: '#f2f2f2',
-  grayish: '#9996A9',
-  deepPurple: '#A74AC7',
-  darkViolet: '#690DAC',
-  deepLavende: '#a043c5',
-  red: '#FF2626',
-  mutedPurple: '#6E6B85',
-  lavenderBlush: '#F6EDF9',
-  vividRed : '#F44336',
-  Purple: '#A64AC7',
-  paleGray: '#F6F7F9',
-  brightGray: '#E6E6EA',
-  mediumAquamarine: '#65CDAA',
-  mintCream: '#e7f3f1',
-  yellow: '#F3A000',
-  lavenderGray: '#E5E5EA',
-  lightOrchid: '#DBB5E8',
-  brightCyan: '#22d3ee',
-  lightCyan: '#67e8f9',
-  vividSkyBlue: '#06b6d4',
-  blueGray: '#f1f5f9',
-  textSlate500: 'rgb(100 116 139)',
-  textSlate700: 'rgb(51 65 85)',
-  textRed500: 'rgb(239 68 68)',
-  slate900: '#0f172a',
-  pewterBlue: '#87a3b8',
-  green: '#43A048',
-  brightNavyBlue: '#0E6CC4',
-  dimsGray: '#7f7f7f',
-  gray9: '#f2f2f2',
-  white3: '#f8f9fb',
-  gold: '#efd05a',
-  mediumBlue: '#014581',
-  orange : '#ff7f50',
-  emeraldGreen : '#43A048',
-  firebrickRed : '#D32F2F',
-  error: '#FF3B30',
-  Amber:"#FFE28A"
-}
+  black2: '#1A1A2E',
+
+  // Primary Blues
+  primary: '#0984E3', // Bright Blue
+  primary2: '#74B9FF', // Light Blue
+  primary3: '#E8F4FD', // Very Light Blue
+
+  // Success Green - More Vibrant
+  success: '#00B894', // Mint Green
+  successLight: '#55EFC4', // Light Mint
+
+  // Gray Scale - Modern
+  gray: '#2D3436', // Dark Gray
+  gray2: '#636E72', // Medium Gray
+  gray3: '#B2BEC3', // Light Gray
+  gray4: '#DFE6E9', // Very Light Gray
+  gray5: '#F1F2F6', // Off White Gray
+  gray6: '#747D8C', // Slate Gray
+  gray7: '#A4B0BE', // Silver
+  gray8: '#F5F6FA', // Background Gray
+  gray9: '#EAECEE', // Border Gray
+  gray10: '#FFFFFF', // White Gray
+
+  // Yellows - Vibrant
+  paleYellow: '#FFEAA7', // Soft Yellow
+  ivoryYellow: '#FFF9E6', // Cream Yellow
+  yellow: '#FDCB6E', // Golden Yellow
+  gold: '#F1C40F', // Bright Gold
+  Amber: '#FFD93D', // Amber Yellow
+
+  // Charcoal & Dark
+  charcoalGray: '#1E272E', // Dark Charcoal
+  dimGray: '#2F3640', // Dim Gray
+  silverGray: '#CED6E0', // Silver
+
+  // Border Colors
+  borderColor: '#DCDDE1',
+
+  // Text Colors
+  textColor: '#2C3A47', // Dark Text
+  textColorSecondary: '#7F8C8D', // Gray Text
+  placeHolderColor: '#95A5A6',
+
+  // Input Focus
+  inputFocusColor: '#6C5CE733',
+
+  // Alert/Error - More Vibrant Red
+  alertColor: '#FF6B6B', // Coral Red
+  vividRed: '#EE5253', // Bright Red
+  red: '#FF4757', // Vibrant Red
+  firebrickRed: '#C0392B', // Deep Red
+  error: '#E74C3C', // Standard Error Red
+
+  // Background Colors
+  bColor: '#FFFFFF',
+  lightBlue: '#E3F2FD', // Light Blue BG
+  lightPink: '#FDEDEE', // Light Pink BG
+  white1: '#FAFAFA',
+  white2: '#F8F9FA',
+  white3: '#FDFDFD',
+
+  // Purple Shades - Modern App Colors
+  grayish: '#8E89A6',
+  deepPurple: '#8E44AD', // Deep Purple
+  darkViolet: '#6C3483', // Dark Violet
+  deepLavende: '#9B59B6', // Lavender Purple
+  mutedPurple: '#A29B6C',
+  lavenderBlush: '#F5EEF8',
+  Purple: '#9B59B6',
+  paleGray: '#F4F6F7',
+  brightGray: '#D5DBDB',
+
+  // Aqua/Teal Colors
+  mediumAquamarine: '#1ABC9C', // Teal
+  mintCream: '#E8F8F5',
+
+  // Lavender
+  lavenderGray: '#D7BDE2',
+  lightOrchid: '#C39BD3',
+
+  // Cyan Colors
+  brightCyan: '#00D2D3', // Bright Cyan
+  lightCyan: '#81ECEC',
+  vividSkyBlue: '#00A8FF',
+
+  // Blue Grays
+  blueGray: '#D6EAF8',
+  textSlate500: '#64748B',
+  textSlate700: '#334155',
+  textRed500: '#EF4444',
+  slate900: '#0F172A',
+  pewterBlue: '#5DADE2',
+
+  // Green Shades
+  green: '#27AE60', // Vibrant Green
+  brightNavyBlue: '#2980B9',
+  emeraldGreen: '#2ECC71',
+
+  dimsGray: '#95A5A6',
+
+  // Orange Colors - Vibrant
+  orange: '#FF7F50', // Coral Orange
+  orangeLight: '#FFAB91',
+  sunsetOrange: '#FF6348',
+
+  // Additional Modern Colors
+  gradientPurple: 'linear-gradient(135deg, #667EEA 0%, #764BA2 100%)',
+  gradientBlue: 'linear-gradient(135deg, #00C9FF 0%, #92FE9D 100%)',
+  gradientOrange: 'linear-gradient(135deg, #F093FB 0%, #F5576C 100%)',
+
+  // Route/Map Colors
+  routeRed: '#FF3B30',
+};

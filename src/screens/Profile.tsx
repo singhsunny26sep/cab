@@ -1,65 +1,137 @@
 import React, {useEffect, useState} from 'react';
-import {
-  Box,
-  Image,
-  Pressable,
-  Text,
-  Toast,
-  ToastTitle,
-  useToast,
-} from '@gluestack-ui/themed';
-import CountryPicker, {CountryCode} from 'react-native-country-picker-modal';
+import {Box, Image, Pressable, Text, ScrollView} from '@gluestack-ui/themed';
 import {DrawerNavigationProp} from '@react-navigation/drawer';
 import {ParamListBase, useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import ImagePicker from 'react-native-image-crop-picker';
 import {ActivityIndicator, Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {colors} from '../constants/colors';
 import {Container} from '../components/Container';
-import {CameraIcon, HamburgerIcon} from '../components/Icons';
+import {
+  HamburgerIcon,
+  WalletIcon,
+  HistoryDrawerIcon,
+  LocationDrawerIcon,
+  OfferIcon,
+  SettingDrawerIcon,
+  SupportDrawerIcon,
+  AboutUsdrawerIcon,
+  LogoutDrawerIcon,
+  LeftAngleIcon,
+  EditProfileIcon,
+} from '../components/Icons';
 import {moderateScale, moderateScaleVertical} from '../utils/responsiveSize';
-import Body from '../components/Body/Body';
-import InputText from '../components/TextInput/InputText';
-import PrimaryButton from '../components/Button/PrimaryButton';
 import {BASE_URL, Instance} from '../api/Instance';
-import {GET_PROFILE, UPDATE_PROFILE} from '../api/ApiEndpoints';
+import {GET_PROFILE, GET_ALL_FAVORITE_ADDRESSES} from '../api/ApiEndpoints';
 import {useTheme} from '../constants/ThemeContext';
 import {
   loadUserFromStorage,
   saveUserToStorage,
   setProfileData,
+  setFavoriteAddresses,
 } from '../store/slice/UserSlice';
-import {useDispatch, useSelector} from 'react-redux';
-import {RootState} from '../store/reduxStore/store';
+import {useDispatch} from 'react-redux';
+import {NavigationString} from '../navigation/navigationStrings';
+
+interface MenuItemProps {
+  icon: React.ReactNode;
+  title: string;
+  subtitle?: string;
+  onPress: () => void;
+  showBadge?: boolean;
+}
+
+const MenuItem: React.FC<MenuItemProps> = ({
+  icon,
+  title,
+  subtitle,
+  onPress,
+  showBadge,
+}) => {
+  const {isDarkMode} = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      flexDirection="row"
+      alignItems="center"
+      py={moderateScaleVertical(15)}
+      px={moderateScale(20)}
+      borderBottomWidth={1}
+      borderBottomColor={isDarkMode ? colors.charcoalGray : colors.gray3}>
+      <Box
+        w={moderateScale(40)}
+        h={moderateScale(40)}
+        borderRadius={moderateScale(8)}
+        bgColor={colors.themePrimary}
+        alignItems="center"
+        justifyContent="center"
+        mr={moderateScale(15)}>
+        {icon}
+      </Box>
+      <Box flex={1}>
+        <Text
+          fontFamily={'$poppinsMedium'}
+          fontSize={16}
+          color={isDarkMode ? colors.white : colors.charcoalGray}>
+          {title}
+        </Text>
+        {subtitle && (
+          <Text
+            fontFamily={'$poppinsRegular'}
+            fontSize={13}
+            color={colors.gray2}
+            mt={moderateScaleVertical(2)}>
+            {subtitle}
+          </Text>
+        )}
+      </Box>
+      {showBadge && (
+        <Box
+          w={moderateScale(22)}
+          h={moderateScale(22)}
+          borderRadius={moderateScale(11)}
+          bgColor={colors.alertColor}
+          alignItems="center"
+          justifyContent="center">
+          <Text color={colors.white} fontSize={12} fontFamily={'$poppinsBold'}>
+            2
+          </Text>
+        </Box>
+      )}
+      <LeftAngleIcon
+        width={moderateScale(20)}
+        height={moderateScale(20)}
+        fill={colors.gray4}
+      />
+    </Pressable>
+  );
+};
+
+type RootStackParamList = {
+  Wallet: undefined;
+  History: undefined;
+  Favourite: undefined;
+  Offers: undefined;
+  Settings: undefined;
+  HelpSupport: undefined;
+  AboutUs: undefined;
+  [key: string]: undefined;
+};
 
 const Profile = () => {
   const navigation = useNavigation<DrawerNavigationProp<ParamListBase>>();
-  const toast = useToast();
+  const stackNavigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const {isDarkMode} = useTheme();
   const dispatch = useDispatch();
-  const userData = useSelector((state: RootState) => state.user);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    emergencyContactNumber: '',
-    trackingNumber: '',
-  });
-
-  const [countryCode, setCountryCode] = useState<CountryCode>('IN');
-  const [_country, setCountry] = useState(null);
   const [selectedImage, setSelectedImage] = useState(
     'https://i2.pngimg.me/thumb/f/720/m2H7K9A0b1d3b1m2.jpg',
   );
   const [loading, setLoading] = useState<boolean>(false);
   const [userLocalData, setUserLocalData] = useState<any>(null);
-
-  const handleCountrySelect = (country: any) => {
-    // console.log(country);
-    setCountryCode(country?.cca2);
-    setCountry(country?.callingCode[0]);
-  };
 
   const error = console.error;
   console.error = (...args: any) => {
@@ -68,8 +140,6 @@ const Profile = () => {
   };
 
   const onHandleSelectImg = () => {
-    // console.log('jjj');
-
     ImagePicker.openPicker({
       width: 300,
       height: 400,
@@ -82,160 +152,9 @@ const Profile = () => {
     });
   };
 
-  const handleUpdateProfile = async () => {
-    try {
-      if (
-        !formData.name ||
-        !formData.email ||
-        !formData.emergencyContactNumber
-      ) {
-        // Alert.alert('Error', 'Please fill all required fields');
-        toast.show({
-          placement: 'top',
-          render: ({id}: any) => {
-            const toastId = 'toast-' + id;
-            return (
-              <Toast nativeID={toastId} variant="accent" action="error">
-                <ToastTitle>{'Please fill all required fields.'}</ToastTitle>
-              </Toast>
-            );
-          },
-        });
-        return;
-      }
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) {
-        // Alert.alert('Error', 'Please enter a valid email address');
-        toast.show({
-          placement: 'top',
-          render: ({id}: any) => {
-            const toastId = 'toast-' + id;
-            return (
-              <Toast nativeID={toastId} variant="accent" action="error">
-                <ToastTitle>{'Please enter a valid email address.'}</ToastTitle>
-              </Toast>
-            );
-          },
-        });
-        return;
-      }
-
-      const token = await AsyncStorage.getItem('userToken');
-      if (!token) {
-        // Alert.alert('Error', 'Please login again');
-        toast.show({
-          placement: 'top',
-          render: ({id}: any) => {
-            const toastId = 'toast-' + id;
-            return (
-              <Toast nativeID={toastId} variant="accent" action="error">
-                <ToastTitle>{'Please login again.'}</ToastTitle>
-              </Toast>
-            );
-          },
-        });
-        return;
-      }
-      setLoading(true);
-      const data = {
-        name: formData.name,
-        email: formData.email,
-        imgUrl: selectedImage,
-        contact: formData.emergencyContactNumber,
-        emergencyContactNumber: formData.emergencyContactNumber,
-        mobileNumber: formData.emergencyContactNumber,
-        trackingNumber: formData.trackingNumber,
-        city: userLocalData?.pickupDetails?.city,
-        state: userLocalData?.pickupDetails?.state,
-      };
-      const response = await Instance.put(UPDATE_PROFILE.url, data, {
-        headers: {
-          Authorization: token,
-        },
-      });
-      console.log('response after profile updated', response.data);
-      if (response?.data?.success) {
-        // Alert.alert('Success', 'Profile updated successfully');
-        toast.show({
-          placement: 'top',
-          render: ({id}: any) => {
-            const toastId = 'toast-' + id;
-            return (
-              <Toast nativeID={toastId} variant="accent" action="success">
-                <ToastTitle>Profile updated successfully.</ToastTitle>
-              </Toast>
-            );
-          },
-        });
-        if (response.data.data) {
-          await getProfile();
-          // await AsyncStorage.setItem(
-          //   'userData',
-          //   JSON.stringify(response.data.data),
-          // );
-        }
-      } else {
-        if (response?.data?.msg?.includes('token expired')) {
-          await AsyncStorage.removeItem('userToken');
-          toast.show({
-            placement: 'top',
-            render: ({id}: any) => {
-              const toastId = 'toast-' + id;
-              return (
-                <Toast nativeID={toastId} variant="accent" action="error">
-                  <ToastTitle>Session Expired, Please login again.</ToastTitle>
-                </Toast>
-              );
-            },
-          });
-          // Alert.alert('Session Expired', 'Please login again');
-          return;
-        }
-        const errorMessage = response?.data?.msg || 'Something went wrong';
-        toast.show({
-          placement: 'top',
-          render: ({id}: any) => {
-            const toastId = 'toast-' + id;
-            return (
-              <Toast nativeID={toastId} variant="accent" action="error">
-                <ToastTitle>{errorMessage}</ToastTitle>
-              </Toast>
-            );
-          },
-        });
-        // Alert.alert('Error', response?.data?.msg || 'Something went wrong');
-      }
-    } catch (error: any) {
-      const errorMessage =
-        error?.response?.data?.msg ||
-        'Something went wrong while updating profile';
-      toast.show({
-        placement: 'top',
-        render: ({id}: any) => {
-          const toastId = 'toast-' + id;
-          return (
-            <Toast nativeID={toastId} variant="accent" action="error">
-              <ToastTitle>{errorMessage}</ToastTitle>
-            </Toast>
-          );
-        },
-      });
-      // Alert.alert(
-      //   'Error',
-      //   error?.response?.data?.msg ||
-      //     'Something went wrong while updating profile',
-      // );
-      console.log('Profile update error:', error?.response || error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const getProfile = async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
-      console.log('user token in profile ....', token);
       if (!token) {
         return;
       }
@@ -248,17 +167,7 @@ const Profile = () => {
       setLoading(false);
       if (response.data.success) {
         const profileData = response.data.data;
-        console.warn('response for get profile api...', profileData);
-        setFormData(prev => ({
-          ...prev,
-          name: profileData?.name,
-          email: profileData?.email,
-          emergencyContactNumber: profileData?.mobileNumber?.toString(),
-          trackingNumber: profileData?.trackingNumber?.toString(),
-        }));
         setSelectedImage(profileData?.imgUrl);
-
-        // Update Redux state
         dispatch(setProfileData({profileData}));
         const currentUserData: any = (await loadUserFromStorage()) || {};
         await saveUserToStorage({
@@ -266,14 +175,61 @@ const Profile = () => {
           profileData,
         });
       }
+
+      // Also sync favorite addresses
+      try {
+        const favoritesResponse = await Instance.get(
+          GET_ALL_FAVORITE_ADDRESSES.url,
+          {
+            headers: {
+              Authorization: token,
+            },
+          },
+        );
+        const favoriteData = favoritesResponse.data;
+        dispatch(setFavoriteAddresses(favoriteData));
+        await AsyncStorage.setItem(
+          'favoriteAddresses',
+          JSON.stringify(favoriteData),
+        );
+      } catch (favError) {
+        console.log('Error fetching favorites:', favError);
+      }
     } catch (error) {
       setLoading(false);
       console.log('error for fetching profile...', error);
     }
   };
 
+  const handleLogout = async () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            await AsyncStorage.clear();
+            // Navigate to login or splash
+            navigation.reset({
+              index: 0,
+              routes: [{name: 'Login'}],
+            });
+          },
+        },
+      ],
+      {cancelable: false},
+    );
+  };
+
   useEffect(() => {
     loadUserLocalDatas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadUserLocalDatas = async () => {
@@ -284,26 +240,73 @@ const Profile = () => {
     await getProfile();
   };
 
-  // console.log('user local state data...', userLocalData);
-  // console.log('form  data after fetch...', formData);
+  // Menu items for Uber-style profile with navigation
+  const menuItems: MenuItemProps[] = [
+    {
+      icon: <WalletIcon width={20} height={20} />,
+      title: 'Payment Methods',
+      subtitle: 'Add debit card, credit card, UPI',
+      onPress: () => stackNavigation.navigate(NavigationString.Wallet),
+    },
+    {
+      icon: <HistoryDrawerIcon width={20} height={20} />,
+      title: 'Ride History',
+      subtitle: 'Your past trips',
+      onPress: () => stackNavigation.navigate(NavigationString.History),
+    },
+    {
+      icon: <LocationDrawerIcon width={20} height={20} />,
+      title: 'Saved Places',
+      subtitle: 'Home, Work, and other places',
+      onPress: () => stackNavigation.navigate(NavigationString.Favourite),
+    },
+    {
+      icon: <OfferIcon width={20} height={20} />,
+      title: 'Promotions',
+      subtitle: 'Apply coupon codes',
+      onPress: () => stackNavigation.navigate(NavigationString.Offers),
+      showBadge: true,
+    },
+  ];
+
+  const settingsItems: MenuItemProps[] = [
+    {
+      icon: <SettingDrawerIcon width={20} height={20} />,
+      title: 'Settings',
+      onPress: () => stackNavigation.navigate(NavigationString.Settings),
+    },
+    {
+      icon: <SupportDrawerIcon width={20} height={20} />,
+      title: 'Help & Support',
+      onPress: () => stackNavigation.navigate(NavigationString.HelpSupport),
+    },
+    {
+      icon: <AboutUsdrawerIcon width={20} height={20} />,
+      title: 'About Us',
+      onPress: () => stackNavigation.navigate(NavigationString.AboutUs),
+    },
+  ];
 
   return (
     <Container
       statusBarStyle={isDarkMode ? 'light-content' : 'dark-content'}
       statusBarBackgroundColor={isDarkMode ? '#000000' : '#ffffff'}
       backgroundColor={isDarkMode ? '#000000' : '#ffffff'}>
+      {/* Header */}
       <Box
         flexDirection="row"
         alignItems="center"
         justifyContent="space-between"
         py={moderateScaleVertical(15)}
-        px={moderateScale(15)}>
+        px={moderateScale(15)}
+        borderBottomWidth={1}
+        borderBottomColor={isDarkMode ? colors.charcoalGray : colors.gray3}>
         <Box flex={1}>
           <Pressable
             onPress={() => {
               navigation.openDrawer();
             }}
-            bgColor={colors.paleYellow}
+            bgColor={colors.themePrimary}
             w={moderateScale(32)}
             h={moderateScale(32)}
             borderRadius={moderateScale(5)}
@@ -320,133 +323,207 @@ const Profile = () => {
             lineHeight={20}
             color={isDarkMode ? colors.white : colors.charcoalGray}
             numberOfLines={1}>
-            Edit Profile
+            Account
           </Text>
         </Box>
 
         <Box flex={1}></Box>
       </Box>
+
       {loading ? (
         <Box flex={1} justifyContent="center" alignItems="center">
-          <ActivityIndicator size="large" color="#00ff00" />
+          <ActivityIndicator size="large" color={colors.themePrimary} />
         </Box>
       ) : (
-        <Body>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{paddingBottom: moderateScaleVertical(100)}}>
+          {/* Profile Section - Uber Style */}
           <Box
-            alignSelf="center"
-            mt={moderateScaleVertical(20)}
-            mb={moderateScaleVertical(20)}>
-            {/* <Avatar bgColor="$amber600" w={moderateScale(75)} h={moderateScale(75)} borderRadius="$full">
-  <AvatarFallbackText>Danish Qureshi</AvatarFallbackText>
-</Avatar> */}
+            bgColor={isDarkMode ? colors.charcoalGray : colors.white}
+            pb={moderateScaleVertical(20)}
+            borderBottomWidth={1}
+            borderBottomColor={isDarkMode ? colors.dimGray : colors.gray3}>
+            {/* Profile Image */}
+            <Box alignItems="center" mt={moderateScaleVertical(25)}>
+              <Box
+                w={moderateScale(90)}
+                h={moderateScale(90)}
+                borderRadius={moderateScale(45)}
+                overflow="hidden"
+                borderWidth={3}
+                borderColor={colors.themePrimary}>
+                <Image
+                  alt="profile"
+                  source={{uri: selectedImage}}
+                  w={'100%'}
+                  h={'100%'}
+                  resizeMode="cover"
+                />
+              </Box>
 
-            <Box
-              w={moderateScale(85)}
-              h={moderateScale(85)}
-              borderRadius={moderateScale(50)}
-              overflow="hidden">
-              <Image
-                alt="icon"
-                // source={{ uri: !!selectedImage ? selectedImage : 'https://i2.pngimg.me/thumb/f/720/m2H7K9A0b1d3b1m2.jpg' }}
-                source={{uri: selectedImage}}
-                w={'100%'}
-                h={'100%'}
-                resizeMode="cover"
-              />
+              {/* Edit Button */}
+              <Pressable
+                onPress={() => {
+                  onHandleSelectImg();
+                }}
+                position="absolute"
+                right={moderateScale(110)}
+                top={moderateScaleVertical(55)}
+                w={moderateScale(32)}
+                h={moderateScale(32)}
+                borderRadius={moderateScale(16)}
+                bg={colors.themePrimary}
+                alignItems="center"
+                justifyContent="center"
+                borderWidth={2}
+                borderColor={colors.white}>
+                <EditProfileIcon width={16} height={16} />
+              </Pressable>
             </Box>
 
-            <Pressable
-              onPress={() => {
-                onHandleSelectImg();
-              }}
-              alignItems="center"
-              justifyContent="center"
-              position="absolute"
-              w={moderateScale(25)}
-              h={moderateScale(25)}
-              borderRadius={moderateScale(20)}
-              bg={colors.themePrimary}
-              right={0}
-              bottom={0}>
-              <CameraIcon />
-            </Pressable>
-          </Box>
+            {/* User Info */}
+            <Box alignItems="center" mt={moderateScaleVertical(15)}>
+              <Text
+                fontFamily={'$poppinsSemiBold'}
+                fontSize={20}
+                color={isDarkMode ? colors.white : colors.charcoalGray}>
+                {userLocalData?.profileData?.name || 'User Name'}
+              </Text>
+              <Text
+                fontFamily={'$poppinsRegular'}
+                fontSize={14}
+                color={colors.gray4}
+                mt={moderateScaleVertical(2)}>
+                {userLocalData?.profileData?.email || 'user@email.com'}
+              </Text>
+            </Box>
 
-          <Box gap={moderateScaleVertical(20)} mx={moderateScaleVertical(15)}>
-            <InputText
-              textInputProps={{
-                placeholder: 'Full Name',
-                value: formData.name,
-                onChangeText: text =>
-                  setFormData(prev => ({...prev, name: text})),
-              }}
-            />
-
-            <InputText
-              textInputProps={{
-                placeholder: 'Email',
-                value: formData.email,
-                onChangeText: text =>
-                  setFormData(prev => ({...prev, email: text})),
-              }}
-            />
-
+            {/* Rating Section */}
             <Box
               flexDirection="row"
               alignItems="center"
-              borderWidth={1}
-              borderColor={colors.silverGray}
-              borderRadius={9}
-              pl={moderateScale(10)}
-              h={moderateScale(56)}>
-              <CountryPicker
-                countryCode={countryCode}
-                onSelect={handleCountrySelect}
-                withAlphaFilter
-                withCallingCode
-                withCallingCodeButton
-                withFilter
-                withFlag
-              />
-
+              justifyContent="center"
+              mt={moderateScaleVertical(12)}>
               <Box
-                flex={1}
-                borderLeftWidth={1}
-                borderLeftColor="#DDDDDD"
-                ml={moderateScale(10)}>
-                <InputText
-                  borderWith={0}
-                  textInputProps={{
-                    placeholder: 'Emergency Contact Number',
-                    keyboardType: 'number-pad',
-                    value: formData.emergencyContactNumber,
-                    onChangeText: text =>
-                      setFormData(prev => ({
-                        ...prev,
-                        emergencyContactNumber: text,
-                      })),
-                  }}
-                />
+                bgColor={colors.themePrimary}
+                px={moderateScale(10)}
+                py={moderateScaleVertical(4)}
+                borderRadius={moderateScale(15)}
+                flexDirection="row"
+                alignItems="center">
+                <Text
+                  fontFamily={'$poppinsBold'}
+                  fontSize={14}
+                  color={colors.black}>
+                  4.8
+                </Text>
+                <Text
+                  fontFamily={'$poppinsRegular'}
+                  fontSize={12}
+                  color={colors.black}
+                  ml={moderateScale(2)}>
+                  Rating
+                </Text>
               </Box>
+              <Box
+                w={1}
+                h={moderateScaleVertical(15)}
+                bgColor={colors.gray4}
+                mx={moderateScale(15)}
+              />
+              <Text
+                fontFamily={'$poppinsMedium'}
+                fontSize={14}
+                color={isDarkMode ? colors.white : colors.charcoalGray}>
+                {userLocalData?.profileData?.totalRides || 0} trips
+              </Text>
             </Box>
-
-            <InputText
-              textInputProps={{
-                placeholder: 'Tracking No.',
-                value: formData.trackingNumber,
-                onChangeText: text =>
-                  setFormData(prev => ({...prev, trackingNumber: text})),
-              }}
-            />
           </Box>
 
-          <PrimaryButton
-            buttonText="Update"
-            marginHorizontal={moderateScale(15)}
-            marginVertical={moderateScaleVertical(20)}
-            onPress={handleUpdateProfile}
-          />
-        </Body>
+          {/* Menu Items Section */}
+          <Box mt={moderateScaleVertical(10)}>
+            {menuItems.map((item, index) => (
+              <MenuItem
+                key={index}
+                icon={item.icon}
+                title={item.title}
+                subtitle={item.subtitle}
+                onPress={item.onPress}
+                showBadge={item.showBadge}
+              />
+            ))}
+          </Box>
+
+          {/* Settings Section */}
+          <Box mt={moderateScaleVertical(20)}>
+            <Text
+              fontFamily={'$poppinsMedium'}
+              fontSize={14}
+              color={colors.gray4}
+              px={moderateScale(20)}
+              mb={moderateScaleVertical(5)}>
+              PREFERENCES
+            </Text>
+            <Box
+              bgColor={isDarkMode ? colors.charcoalGray : colors.white}
+              borderTopWidth={1}
+              borderBottomWidth={1}
+              borderColor={isDarkMode ? colors.dimGray : colors.gray3}>
+              {settingsItems.map((item, index) => (
+                <MenuItem
+                  key={index}
+                  icon={item.icon}
+                  title={item.title}
+                  onPress={item.onPress}
+                />
+              ))}
+            </Box>
+          </Box>
+
+          {/* Logout Section */}
+          <Box mt={moderateScaleVertical(20)} mb={moderateScaleVertical(30)}>
+            <Box
+              bgColor={isDarkMode ? colors.charcoalGray : colors.white}
+              borderTopWidth={1}
+              borderBottomWidth={1}
+              borderColor={isDarkMode ? colors.dimGray : colors.gray3}>
+              <Pressable
+                onPress={handleLogout}
+                flexDirection="row"
+                alignItems="center"
+                py={moderateScaleVertical(15)}
+                px={moderateScale(20)}>
+                <Box
+                  w={moderateScale(40)}
+                  h={moderateScale(40)}
+                  borderRadius={moderateScale(8)}
+                  bgColor={colors.lightPink}
+                  alignItems="center"
+                  justifyContent="center"
+                  mr={moderateScale(15)}>
+                  <LogoutDrawerIcon width={20} height={20} />
+                </Box>
+                <Text
+                  fontFamily={'$poppinsMedium'}
+                  fontSize={16}
+                  color={colors.alertColor}>
+                  Log Out
+                </Text>
+              </Pressable>
+            </Box>
+          </Box>
+
+          {/* App Version */}
+          <Box alignItems="center" mb={moderateScaleVertical(20)}>
+            <Text
+              fontFamily={'$poppinsRegular'}
+              fontSize={12}
+              color={colors.gray4}>
+              Version 1.0.0
+            </Text>
+          </Box>
+        </ScrollView>
       )}
     </Container>
   );

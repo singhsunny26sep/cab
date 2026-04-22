@@ -6,7 +6,6 @@ import { NavigationString } from '../navigationStrings';
 import { StackRoute } from '../navigationRoutes';
 import CustomDrawer from '../../components/CustomDrawer/CustomDrawer';
 import { moderateScale } from '../../utils/responsiveSize';
-import { deviceWidth } from '../../constants/contants';
 import { colors } from '../../constants/colors';
 import { useTheme } from '../../constants/ThemeContext';
 
@@ -23,8 +22,8 @@ const DrawerStack = () => {
       drawerStyle:{
         borderTopRightRadius:moderateScale(3),
         borderBottomRightRadius:moderateScale(3),
-        width:deviceWidth/2,
-        backgroundColor:isDarkMode ? colors.black : colors.white
+        width:250,
+        backgroundColor:colors.themePrimary,  
       },
       drawerType:'front'
     }}>

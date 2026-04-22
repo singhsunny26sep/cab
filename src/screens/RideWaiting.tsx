@@ -95,7 +95,10 @@ const RideWaiting = () => {
   const toast = useToast();
   const route = useRoute();
   const {bookingData}: any = route.params;
-  console.log('booking Data at ride waitin -----------------------> ', bookingData);
+  console.log(
+    'booking Data at ride waitin -----------------------> ',
+    bookingData,
+  );
 
   const mapRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
@@ -224,12 +227,15 @@ const RideWaiting = () => {
     };
   }, []);
   useEffect(() => {
-    console.log("checking---------------===========>>>>>>2", userLocalData?.token)
+    console.log(
+      'checking---------------===========>>>>>>2',
+      userLocalData?.token,
+    );
     // if (!userToken) return;
-    console.log("checking---------------===========>>>>>>3")
+    console.log('checking---------------===========>>>>>>3');
     const initializeSocket = async () => {
       try {
-        console.log("checking---------------===========>>>>>>4")
+        console.log('checking---------------===========>>>>>>4');
         if (socketServices.isConnected()) {
           setSocketInitialized(true);
         }
@@ -247,7 +253,10 @@ const RideWaiting = () => {
     // if (!socketInitialized) return;
 
     // if (socketInitialized) {
-    console.log('bookingData passed in socketttttttttttttt at ride waiting', bookingData);
+    console.log(
+      'bookingData passed in socketttttttttttttt at ride waiting',
+      bookingData,
+    );
     socketServices.emit('booking', bookingData);
     socketServices.on('booking-response', (bookingResponse: any) => {
       console.log(
@@ -299,7 +308,7 @@ const RideWaiting = () => {
       }
     });
     return () => {
-      socketServices?.removeListener('driver_booking_response', ()=>{});
+      socketServices?.removeListener('driver_booking_response', () => {});
     };
   }, [socketInitialized, navigation, toast]);
   useEffect(() => {
@@ -364,7 +373,10 @@ const RideWaiting = () => {
       const errorMessage =
         error?.response?.data?.message ||
         'Network error. Please check your connection.';
-      console.error('Error updating status for cancel in Waiting:', JSON.stringify(error));
+      console.error(
+        'Error updating status for cancel in Waiting:',
+        JSON.stringify(error),
+      );
       toast.show({
         placement: 'top',
         render: ({id}: any) => {
@@ -511,7 +523,8 @@ const RideWaiting = () => {
             rotation={bookingResponseData?.driverInfo?.heading || 0}>
             <Image
               source={
-                bookingResponseData?.data?.rideCategory === 'bike' || bookingResponseData?.data?.rideCategory === 'cycle'
+                bookingResponseData?.data?.rideCategory === 'bike' ||
+                bookingResponseData?.data?.rideCategory === 'cycle'
                   ? Icons.BikeTop1
                   : Icons.CarTop1
               }
@@ -535,7 +548,7 @@ const RideWaiting = () => {
             }}
             apikey={GOOGLE_API_KEY}
             strokeWidth={3}
-            strokeColor={colors.themePrimary}
+            strokeColor={colors.routeRed}
             optimizeWaypoints={true}
             onReady={async (result: any) => {
               if (

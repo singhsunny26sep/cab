@@ -86,6 +86,7 @@ interface Location {
   latitude: number;
   longitude: number;
   address?: string;
+  distance?: string;
 }
 
 interface State {
@@ -146,7 +147,8 @@ const Home = () => {
   );
   const [completedRideData, setCompletedRideData] = useState<any>(null); // New state to store completed ride data
   const [showPaymentModal, setShowPaymentModal] = useState<boolean>(false);
-  const [completedRideForPayment, setCompletedRideForPayment] = useState<any>(null);
+  const [completedRideForPayment, setCompletedRideForPayment] =
+    useState<any>(null);
 
   const getLocationOnce = async () => {
     const locationData: any = await getCurrentLocationOnce();
@@ -214,7 +216,7 @@ const Home = () => {
 
           socketServices.emit('onGoing_booking', {});
           socketServices.on('onGoing_Booking_List', handleOngoingBooking);
-          
+
           socketServices.on(
             'driver_booking_response',
             handleDriverBookingResponse,
@@ -286,11 +288,11 @@ const Home = () => {
       ride.bookingStatus === 'completed' &&
       ride.rideStatus === 'ridePicked'
     ) {
-          // Ride completed - show payment first
-    setCompletedRideForPayment(ride);
-    setShowPaymentModal(true);
-    setOngoingRide(null);
-    setShowOngoingRideModal(false);
+      // Ride completed - show payment first
+      setCompletedRideForPayment(ride);
+      setShowPaymentModal(true);
+      setOngoingRide(null);
+      setShowOngoingRideModal(false);
 
       // Ride completed - show rating
       // setCompletedRideData(ride); // Store completed ride data
@@ -299,11 +301,11 @@ const Home = () => {
       // setShowAlert(true);
       // setShowOngoingRideModal(false);
     } else {
-          // Reset if no ongoing ride
-    setOngoingRide(null);
-    setShowOngoingRideModal(false);
-    setCompletedRideForPayment(null);
-    setCompletedRideData(null);
+      // Reset if no ongoing ride
+      setOngoingRide(null);
+      setShowOngoingRideModal(false);
+      setCompletedRideForPayment(null);
+      setCompletedRideData(null);
 
       // // Reset if no ongoing ride
       // setOngoingRide(null);
@@ -322,11 +324,11 @@ const Home = () => {
 
   useEffect(() => {
     if (!socketInitialized) return;
-    
+
     const debouncedLocationUpdate = debounce((location: any) => {
-      console.log("location for customer going ===> ", )
+      console.log('location for customer going ===> ');
       if (socketInitialized) {
-        console.log("location for customer going ===> ", location)
+        console.log('location for customer going ===> ', location);
         socketServices.emit('registerClientLocation', {
           lat: location.latitude,
           lng: location.longitude,
@@ -340,7 +342,7 @@ const Home = () => {
 
     const locationWatcher = watchLocationContinuously(
       async (location: any) => {
-        console.log("in continuous location ===", location)
+        console.log('in continuous location ===', location);
         let currentPickupData = pickupData;
         if (!currentPickupData) {
           currentPickupData = await getLocationOnce();
@@ -460,6 +462,7 @@ const Home = () => {
         latitude: newToCords?.latitude,
         longitude: newToCords?.longitude,
         address: newToCords?.address,
+        distance: newToCords?.distance,
       },
     });
     setShowLocationRoute(true);
@@ -749,7 +752,10 @@ const Home = () => {
         currentLocation={state.curLoc}
         remainTimeForPickup={remainTimeForPickup}
         remainDurationForPickup={remainDurationForPickup}
-        isRideStarted={ongoingRide?.rideStatus === "ridePicked" && ongoingRide?.bookingStatus === "ongoing"}
+        isRideStarted={
+          ongoingRide?.rideStatus === 'ridePicked' &&
+          ongoingRide?.bookingStatus === 'ongoing'
+        }
         setOngoingRide={setOngoingRide}
         setShowOngoingRideModal={setShowOngoingRideModal}
       />
@@ -999,7 +1005,11 @@ const Home = () => {
                       lineHeight={16}
                       color={isDarkMode ? colors.white : colors.charcoalGray}
                       numberOfLines={1}>
-                      {state?.distance ?? 'N/A'} Kms
+                      {state?.destinationCords?.distance
+                        ? `${Number(state?.destinationCords?.distance).toFixed(1)} km`
+                        : state?.distance
+                          ? `${Number(state.distance).toFixed(1)} km`
+                          : 'N/A'}
                     </Text>
                   </Box>
                   <Text

@@ -17,9 +17,11 @@ import {Container} from '../components/Container';
 import {AppBar} from '../components/AppBar';
 import {colors} from '../constants/colors';
 import {moderateScale, moderateScaleVertical} from '../utils/responsiveSize';
+import {NavigationString} from '../navigation/navigationStrings';
 import {
   DeleteAddressIcon,
   HamburgerIcon,
+  HeartIcon,
   MapMarkerBlack24Icon,
   PlusIcon,
 } from '../components/Icons';
@@ -30,6 +32,8 @@ import {
 } from '../api/ApiEndpoints';
 import {BASE_URL} from '../api/Instance';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useDispatch} from 'react-redux';
+import {setFavoriteAddresses} from '../store/slice/UserSlice';
 
 interface FavoriteAddress {
   _id: string;
@@ -56,65 +60,71 @@ interface FavoriteAddress {
 const FavouriteCard = ({
   item,
   onDelete,
+  onSelect,
   isLoading,
 }: {
   item: FavoriteAddress;
   onDelete: (id: string) => void;
+  onSelect: (item: FavoriteAddress) => void;
   isLoading: boolean;
 }) => {
   const {isDarkMode} = useTheme();
 
   return (
-    <Box
-      flexDirection="row"
-      alignItems="center"
-      h={moderateScale(77)}
-      bgColor={isDarkMode ? colors.black : colors.white}
-      px={moderateScale(10)}
-      borderRadius={moderateScale(10)}
-      gap={moderateScale(10)}
-      borderWidth={1}
-      borderColor={colors.paleYellow}>
-      <MapMarkerBlack24Icon />
+    <Pressable onPress={() => onSelect(item)}>
+      <Box
+        flexDirection="row"
+        alignItems="center"
+        h={moderateScale(77)}
+        bgColor={isDarkMode ? colors.black : colors.white}
+        px={moderateScale(10)}
+        borderRadius={moderateScale(10)}
+        gap={moderateScale(10)}
+        borderWidth={1}
+        borderColor={colors.paleYellow}>
+        <MapMarkerBlack24Icon />
 
-      <Box flex={1} gap={moderateScaleVertical(3)}>
-        <Text
-          fontFamily={'$poppinsSemiBold'}
-          fontSize={16}
-          lineHeight={18}
-          color={isDarkMode ? colors.white : colors.black}
-          numberOfLines={1}>
-          {item.label}
-        </Text>
-        <Text
-          fontFamily={'$poppinsRegular'}
-          fontSize={12}
-          lineHeight={14}
-          color={isDarkMode ? colors.white : '#898989'}
-          numberOfLines={2}>
-          From: {item.pickup.address}
-        </Text>
-        <Text
-          fontFamily={'$poppinsRegular'}
-          fontSize={12}
-          lineHeight={14}
-          color={isDarkMode ? colors.white : '#898989'}
-          numberOfLines={2}>
-          To: {item.destination.address}
-        </Text>
+        <Box flex={1} gap={moderateScaleVertical(3)}>
+          <Text
+            fontFamily={'$poppinsSemiBold'}
+            fontSize={16}
+            lineHeight={18}
+            color={isDarkMode ? colors.white : colors.black}
+            numberOfLines={1}>
+            {item.label}
+          </Text>
+          <Text
+            fontFamily={'$poppinsRegular'}
+            fontSize={12}
+            lineHeight={14}
+            color={isDarkMode ? colors.white : '#898989'}
+            numberOfLines={2}>
+            From: {item.pickup.address}
+          </Text>
+          <Text
+            fontFamily={'$poppinsRegular'}
+            fontSize={12}
+            lineHeight={14}
+            color={isDarkMode ? colors.white : '#898989'}
+            numberOfLines={2}>
+            To: {item.destination.address}
+          </Text>
+        </Box>
+
+        <Pressable
+          onPress={e => {
+            e.stopPropagation();
+            onDelete(item._id);
+          }}
+          disabled={isLoading}>
+          {isLoading ? (
+            <ActivityIndicator size="small" color={colors.themePrimary} />
+          ) : (
+            <DeleteAddressIcon />
+          )}
+        </Pressable>
       </Box>
-
-      <Pressable onPress={() => onDelete(item._id)} disabled={isLoading}>
-        {isLoading ? (
-          <ActivityIndicator
-            size="small"
-            color={colors.themePrimary}
-          />
-        ) : (
-          <DeleteAddressIcon />
-        )}
-      </Pressable>
-    </Box>
+    </Pressable>
   );
 };
 
@@ -123,6 +133,7 @@ const Favourite = () => {
   const navigation = useNavigation<DrawerNavigationProp<ParamListBase>>();
   const {isDarkMode} = useTheme();
   const toast = useToast();
+  const dispatch = useDispatch();
 
   // states
   const [favorites, setFavorites] = useState<FavoriteAddress[]>([]);
@@ -167,7 +178,13 @@ const Favourite = () => {
           },
         },
       );
-      setFavorites(response.data);
+      const favoriteData = response.data;
+      setFavorites(favoriteData);
+      dispatch(setFavoriteAddresses(favoriteData));
+      await AsyncStorage.setItem(
+        'favoriteAddresses',
+        JSON.stringify(favoriteData),
+      );
     } catch (error: any) {
       console.error('Error fetching favorite addresses:', error?.response);
       showErrorToast('Failed to load favorite addresses');
@@ -196,7 +213,24 @@ const Favourite = () => {
     }
   };
 
+  const handleSelectAddress = (item: FavoriteAddress) => {
+    navigation.navigate(NavigationString.Home, {favoriteData: item});
+  };
+
   useEffect(() => {
+    const loadCachedFavorites = async () => {
+      try {
+        const cachedFavorites = await AsyncStorage.getItem('favoriteAddresses');
+        if (cachedFavorites) {
+          setFavorites(JSON.parse(cachedFavorites));
+          dispatch(setFavoriteAddresses(JSON.parse(cachedFavorites)));
+        }
+      } catch (error) {
+        console.error('Error loading cached favorites:', error);
+      }
+    };
+
+    loadCachedFavorites();
     fetchFavoriteAddresses();
   }, []);
 
@@ -207,10 +241,7 @@ const Favourite = () => {
         statusBarBackgroundColor={isDarkMode ? '#000000' : '#f5f5f5'}
         backgroundColor={isDarkMode ? '#000000' : '#f5f5f5'}>
         <Box flex={1} justifyContent="center" alignItems="center">
-          <ActivityIndicator
-            size="large"
-            color={colors.themePrimary}
-          />
+          <ActivityIndicator size="large" color={colors.themePrimary} />
         </Box>
       </Container>
     );
@@ -231,7 +262,7 @@ const Favourite = () => {
             onPress={() => {
               navigation.openDrawer();
             }}
-            bgColor={colors.paleYellow}
+            bgColor={colors.themePrimary}
             w={moderateScale(32)}
             h={moderateScale(32)}
             borderRadius={moderateScale(5)}
@@ -260,18 +291,33 @@ const Favourite = () => {
           }}
           // bgColor={colors.paleYellow}
           borderRadius={moderateScale(5)}
-          justifyContent="space-around"
-          >
+          justifyContent="space-around">
           {/* <PlusIcon /> */}
         </Pressable>
       </Box>
 
       {favorites.length === 0 ? (
-        <Box flex={1} justifyContent="center" alignItems="center">
+        <Box
+          flex={1}
+          justifyContent="center"
+          alignItems="center"
+          gap={moderateScaleVertical(15)}>
+          <Box opacity={0.4}>
+            <HeartIcon width={moderateScale(64)} height={moderateScale(64)} />
+          </Box>
           <Text
             fontFamily={'$poppinsMedium'}
+            fontSize={16}
             color={isDarkMode ? colors.white : colors.black}>
-            No favorite addresses found
+            No favorite addresses yet
+          </Text>
+          <Text
+            fontFamily={'$poppinsRegular'}
+            fontSize={12}
+            color={isDarkMode ? '#9CA3AF' : '#6B7280'}
+            textAlign="center"
+            px={moderateScale(40)}>
+            Save your frequent routes for{'\n'}faster booking experience
           </Text>
         </Box>
       ) : (
@@ -281,6 +327,7 @@ const Favourite = () => {
             <FavouriteCard
               item={item}
               onDelete={handleDeleteAddress}
+              onSelect={handleSelectAddress}
               isLoading={deletingId === item._id}
             />
           )}

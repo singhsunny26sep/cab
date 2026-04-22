@@ -1,8 +1,7 @@
-import { io, Socket } from "socket.io-client";
+import {io, Socket} from 'socket.io-client';
 
-const SOCKET_URL = "http://192.168.31.250:5000";
-// const SOCKET_URL = "https://48cb-2401-4900-51e0-1730-29ae-bd3a-55b4-939c.ngrok-free.app";
-// const SOCKET_URL = "https://cabdriverserver-a3cdd048fc7c.herokuapp.com";
+const SOCKET_URL = 'https://api.mrmanfredhotel.com/';
+// Make sure your socket server is running on this IP/port
 
 type EventCallback = (...args: any[]) => void;
 
@@ -22,7 +21,7 @@ class WSService {
         secure: true,
         auth: {
           token: userToken,
-          type: "customer"
+          type: 'customer',
         },
         query: {
           token: userToken,
@@ -32,41 +31,54 @@ class WSService {
         reconnectionDelay: 1000,
         timeout: 30000,
         // extraHeaders: {
-          // "Authorization": `${userToken}`,
-          // "User-Agent": "okhttp/4.12.0",
-          // "Accept-Encoding": "gzip",
-          // Origin: SOCKET_URL,
-          // "Host": "cabdriver-987432da3a86.herokuapp.com",
+        // "Authorization": `${userToken}`,
+        // "User-Agent": "okhttp/4.12.0",
+        // "Accept-Encoding": "gzip",
+        // Origin: SOCKET_URL,
+        // "Host": "cabdriver-987432da3a86.herokuapp.com",
         // }
       });
 
       console.log('👋 Initializing socket');
 
       // Setup event handlers
-      this.socket.on("connect", () => {
-        console.log("✅✅✅✅✅✅ Socket connected successfully!✅✅✅✅✅✅", this.socket?.connected);
+      this.socket.on('connect', () => {
+        console.log(
+          '✅✅✅✅✅✅ Socket connected successfully!✅✅✅✅✅✅',
+          this.socket?.connected,
+        );
       });
 
-      this.socket.on("disconnect", () => {
-        console.log("=== socket disconnected ===");
+      this.socket.on('disconnect', () => {
+        console.log('=== socket disconnected ===');
       });
 
-      this.socket.on("connect_error", (error) => {
-        console.log("=== socket connection error ===", error);
+      this.socket.on('connect_error', (error: any) => {
+        console.log('=== socket connection error ===', error?.message || error);
+      });
+
+      this.socket.on('error', (error: any) => {
+        console.log('=== socket error ===', error?.message || error);
+      });
+
+      this.socket.on('reconnect_attempt', (attempt: number) => {
+        console.log('=== socket reconnect attempt ===', attempt);
+      });
+
+      this.socket.on('reconnect_failed', () => {
+        console.log('=== socket reconnect failed ===');
       });
 
       return this.socket;
-
     } catch (error) {
-      console.log("=== socket initialization error ===", error);
+      console.log('=== socket initialization error ===', error);
       throw error;
     }
-  }
+  };
 
-  
   on(event: string, callback: EventCallback): void {
     if (!this.socket) {
-      console.warn("Socket not initialized. Call initializeSocket first.");
+      console.warn('Socket not initialized. Call initializeSocket first.');
       return;
     }
     this.socket.on(event, callback);
@@ -74,7 +86,7 @@ class WSService {
 
   emit(event: string, data: any, callback?: EventCallback): void {
     if (!this.socket) {
-      console.warn("Socket not initialized. Call initializeSocket first.");
+      console.warn('Socket not initialized. Call initializeSocket first.');
       return;
     }
     this.socket.emit(event, data, callback);
@@ -82,7 +94,7 @@ class WSService {
 
   removeListener(event: string, listener: EventCallback): void {
     if (!this.socket) {
-      console.warn("Socket not initialized. Call initializeSocket first.");
+      console.warn('Socket not initialized. Call initializeSocket first.');
       return;
     }
     this.socket.off(event, listener);
@@ -92,13 +104,13 @@ class WSService {
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
-      console.log("=== Socket manually disconnected ===");
+      console.log('=== Socket manually disconnected ===');
     }
-  }
+  };
 
   isConnected = (): boolean => {
     return this.socket?.connected || false;
-  }
+  };
 }
 
 const socketServices = new WSService();

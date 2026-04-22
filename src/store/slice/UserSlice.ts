@@ -2,13 +2,13 @@ import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Location {
-    latitude: number;
-    longitude: number;
-    address?: string;
-    distance?: string;
-    city?: string;
-    state?: string;
-    country?: string;
+  latitude: number;
+  longitude: number;
+  address?: string;
+  distance?: string;
+  city?: string;
+  state?: string;
+  country?: string;
 }
 
 // Define the initial state's types for the user slice
@@ -18,17 +18,19 @@ interface UserState {
   dropDistance?: number | string | null;
   token?: string | null;
   profileData?: any;
-  destinationByFavorite: boolean; // Add this line
+  destinationByFavorite: boolean;
+  favoriteAddresses?: any[];
 }
 
 // Define the initial state for the user slice
 const initialState: UserState = {
-    pickupDetails: null,
-    dropDetails: null,
-    dropDistance: null,
-    token: null,
-    profileData: null,
-    destinationByFavorite: false, // Add this line
+  pickupDetails: null,
+  dropDetails: null,
+  dropDistance: null,
+  token: null,
+  profileData: null,
+  destinationByFavorite: false,
+  favoriteAddresses: [],
 };
 
 const userSlice = createSlice({
@@ -46,7 +48,7 @@ const userSlice = createSlice({
       };
     },
     setDropDetails: (state, action: PayloadAction<Location>) => {
-        console.warn("action payload  getting ... ", action.payload);
+      console.warn('action payload  getting ... ', action.payload);
       state.dropDetails = {
         latitude: action.payload.latitude,
         longitude: action.payload.longitude,
@@ -58,14 +60,17 @@ const userSlice = createSlice({
     setDestinationByFavorite: (state, action: PayloadAction<boolean>) => {
       state.destinationByFavorite = action.payload;
     },
+    setFavoriteAddresses: (state, action: PayloadAction<any[]>) => {
+      state.favoriteAddresses = action.payload;
+    },
     setDropDistance: (state, action: PayloadAction<any>) => {
-      state.dropDetails = action.payload
+      state.dropDetails = action.payload;
     },
     setProfileData: (state, action: PayloadAction<any>) => {
-      state.profileData = action.payload
+      state.profileData = action.payload;
     },
     setToken: (state, action: PayloadAction<any>) => {
-      state.token = action.payload
+      state.token = action.payload;
     },
     clearUserData: state => {
       state.pickupDetails = null;
@@ -74,28 +79,30 @@ const userSlice = createSlice({
       state.token = null;
       state.profileData = null;
       state.destinationByFavorite = false;
+      state.favoriteAddresses = [];
     },
   },
 });
 
 export const {
-    clearUserData,
-    setPickupDetails,
-    setDropDetails,
-    setDropDistance,
-    setToken,
-    setProfileData,
-    setDestinationByFavorite
+  clearUserData,
+  setPickupDetails,
+  setDropDetails,
+  setDropDistance,
+  setToken,
+  setProfileData,
+  setDestinationByFavorite,
+  setFavoriteAddresses,
 } = userSlice.actions;
 
 // AsyncStorage helper functions
 export const saveUserToStorage = async (userData: UserState) => {
   const dataToSave = {
     ...userData,
-    destinationByFavorite: userData.destinationByFavorite || false, // Ensure it has a value
+    destinationByFavorite: userData.destinationByFavorite || false,
+    favoriteAddresses: userData.favoriteAddresses || [],
   };
   await AsyncStorage.setItem('userData', JSON.stringify(dataToSave));
-  // await AsyncStorage.setItem('userData', JSON.stringify(userData));
 };
 
 export const loadUserFromStorage = async (): Promise<UserState | null> => {
@@ -104,13 +111,11 @@ export const loadUserFromStorage = async (): Promise<UserState | null> => {
     const parsedData = JSON.parse(userData);
     return {
       ...parsedData,
-      destinationByFavorite: parsedData.destinationByFavorite || false, // Ensure it has a value
+      destinationByFavorite: parsedData.destinationByFavorite || false,
+      favoriteAddresses: parsedData.favoriteAddresses || [],
     };
   }
   return null;
-
-  // const userData = await AsyncStorage.getItem('userData');
-  // return userData ? JSON.parse(userData) : null;
 };
 
 export default userSlice.reducer;

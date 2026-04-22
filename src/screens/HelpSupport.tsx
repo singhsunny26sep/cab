@@ -1,10 +1,6 @@
 import {
-  Box,
   ScrollView,
   Text,
-  Toast,
-  ToastTitle,
-  useToast,
 } from '@gluestack-ui/themed';
 
 import {Container} from '../components/Container';
@@ -12,56 +8,42 @@ import {AppBar} from '../components/AppBar';
 import {colors} from '../constants/colors';
 import {moderateScale, moderateScaleVertical} from '../utils/responsiveSize';
 import {useTheme} from '../constants/ThemeContext';
-import {useEffect, useState} from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {BASE_URL, Instance} from '../api/Instance';
-import {GET_HELP_SUPPORT} from '../api/ApiEndpoints';
-import {ActivityIndicator} from 'react-native';
 
 const HelpSupport = () => {
   const {isDarkMode} = useTheme();
-  const toast = useToast();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [helpAndSupportData, setHelpAndSupportData] = useState<any>(null);
 
-  useEffect(() => {
-    fetchHelpAndSupportData();
-  }, []);
-
-  const fetchHelpAndSupportData = async () => {
-    setLoading(true);
-    try {
-      // const token = await AsyncStorage.getItem('userToken');
-
-      const url = `${BASE_URL}${GET_HELP_SUPPORT.url}`;
-      const response = await Instance.get(url, {
-        // headers: {
-        //   Authorization: token,
-        // },
-      });
-      console.log('--- HELP & SUPPORT --- API response ---', response.data);
-      setLoading(false);
-      if (response.data.success) {
-        setHelpAndSupportData(response.data.data.helpAndSupport);
-      }
-    } catch (error: any) {
-      setLoading(false);
-      toast.show({
-        placement: 'top',
-        render: ({id}: any) => {
-          const toastId = 'toast-' + id;
-          return (
-            <Toast nativeID={toastId} variant="accent" action="error">
-              <ToastTitle>Error during deleting account:</ToastTitle>
-              <ToastTitle>
-                {error?.response?.message || 'Unable to fetch data.'}
-              </ToastTitle>
-            </Toast>
-          );
-        },
-      });
-    }
-  };
+  const helpAndSupportData = [
+    {
+      question: 'How do I book a cab?',
+      answer:
+        'You can book a cab by opening the app and entering your pickup and drop-off locations. Select your preferred vehicle type and confirm your booking.',
+    },
+    {
+      question: 'How can I cancel my booking?',
+      answer:
+        'You can cancel your booking from the active bookings section. Please note that cancellation charges may apply depending on the time of cancellation.',
+    },
+    {
+      question: 'What payment methods are accepted?',
+      answer:
+        'We accept various payment methods including credit/debit cards, UPI, digital wallets, and cash. You can also save your preferred payment method for future bookings.',
+    },
+    {
+      question: 'How do I track my ride?',
+      answer:
+        'Once your booking is confirmed, you can track your driver\'s real-time location on the map in the app. You will also receive updates about your driver\'s arrival.',
+    },
+    {
+      question: 'What if I lost something in the cab?',
+      answer:
+        'If you have left something in the cab, please contact our customer support immediately. We will try to help you recover your lost item.',
+    },
+    {
+      question: 'How do I rate my driver?',
+      answer:
+        'After completing your trip, you will be prompted to rate your driver and provide feedback. Your feedback helps us improve our service.',
+    },
+  ];
 
   return (
     <Container
@@ -70,42 +52,35 @@ const HelpSupport = () => {
       backgroundColor={isDarkMode ? colors.black : colors.white}>
       <AppBar back title="Help and Support" isDarkMode={isDarkMode} />
 
-      {loading ? (
-        <Box flex={1} justifyContent="center" alignItems="center">
-          <ActivityIndicator size="large" color="#00ff00" />
-        </Box>
-      ) : (
-        <ScrollView mb={moderateScale(10)} showsVerticalScrollIndicator={false}>
-          {helpAndSupportData?.map((item: any) => {
-            return (
-              <>
-                <Text
-                  fontFamily={'$poppinsRegular'}
-                  fontSize={14}
-                  lineHeight={16}
-                  color={isDarkMode ? colors.white : colors.charcoalGray}
-                  numberOfLines={22}
-                  textAlign="justify"
-                  mx={moderateScale(15)}
-                  mt={moderateScaleVertical(25)}>
-                  {item?.question}
-                </Text>
-                <Text
-                  fontFamily={'$poppinsRegular'}
-                  fontSize={14}
-                  lineHeight={16}
-                  color={isDarkMode ? colors.white : colors.charcoalGray}
-                  numberOfLines={22}
-                  textAlign="justify"
-                  mx={moderateScale(15)}
-                  mt={moderateScaleVertical(25)}>
-                  {item?.answer}
-                </Text>
-              </>
-            );
-          })}
-        </ScrollView>
-      )}
+      <ScrollView mb={moderateScale(10)} showsVerticalScrollIndicator={false}>
+        {helpAndSupportData?.map((item: any, index: number) => {
+          return (
+            <>
+              <Text
+                key={`question-${index}`}
+                fontFamily={'$poppinsSemiBold'}
+                fontSize={16}
+                lineHeight={20}
+                color={isDarkMode ? colors.white : colors.charcoalGray}
+                mx={moderateScale(15)}
+                mt={moderateScaleVertical(25)}>
+                {item?.question}
+              </Text>
+              <Text
+                key={`answer-${index}`}
+                fontFamily={'$poppinsRegular'}
+                fontSize={14}
+                lineHeight={18}
+                color={isDarkMode ? colors.gray3 : colors.gray2}
+                textAlign="justify"
+                mx={moderateScale(15)}
+                mt={moderateScaleVertical(10)}>
+                {item?.answer}
+              </Text>
+            </>
+          );
+        })}
+      </ScrollView>
     </Container>
   );
 };

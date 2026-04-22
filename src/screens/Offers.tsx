@@ -51,7 +51,7 @@ const Offers = () => {
     <Container   statusBarStyle={isDarkMode ? 'light-content' : 'dark-content'}  statusBarBackgroundColor={isDarkMode ? '#000000' : '#f5f5f5'}  backgroundColor={isDarkMode ? '#000000' : '#f5f5f5'}>
       <Box flexDirection='row' alignItems='center' justifyContent='space-between' py={moderateScaleVertical(15)} px={moderateScale(15)}>
         <Box flex={1}>
-          <Pressable onPress={() => { navigation.openDrawer() }} bgColor={colors.paleYellow} w={moderateScale(32)} h={moderateScale(32)} borderRadius={moderateScale(5)} alignItems='center' justifyContent='center'>
+          <Pressable onPress={() => { navigation.openDrawer() }} bgColor={colors.themePrimary} w={moderateScale(32)} h={moderateScale(32)} borderRadius={moderateScale(5)} alignItems='center' justifyContent='center'>
             <HamburgerIcon />
           </Pressable>
         </Box>
@@ -59,7 +59,6 @@ const Offers = () => {
         <Box alignItems='center' flex={1} >
           <Text fontFamily={'$poppinsMedium'} fontSize={18} lineHeight={20} color={isDarkMode ? colors.white : colors.charcoalGray} numberOfLines={1} >Special Offer</Text>
         </Box>
-
         <Box flex={1}></Box>
       </Box>
 

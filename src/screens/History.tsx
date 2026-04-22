@@ -202,7 +202,9 @@ const HistoryCard = ({
 
 const History = () => {
   const {isDarkMode} = useTheme();
-  const [selectedOption, setSelectedOption] = useState<'active' | 'ongoing' | 'completed' | 'cancelled'>('active');
+  const [selectedOption, setSelectedOption] = useState<
+    'active' | 'ongoing' | 'completed' | 'cancelled'
+  >('active');
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -224,35 +226,43 @@ const History = () => {
         active: 'waiting for pickup',
         ongoing: 'ongoing',
         completed: 'completed',
-        cancelled: 'cancelled'
+        cancelled: 'cancelled',
       };
 
       socketServices.emit('client_booking', {
-        bookingStatus: statusMap[selectedOption]
+        bookingStatus: statusMap[selectedOption],
       });
 
+      // Set timeout to handle no response from socket
+      const timeoutId = setTimeout(() => {
+        setLoading(false);
+        setBookings([]);
+        setNoDataMessage('No data found');
+      }, 10000);
+
       // Clear previous listeners to avoid duplicates
-      // socketServices.off('client_booking_error');
-      // socketServices.off('client_booking_list');
+      socketServices.off('client_booking_error');
+      socketServices.off('client_booking_list');
 
       socketServices.on('client_booking_error', (errorData: any) => {
+        clearTimeout(timeoutId);
         console.log('Error data:', JSON.stringify(errorData));
         setError('Failed to fetch data. Please try again.');
         setLoading(false);
       });
 
       socketServices.on('client_booking_list', (response: any) => {
+        clearTimeout(timeoutId);
         console.log('Booking data:', JSON.stringify(response));
         if (response.data && response.data.length > 0) {
           setBookings(response.data);
           setNoDataMessage(null);
         } else {
           setBookings([]);
-          setNoDataMessage(`No ${selectedOption} rides found.`);
+          setNoDataMessage('No data found');
         }
         setLoading(false);
       });
-
     } catch (err) {
       console.log('Error:', err);
       setError('Failed to fetch data. Please try again.');
@@ -299,9 +309,7 @@ const History = () => {
             fontFamily={'$poppinsMedium'}
             fontSize={12}
             lineHeight={14}
-            color={
-              selectedOption === 'active' ? colors.white : colors.dimGray
-            }
+            color={selectedOption === 'active' ? colors.white : colors.dimGray}
             numberOfLines={1}
             alignSelf="center">
             Active
@@ -320,9 +328,7 @@ const History = () => {
             fontFamily={'$poppinsMedium'}
             fontSize={12}
             lineHeight={14}
-            color={
-              selectedOption === 'ongoing' ? colors.white : colors.dimGray
-            }
+            color={selectedOption === 'ongoing' ? colors.white : colors.dimGray}
             numberOfLines={1}
             alignSelf="center">
             Ongoing

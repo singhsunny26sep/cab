@@ -41,9 +41,10 @@ import {
   saveUserToStorage,
   setDestinationByFavorite,
   setDropDetails,
+  setFavoriteAddresses,
 } from '../store/slice/UserSlice';
-import { BASE_URL } from '../api/Instance';
-import { GET_ALL_FAVORITE_ADDRESSES } from '../api/ApiEndpoints';
+import {BASE_URL} from '../api/Instance';
+import {GET_ALL_FAVORITE_ADDRESSES} from '../api/ApiEndpoints';
 
 const FormLeft = () => {
   return (
@@ -79,7 +80,9 @@ const SelectPath = ({route}: any) => {
 
   const [searchText, setSearchText] = useState('');
   const [showLocations, setShowLocations] = useState(false);
-  const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(
+    null,
+  );
   const [selectedPlace, setSelectedPlace] = useState<any>(null);
   const [userLocalData, setUserLocalData] = useState<any>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -122,17 +125,17 @@ const SelectPath = ({route}: any) => {
     try {
       // First update Redux state
       dispatch(setDropDetails(dropDetails));
-      
+
       // Then save to storage
       const currentUserData = await loadUserFromStorage();
       const updatedUserData: any = {
         ...currentUserData,
-        dropDetails: dropDetails
+        dropDetails: dropDetails,
       };
-      
+
       await saveUserToStorage(updatedUserData);
       setUserLocalData(updatedUserData);
-      
+
       return true;
     } catch (error) {
       console.error('Failed to save drop details:', error);
@@ -144,7 +147,7 @@ const SelectPath = ({route}: any) => {
 
   const onDone = async () => {
     if (!checkValid()) return;
-    
+
     if (toCords?.distance && Number(toCords.distance) > 10000) {
       showErrorToast('The destination is too far away.');
       return;
@@ -212,8 +215,18 @@ const SelectPath = ({route}: any) => {
   const loadUserLocalDatas = async () => {
     try {
       const localData = await loadUserFromStorage();
-      await fetchFavoriteAddresses();
       setUserLocalData(localData);
+
+      // Load cached favorites from AsyncStorage
+      const cachedFavorites = await AsyncStorage.getItem('favoriteAddresses');
+      if (cachedFavorites) {
+        const parsedFavorites = JSON.parse(cachedFavorites);
+        setFavorites(parsedFavorites);
+        dispatch(setFavoriteAddresses(parsedFavorites));
+      }
+
+      // Always fetch fresh favorites from API
+      await fetchFavoriteAddresses();
     } catch (error) {
       console.error('Failed to load user data:', error);
     }
@@ -249,8 +262,8 @@ const SelectPath = ({route}: any) => {
     try {
       setLoadingFavorites(true);
       const token = await AsyncStorage.getItem('userToken');
-      console.log("token" , token)
-      console.log("url" , `${BASE_URL}${GET_ALL_FAVORITE_ADDRESSES.url}`)
+      console.log('token', token);
+      console.log('url', `${BASE_URL}${GET_ALL_FAVORITE_ADDRESSES.url}`);
       const response = await axios.get(
         `${BASE_URL}${GET_ALL_FAVORITE_ADDRESSES.url}`,
         {
@@ -259,8 +272,14 @@ const SelectPath = ({route}: any) => {
           },
         },
       );
-      console.log("respomse", response)
-      setFavorites(response.data);
+      console.log('respomse', response);
+      const favoriteData = response.data;
+      setFavorites(favoriteData);
+      dispatch(setFavoriteAddresses(favoriteData));
+      await AsyncStorage.setItem(
+        'favoriteAddresses',
+        JSON.stringify(favoriteData),
+      );
     } catch (error: any) {
       console.error('Error fetching favorite addresses:', error?.response);
       showErrorToast('Failed to load favorite addresses');
@@ -301,10 +320,18 @@ const SelectPath = ({route}: any) => {
       ]}
       onPress={() => handleFavoriteSelect(item)}>
       <View style={styles.favoriteContent}>
-        <Text style={[styles.favoriteLabel, {color: isDarkMode ? 'white' : 'black'}]}>
+        <Text
+          style={[
+            styles.favoriteLabel,
+            {color: isDarkMode ? 'white' : 'black'},
+          ]}>
           {item.label}
         </Text>
-        <Text style={[styles.favoriteAddress, {color: isDarkMode ? '#ccc' : '#666'}]}>
+        <Text
+          style={[
+            styles.favoriteAddress,
+            {color: isDarkMode ? '#ccc' : '#666'},
+          ]}>
           {item.destination.address}
         </Text>
       </View>
@@ -364,12 +391,18 @@ const SelectPath = ({route}: any) => {
                   }}
                   onPress={() => {
                     dispatch(setDestinationByFavorite(false));
-                    handleSelectPlace(item)
+                    handleSelectPlace(item);
+                  }}>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: '500',
+                      color: isDarkMode ? 'white' : 'black',
                     }}>
-                  <Text style={{fontSize: 16, fontWeight: '500', color: isDarkMode ? 'white' : 'black'}}>
                     {item.name}
                   </Text>
-                  <Text style={{fontSize: 14, color: isDarkMode ? '#ccc' : '#666'}}>
+                  <Text
+                    style={{fontSize: 14, color: isDarkMode ? '#ccc' : '#666'}}>
                     {item.address}
                   </Text>
                 </TouchableOpacity>
@@ -385,7 +418,7 @@ const SelectPath = ({route}: any) => {
           marginVertical={moderateScaleVertical(10)}
         />
         <PrimaryButton
-          buttonText={isSaving ? "Saving..." : "Done"}
+          buttonText={isSaving ? 'Saving...' : 'Done'}
           onPress={onDone}
           disabled={isSaving}
           marginHorizontal={moderateScale(15)}
@@ -399,21 +432,36 @@ const SelectPath = ({route}: any) => {
           onBackButtonPress={() => setShowFavoritesModal(false)}
           style={styles.modal}
           backdropOpacity={0.5}>
-          <View style={[styles.modalContent, {backgroundColor: isDarkMode ? '#1a1a1a' : 'white'}]}>
-            <Text style={[styles.modalTitle, {color: isDarkMode ? 'white' : 'black'}]}>
+          <View
+            style={[
+              styles.modalContent,
+              {backgroundColor: isDarkMode ? '#1a1a1a' : 'white'},
+            ]}>
+            <Text
+              style={[
+                styles.modalTitle,
+                {color: isDarkMode ? 'white' : 'black'},
+              ]}>
               Select Favorite Destination
             </Text>
-            
+
             {loadingFavorites ? (
-              <ActivityIndicator size="large" color={isDarkMode ? 'white' : '#000'} />
+              <ActivityIndicator
+                size="large"
+                color={isDarkMode ? 'white' : '#000'}
+              />
             ) : favorites.length === 0 ? (
-              <Text style={[styles.emptyText, {color: isDarkMode ? '#ccc' : '#666'}]}>
+              <Text
+                style={[
+                  styles.emptyText,
+                  {color: isDarkMode ? '#ccc' : '#666'},
+                ]}>
                 No favorite addresses found
               </Text>
             ) : (
               <FlatList
                 data={favorites}
-                keyExtractor={(item) => item._id}
+                keyExtractor={item => item._id}
                 renderItem={renderFavoriteItem}
                 contentContainerStyle={styles.favoritesList}
               />

@@ -1,19 +1,12 @@
 import React from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
 import { StackRoute } from '../navigationRoutes';
 import { NavigationString } from '../navigationStrings';
-
 import DrawerStack from './DrawerStack';
-
-
 
 const MainNavigation = () => {
   // init
   const Stack = createNativeStackNavigator();
-
-  
-
   return (
     <Stack.Navigator
       screenOptions={{

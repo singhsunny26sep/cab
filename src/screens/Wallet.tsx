@@ -24,7 +24,6 @@ import {loadUserFromStorage} from '../store/slice/UserSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {BASE_URL, Instance} from '../api/Instance';
 import {
-  GET_PROFILE,
   GET_TRANSACTIONS_HISTORIES,
   GET_WALLET_HISTORY,
 } from '../api/ApiEndpoints';
@@ -143,7 +142,7 @@ const Wallet = () => {
           onPress={() => {
             navigation.openDrawer();
           }}
-          bgColor={colors.paleYellow}
+          bgColor={colors.themePrimary}
           w={moderateScale(32)}
           h={moderateScale(32)}
           borderRadius={moderateScale(5)}
@@ -162,7 +161,7 @@ const Wallet = () => {
         </Text>
         <Pressable
           onPress={() => navigation.navigate(NavigationString?.Notifications)}
-          bgColor={colors.paleYellow}
+          bgColor={colors.themePrimary}
           w={moderateScale(32)}
           h={moderateScale(32)}
           borderRadius={moderateScale(5)}
@@ -195,7 +194,7 @@ const Wallet = () => {
           <Box
             borderWidth={1}
             borderColor={colors.themePrimary}
-            bgColor={colors.ivoryYellow}
+            bgColor={colors.themePrimary}
             flex={1}
             h={moderateScale(145)}
             borderRadius={moderateScale(10)}
@@ -206,7 +205,7 @@ const Wallet = () => {
                 fontFamily={'$poppinsMedium'}
                 fontSize={28}
                 lineHeight={32}
-                color={colors.charcoalGray}
+                color={colors.white}
                 numberOfLines={1}
                 textAlign="center">
                 {'\u20B9'} {walletData?.balance || 0}
@@ -215,7 +214,7 @@ const Wallet = () => {
                 fontFamily={'$poppinsMedium'}
                 fontSize={14}
                 lineHeight={16}
-                color={colors.charcoalGray}
+                color={colors.white}
                 numberOfLines={1}
                 textAlign="center">
                 Available Balance
@@ -226,7 +225,7 @@ const Wallet = () => {
           <Box
             borderWidth={1}
             borderColor={colors.themePrimary}
-            bgColor={colors.ivoryYellow}
+            bgColor={colors.themePrimary}
             flex={1}
             h={moderateScale(145)}
             borderRadius={moderateScale(10)}
@@ -237,7 +236,7 @@ const Wallet = () => {
                 fontFamily={'$poppinsMedium'}
                 fontSize={28}
                 lineHeight={32}
-                color={colors.charcoalGray}
+                color={colors.white}
                 numberOfLines={1}
                 textAlign="center">
                 {'\u20B9'} {walletData?.debitAmount || 0}
@@ -246,7 +245,7 @@ const Wallet = () => {
                 fontFamily={'$poppinsMedium'}
                 fontSize={14}
                 lineHeight={16}
-                color={colors.charcoalGray}
+                color={colors.white}
                 numberOfLines={1}
                 textAlign="center">
                 Total Expend

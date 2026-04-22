@@ -585,7 +585,7 @@ const AvailableTransport = () => {
               key={type.id}
               onPress={() => setActiveTab(type.id)}
               borderRadius={moderateScale(30)}
-              bgColor={isActive ? colors.paleYellow : 'transparent'}
+              bgColor={isActive ? colors.themePrimary : 'transparent'}
               px={moderateScale(12)}
               py={moderateScaleVertical(6)}
               flexDirection="row"
@@ -603,7 +603,7 @@ const AvailableTransport = () => {
               <Text
                 fontFamily="$poppinsMedium"
                 fontSize={12}
-                color={colors.themePrimary}
+                color={colors.black}
                 ml={isActive ? 0 : moderateScale(5)}>
                 {type.label}
               </Text>

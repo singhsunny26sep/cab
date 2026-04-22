@@ -5,7 +5,6 @@ import { GOOGLE_API_KEY } from '../constants/contants';
 const useSearchPlace = () => {
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const searchPlaceByText = async (query: string) => {
     if (!query.trim()) {
       console.log('[useSearchPlace] Empty query, skipping search');
