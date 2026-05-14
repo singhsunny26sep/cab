@@ -17,7 +17,7 @@ import {Pressable} from '@gluestack-ui/themed';
 import {NavigationString} from '../navigation/navigationStrings';
 import PrimaryButton from '../components/Button/PrimaryButton';
 import {SIGNUP, VERIFYOTP} from '../api/ApiEndpoints';
-import {Instance} from '../api/Instance';
+import {Instance, Instance2} from '../api/Instance.ts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {loadUserFromStorage, saveUserToStorage} from '../store/slice/UserSlice';
 const OTP_RESEND_TIME = 60;
@@ -73,10 +73,11 @@ const OtpVerify = () => {
         setError('Invalid OTP. Please try again.');
         return;
       }
-
-      const response = await Instance.post(VERIFYOTP.url, {
+console.log('Verifying OTP with email:', email, 'and sessionId:', route.params?.sessionId);
+      const response = await Instance2.post(VERIFYOTP.url, {
         otp: otpNumber,
         email: email,
+        sessionId: route.params?.sessionId,
       });
 
       console.log('OTP Response:', response.data);

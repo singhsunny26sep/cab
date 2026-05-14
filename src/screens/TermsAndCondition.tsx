@@ -2,7 +2,7 @@ import { View,  ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useTheme } from '@gluestack-style/react';
 import { Box, ScrollView, Toast, ToastTitle, useToast,Text, } from '@gluestack-ui/themed';
-import { BASE_URL, Instance } from '../api/Instance';
+import { BASE_URL, Instance } from '../api/Instance.ts';
 import { GET_TERMS_CONDITIONS } from '../api/ApiEndpoints';
 import { Container } from '../components/Container';
 import { AppBar } from '../components/AppBar';

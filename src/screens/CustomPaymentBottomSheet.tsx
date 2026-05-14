@@ -14,7 +14,7 @@ import {useTheme} from '../constants/ThemeContext';
 import axios from 'axios';
 import {useSelector} from 'react-redux';
 import {RootState} from '../store/reduxStore/store';
-import {BASE_URL} from '../api/Instance';
+import {BASE_URL} from '../api/Instance.ts';
 import PrimaryButton from '../components/Button/PrimaryButton';
 import useRazorpayPayment from '../utils/useRazorpayPayment';
 import { loadUserFromStorage, saveUserToStorage } from '../store/slice/UserSlice';

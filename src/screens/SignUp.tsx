@@ -17,7 +17,7 @@ import PrimaryButton from '../components/Button/PrimaryButton'
 import { AppleLogoIcon, GmailIcon } from '../components/Icons'
 import { NavigationString } from '../navigation/navigationStrings'
 import Body from '../components/Body/Body'
-import { Instance } from '../api/Instance'
+import { Instance } from '../api/Instance.ts'
 import { SIGNUP, VALIDATE_REFERRAL } from '../api/ApiEndpoints'
 import { getFCMToken } from '../utils/notifications'
 

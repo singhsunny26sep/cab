@@ -6,7 +6,7 @@ import {colors} from '../constants/colors';
 import {moderateScale, moderateScaleVertical} from '../utils/responsiveSize';
 import {useTheme} from '../constants/ThemeContext';
 import {useEffect, useState} from 'react';
-import {BASE_URL, Instance} from '../api/Instance';
+import {BASE_URL, Instance} from '../api/Instance.ts';
 import {GET_PRIVACY_POLICIES} from '../api/ApiEndpoints';
 import { ActivityIndicator } from 'react-native';
 

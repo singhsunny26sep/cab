@@ -43,7 +43,7 @@ import {
   setDropDetails,
   setFavoriteAddresses,
 } from '../store/slice/UserSlice';
-import {BASE_URL} from '../api/Instance';
+import {BASE_URL} from '../api/Instance.ts';
 import {GET_ALL_FAVORITE_ADDRESSES} from '../api/ApiEndpoints';
 
 const FormLeft = () => {

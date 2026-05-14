@@ -64,7 +64,7 @@ import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {BASE_URL} from '../api/Instance';
+import {BASE_URL} from '../api/Instance.ts';
 import {UPDATE_RIDE_STATUS} from '../api/ApiEndpoints';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';

@@ -12,7 +12,7 @@ import {moderateScale, moderateScaleVertical} from '../utils/responsiveSize';
 import {MapMarkerBlackIcon} from '../components/Icons';
 import PrimaryButton from '../components/Button/PrimaryButton';
 import {NavigationString} from '../navigation/navigationStrings';
-import {BASE_URL, Instance} from '../api/Instance';
+import {BASE_URL, Instance} from '../api/Instance.ts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useTheme} from '../constants/ThemeContext';
 import {GET_BIKES, GET_CARS, GET_CYCLES, GET_TAXIS} from '../api/ApiEndpoints';

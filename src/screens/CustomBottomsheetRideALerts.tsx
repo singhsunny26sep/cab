@@ -15,7 +15,7 @@ import {useTheme} from '../constants/ThemeContext';
 import axios from 'axios';
 import {useSelector} from 'react-redux';
 import {RootState} from '../store/reduxStore/store';
-import {BASE_URL} from '../api/Instance';
+import {BASE_URL} from '../api/Instance.ts';
 import {CREATE_RATING} from '../api/ApiEndpoints';
 
 type AlertType = 'confirmation' | 'rating' | null;

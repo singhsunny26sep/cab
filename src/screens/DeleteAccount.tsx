@@ -12,7 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {ParamListBase, useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {NavigationString} from '../navigation/navigationStrings';
-import {BASE_URL, Instance} from '../api/Instance';
+import {BASE_URL, Instance} from '../api/Instance.ts';
 import {DELETE_PROFILE} from '../api/ApiEndpoints';
 import {ActivityIndicator} from 'react-native';
 

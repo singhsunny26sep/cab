@@ -8,7 +8,7 @@ import {TransectionsCreditIcon, TransectionsDebitIcon} from '../components/Icons
 import {colors} from '../constants/colors';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {BASE_URL, Instance} from '../api/Instance';
+import {BASE_URL, Instance} from '../api/Instance.ts';
 import {GET_TRANSACTIONS_HISTORIES} from '../api/ApiEndpoints';
 import moment from 'moment';
 

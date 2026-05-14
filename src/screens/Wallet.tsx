@@ -22,7 +22,7 @@ import PrimaryButton from '../components/Button/PrimaryButton';
 import {useEffect, useState, useCallback} from 'react';
 import {loadUserFromStorage} from '../store/slice/UserSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {BASE_URL, Instance} from '../api/Instance';
+import {BASE_URL, Instance} from '../api/Instance.ts';
 import {
   GET_TRANSACTIONS_HISTORIES,
   GET_WALLET_HISTORY,

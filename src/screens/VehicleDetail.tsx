@@ -16,7 +16,7 @@ import Icons from "../assets/Icons";
 import PrimaryButton from "../components/Button/PrimaryButton";
 import { NavigationString } from '../navigation/navigationStrings';
 import { useTheme } from '../constants/ThemeContext';
-import { BASE_URL, Instance } from '../api/Instance';
+import { BASE_URL, Instance } from '../api/Instance.ts';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { loadUserFromStorage } from '../store/slice/UserSlice';

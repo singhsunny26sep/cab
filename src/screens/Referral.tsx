@@ -8,7 +8,7 @@ import PrimaryButton from '../components/Button/PrimaryButton';
 import {useTheme} from '../constants/ThemeContext';
 import {useEffect, useState} from 'react';
 import { loadUserFromStorage } from '../store/slice/UserSlice';
-import { BASE_URL, Instance } from '../api/Instance';
+import { BASE_URL, Instance } from '../api/Instance.ts';
 import { GET_PROFILE } from '../api/ApiEndpoints';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Share } from 'react-native';

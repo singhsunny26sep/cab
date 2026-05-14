@@ -4,7 +4,12 @@ export const SIGNUP = {
 };
 
 export const VERIFYOTP = {
-  url: '/verify-otp',
+  url: '/verify-otp-contact',
+  method: 'POST',
+};
+
+export const SEND_OTP_CONTACT = {
+  url: '/send-otp-contact',
   method: 'POST',
 };
 
@@ -29,12 +34,12 @@ export const GET_HELP_SUPPORT = {
 };
 
 export const GET_TERMS_CONDITIONS = {
-  url: '/info/termsAndCondition  ',
+  url: '/info/termsAndCondition',
   method: 'GET',
 };
 
 export const GET_PRIVACY_POLICIES = {
-  url: '/info/privacyPolicies  ',
+  url: '/info/privacyPolicies',
   method: 'GET',
 };
 

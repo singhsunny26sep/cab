@@ -1,187 +1,223 @@
-  import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Box, Pressable, Text } from '@gluestack-ui/themed'
 import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { Container } from '../components/Container'
 import { colors } from '../constants/colors'
-import { AppBar } from '../components/AppBar'
 import { moderateScale, moderateScaleVertical } from '../utils/responsiveSize'
 import InputText from '../components/TextInput/InputText'
-import { AppleLogoIcon, CloseEyeIcon, GmailIcon, OpenEyeIcon } from '../components/Icons'
+import { GmailIcon, AppleLogoIcon } from '../components/Icons'
 import PrimaryButton from '../components/Button/PrimaryButton'
 import { NavigationString } from '../navigation/navigationStrings';
-import { Instance } from '../api/Instance';
-import { SIGNUP } from '../api/ApiEndpoints';
+import axios from 'axios';
+import { BASE_URL2, Instance2 } from '../api/Instance.ts';
+import { SEND_OTP_CONTACT, VALIDATE_REFERRAL } from '../api/ApiEndpoints';
 import { getFCMToken } from '../utils/notifications';
+import CountryPicker, { CountryCode } from 'react-native-country-picker-modal'
 
 const SignIn = () => {
   // init 
   const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
 
   // state
-  const [secureText, setSecureText] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+   const [countryCode, setCountryCode] = useState<CountryCode>('IN');
+   const [callingCode, setCallingCode] = useState<string>('+91');
+   const [mobileNumber, setMobileNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [fcmToken, setFcmToken] = useState<any>('');
   const [error, setError] = useState({
-    email: '',
-    password: '',
-    general: ''
+    general: '',
   });
-  
-  useEffect(()=> {
+  const [referralCode, setReferralCode] = useState('');
+  const [referralCodeError, setReferralCodeError] = useState('');
+  const [isReferralValid, setIsReferralValid] = useState(false);
+  const [referralLoading, setReferralLoading] = useState(false);
+
+  useEffect(() => {
     askFCMToken();
-  },[]);
+  }, []);
 
   const askFCMToken = async () => {
-    // const userLData = await loadUserLocalMethod();
     const token = await getFCMToken();
-    // console.log("fcm token....",token)
-    console.log('FCM TOKEN at Login --- ', token );
+    console.log('FCM TOKEN at Login --- ', token);
     setFcmToken(token);
-  }
-  console.log('STATE variable FCM TOKEN at Login --- ', fcmToken );
+  };
 
-  const EyeIcon = () => {
-    return (
-      <Pressable onPress={() => { setSecureText(!secureText) }} pr={moderateScale(10)}>
-        <>
-          {secureText ? <CloseEyeIcon /> : <OpenEyeIcon />}
-        </>
-      </Pressable>
-    )
-  }
+  const validateReferralCode = async (code: string) => {
+    if (!code.trim()) {
+      setReferralCodeError('');
+      setIsReferralValid(false);
+      return;
+    }
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    setReferralLoading(true);
+     try {
+       const response = await Instance2.post(VALIDATE_REFERRAL.url, {
+         referralCode: code,
+       });
+
+      if (response.data.success) {
+        setReferralCodeError('');
+        setIsReferralValid(true);
+      } else {
+        setReferralCodeError(response.data.message || 'Invalid referral code');
+        setIsReferralValid(false);
+      }
+    } catch (error: any) {
+      console.error('Error validating referral code:', error?.response);
+      setReferralCodeError('Error validating referral code');
+      setIsReferralValid(false);
+    } finally {
+      setReferralLoading(false);
+    }
   };
 
   const validateForm = () => {
     let isValid = true;
     const newError = {
-      email: '',
-      password: '',
-      general: ''
+      general: '',
     };
 
-    // Email validation
-    if (!email.trim()) {
-      newError.email = 'Email is required';
+    // Mobile number validation
+    if (!mobileNumber.trim()) {
+      newError.general = 'Mobile number is required';
       isValid = false;
-    } else if (!validateEmail(email.trim())) {
-      newError.email = 'Please enter a valid email';
+    } else if (!/^\d{10}$/.test(mobileNumber)) {
+      newError.general = 'Please enter a valid 10-digit mobile number';
       isValid = false;
     }
 
-    // Password validation
-    // if (!password.trim()) {
-    //   newError.password = 'Password is required';
-    //   isValid = false;
-    // } else if (password.length < 6) {
-    //   newError.password = 'Password must be at least 6 characters';
-    //   isValid = false;
-    // }
+    // Check referral code only if it's not empty
+    if (referralCode.trim() && !isReferralValid) {
+      newError.general = 'Please enter a valid referral code or leave it empty';
+      isValid = false;
+    }
 
     setError(newError);
     return isValid;
   };
 
-  const handleSignIn = async () => {
-    try {
-      if (!validateForm()) return;
-  
-      setError({ email: '', password: '', general: '' }); 
-      setLoading(true); 
-      
-      const response = await Instance.post(SIGNUP.url, {
-        email: email.trim(),
-        fcmToken,
-        password: password
-      });
-  
-      setLoading(false); 
-  
-      if (response.status === 200) {
-        navigation.navigate(NavigationString.OtpVerify, { email: email.trim() });
-      } else {
-        setError(prev => ({ ...prev, general: 'Failed to send OTP. Please try again.' }));
-      }
-    } catch (error: any) {
-      console.error('Error sending OTP:', error);
-      setLoading(false); 
-      setError(prev => ({
-        ...prev,
-        general: error?.response?.data?.message || 'Something went wrong. Please try again.'
-      }));
-    }
-  }
-  
+   const handleSignIn = async () => {
+     try {
+       if (!validateForm()) return;
+
+        setError({ general: '' });
+        setLoading(true);
+
+        // Send the full contact number including country code (e.g., +91xxxxxxxxxx)
+        const fullContactNumber = callingCode + mobileNumber;
+         const response = await Instance2.post(SEND_OTP_CONTACT.url, {
+            contact: fullContactNumber,
+            fcmToken,
+            // referralCode: referralCode.trim() || undefined, // Only send if not empty
+          });
+
+          const sessionId = response.data?.sessionId;
+
+        setLoading(false);
+
+        if (response.status === 200) {
+          navigation.navigate(NavigationString.OtpVerify, {
+            contact: fullContactNumber,
+            sessionId: sessionId,
+          });
+        } else {
+         setError(prev => ({ ...prev, general: 'Failed to send OTP. Please try again.' }));
+       }
+     } catch (error: any) {
+       console.error('Error sending OTP:', error);
+       setLoading(false);
+       setError(prev => ({
+         ...prev,
+         general: error?.response?.data?.message || 'Something went wrong. Please try again.',
+       }));
+     }
+   };
+
+   const handleCountrySelect = (country: any) => {
+     setCountryCode(country?.cca2);
+     setCallingCode(country?.callingCode || '+91');
+   };
 
   return (
     <Container statusBarStyle='dark-content' statusBarBackgroundColor={colors.white}>
-      {/* <AppBar back /> */}
-
       <Box mx={moderateScale(15)} gap={moderateScaleVertical(20)} mt={moderateScaleVertical(30)}>
-        <Text fontFamily={'$poppinsMedium'} fontSize={24} lineHeight={26} color={colors.charcoalGray} numberOfLines={1}>Sign In</Text> 
+        <Text fontFamily={'$poppinsMedium'} fontSize={24} lineHeight={26} color={colors.charcoalGray} numberOfLines={1}>
+          Sign In
+        </Text>
 
-        <Box pt={moderateScale(80)}>
-          <InputText
-            textInputProps={{
-              placeholder: 'Enter your email',
-              onChangeText: (text) => {
-                setEmail(text);
-                setError(prev => ({ ...prev, email: '', general: '' }));
-              },
-              value: email,
-            }}
+        {/* Mobile Number Field with Country Picker */}
+        <Box flexDirection='row' alignItems='center' borderWidth={1} borderColor={colors.silverGray} borderRadius={9} pl={moderateScale(10)} h={moderateScale(56)}>
+          <CountryPicker
+            countryCode={countryCode}
+            onSelect={handleCountrySelect}
+            withAlphaFilter
+            withCallingCode
+            withCallingCodeButton
+            withFilter
+            withFlag
           />
-          {error.email ? (
-            <Text color={colors.vividRed} fontSize={12} mt={moderateScaleVertical(5)}>
-              {error.email}
-            </Text>
-          ) : null}
+
+          <Box flex={1} borderLeftWidth={1} borderLeftColor='#DDDDDD' ml={moderateScale(10)}>
+            <InputText
+              borderWith={0}
+              textInputProps={{
+                placeholder: 'Your mobile number',
+                keyboardType: 'number-pad',
+                onChangeText: (text) => {
+                  setMobileNumber(text);
+                  setError(prev => ({ ...prev, general: '' }));
+                },
+                value: mobileNumber,
+              }}
+            />
+          </Box>
         </Box>
-
-        {/* <Box>
-          <InputText
-            textInputProps={{
-              placeholder: 'Enter Your Password',
-              onChangeText: (text) => {
-                setPassword(text);
-                setError(prev => ({ ...prev, password: '', general: '' }));
-              },
-              value: password,
-            }}
-            secureTextEntry={secureText}
-            right={<EyeIcon />}
-          />
-          {error.password ? (
-            <Text color={colors.vividRed} fontSize={12} mt={moderateScaleVertical(5)}>
-              {error.password}
-            </Text>
-          ) : null}
-        </Box> */}
-
-        <Pressable alignSelf='flex-end' onPress={() => navigation.navigate(NavigationString.ForgotPassword)}>
-          <Text fontFamily={'$poppinsMedium'} fontSize={14} lineHeight={16} color={colors.vividRed} numberOfLines={1}>Forget password?</Text>
-        </Pressable>
-      </Box>
-
-      <Box mx={moderateScale(15)} gap={moderateScaleVertical(30)} mt={moderateScaleVertical(30)}>
         {error.general ? (
-          <Text color={colors.vividRed} fontSize={12} textAlign="center">
+          <Text color={colors.error} fontSize={12} fontFamily="$poppinsRegular">
             {error.general}
           </Text>
         ) : null}
-        
-        <PrimaryButton buttonText='Sign In' onPress={handleSignIn}  loading={loading}/>
 
-        <Box flexDirection='row' alignItems='center' gap={moderateScale(4)} mx={moderateScale(15)} >
+        {/* Referral Code Field (Optional) */}
+        <InputText
+          textInputProps={{
+            placeholder: 'Referral Code (Optional)',
+            onChangeText: (text) => {
+              setReferralCode(text);
+              // Only validate if text is not empty
+              if (text.trim()) {
+                validateReferralCode(text);
+              } else {
+                setReferralCodeError('');
+                setIsReferralValid(false);
+              }
+            },
+            value: referralCode,
+          }}
+        />
+        {referralLoading ? (
+          <Text color={colors.themePrimary} fontSize={12} fontFamily="$poppinsRegular">
+            Validating referral code...
+          </Text>
+        ) : referralCodeError ? (
+          <Text color={colors.error} fontSize={12} fontFamily="$poppinsRegular">
+            {referralCodeError}
+          </Text>
+        ) : isReferralValid ? (
+          <Text color={colors.green} fontSize={12} fontFamily="$poppinsRegular">
+            Referral code is valid
+          </Text>
+        ) : null}
+
+        <PrimaryButton buttonText='Sign In' onPress={handleSignIn} loading={loading} />
+
+        <Box flexDirection='row' alignItems='center' gap={moderateScale(4)} mx={moderateScale(15)}>
           <Box borderBottomWidth={1} borderBottomColor={colors.silverGray} flex={1}></Box>
-          <Text fontFamily={'$poppinsMedium'} fontSize={16} lineHeight={18} color={colors.silverGray} numberOfLines={1}>or</Text>
+          <Text fontFamily={'$poppinsMedium'} fontSize={16} lineHeight={18} color={colors.silverGray} numberOfLines={1}>
+            or
+          </Text>
           <Box borderBottomWidth={1} borderBottomColor={colors.silverGray} flex={1}></Box>
         </Box>
 
@@ -196,14 +232,18 @@ const SignIn = () => {
         </Box>
       </Box>
 
-      <Box flexDirection='row' alignItems='center' alignSelf='center' mt={moderateScaleVertical(60)} >
-        <Text fontFamily={'$poppinsMedium'} fontSize={16} lineHeight={18} color={colors.charcoalGray} numberOfLines={2} alignSelf='center'>Already have an account ?</Text>
-        <Pressable onPress={() => navigation.navigate(NavigationString.SignUp)} >
-          <Text fontFamily={'$poppinsMedium'} fontSize={16} lineHeight={18} color={colors.themePrimary} numberOfLines={1}>Sign Up</Text>
+      <Box flexDirection='row' alignItems='center' alignSelf='center' mt={moderateScaleVertical(60)}>
+        <Text fontFamily={'$poppinsMedium'} fontSize={16} lineHeight={18} color={colors.charcoalGray} numberOfLines={2} alignSelf='center'>
+          Already have an account ?
+        </Text>
+        <Pressable onPress={() => navigation.navigate(NavigationString.SignUp)}>
+          <Text fontFamily={'$poppinsMedium'} fontSize={16} lineHeight={18} color={colors.themePrimary} numberOfLines={1}>
+            Sign Up
+          </Text>
         </Pressable>
       </Box>
     </Container>
-  )
-}
+  );
+};
 
 export default SignIn;

@@ -1,11 +1,8 @@
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Box,
-  CloseIcon,
-  Icon,
   Pressable,
   Text,
-  Toast,
-  ToastTitle,
   useToast,
 } from '@gluestack-ui/themed';
 import {
@@ -13,32 +10,23 @@ import {
   Dimensions,
   Image,
   Linking,
-  Modal,
   Platform,
-  TextInput,
   View,
+  TouchableOpacity,
 } from 'react-native';
-import React, {useEffect, useRef, useState, useCallback} from 'react';
-import {ParamListBase, useNavigation, useRoute} from '@react-navigation/native';
-import {DrawerNavigationProp} from '@react-navigation/drawer';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MapView, {
   AnimatedRegion,
   Marker,
   PROVIDER_DEFAULT,
   PROVIDER_GOOGLE,
 } from 'react-native-maps';
+import { useNavigation} from '@react-navigation/native';
 import axios from 'axios';
 import {Container} from '../components/Container';
 import {colors} from '../constants/colors';
 import {
-  BetweenLineIcon,
   HamburgerIcon,
-  LocationMakerRedIcon,
-  LocationMakerYellowIcon,
-  LocationTargetIcon,
   Notification,
-  SearchIcon,
 } from '../components/Icons';
 import {deviceHeight, deviceWidth, GOOGLE_API_KEY} from '../constants/contants';
 import {
@@ -51,6 +39,7 @@ import {NavigationString} from '../navigation/navigationStrings';
 import PrimaryButton from '../components/Button/PrimaryButton';
 import MapViewDirections from 'react-native-maps-directions';
 import Icons from '../assets/Icons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useTheme} from '../constants/ThemeContext';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../store/reduxStore/store';
@@ -58,24 +47,20 @@ import {
   loadUserFromStorage,
   saveUserToStorage,
   setDropDetails,
-  setDropDistance,
   setPickupDetails,
 } from '../store/slice/UserSlice';
 import {
-  checkDeviceLocationServices,
-  requestLocationPermissions,
   stopWatchingLocation,
   watchLocationContinuously,
-  openLocationSettings,
   getCurrentLocationOnce,
 } from '../utils/locationHelper';
 import socketServices from '../utils/socketServices';
 import debounce from '../utils/debounce';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import moment from 'moment';
 import OngoingRideModal from '../components/OngoingRideModal/OngoingRideModal';
 import CustomBottomsheetRideALerts from './CustomBottomsheetRideALerts';
 import CustomPaymentBottomSheet from './CustomPaymentBottomSheet';
+import { ScrollView } from 'react-native';
 
 const screen = Dimensions.get('window');
 const ASPECT_RATIO = screen.width / screen.height;
@@ -105,9 +90,8 @@ const Home = () => {
   const toast = useToast();
   const mapRef: any = useRef(null);
   const markerRef: any = useRef(null);
-  const navigation = useNavigation<DrawerNavigationProp<ParamListBase>>();
-  const route: any = useRoute();
-  const locationWatcherRef = useRef<any>(null);
+const navigation = useNavigation<any>();
+   const locationWatcherRef = useRef<any>(null);
 
   // state
   const [state, setState] = useState<State>({
@@ -145,10 +129,13 @@ const Home = () => {
   const [alertType, setAlertType] = useState<'confirmation' | 'rating' | null>(
     null,
   );
-  const [completedRideData, setCompletedRideData] = useState<any>(null); // New state to store completed ride data
+  const [completedRideData, setCompletedRideData] = useState<any>(null);
   const [showPaymentModal, setShowPaymentModal] = useState<boolean>(false);
   const [completedRideForPayment, setCompletedRideForPayment] =
     useState<any>(null);
+
+  // Ride type selector state
+  const [selectedRideType, setSelectedRideType] = useState<'bike' | 'car' | 'auto'>('auto');
 
   const getLocationOnce = async () => {
     const locationData: any = await getCurrentLocationOnce();
@@ -187,7 +174,6 @@ const Home = () => {
     const initializeApp = async () => {
       try {
         await loadUserLocalDatas();
-        await requestLocationPermission();
         await getLocationOnce();
       } catch (error) {
         console.error('Initialization error:', error);
@@ -270,51 +256,34 @@ const Home = () => {
       ride.bookingStatus === 'ongoing' &&
       ride.rideStatus === 'rideNotPicked'
     ) {
-      // Driver is on the way
       setOngoingRide(ride);
       setShowOngoingRideModal(true);
-      setCompletedRideData(null); // Clear any completed ride data
+      setCompletedRideData(null);
     } else if (
       ride.bookingStatus === 'ongoing' &&
       ride.rideStatus === 'ridePicked'
     ) {
-      // Ride picked - show confirmation
       setOngoingRide(ride);
       setAlertType('confirmation');
       setShowAlert(true);
       setShowOngoingRideModal(false);
-      setCompletedRideData(null); // Clear any completed ride data
+      setCompletedRideData(null);
     } else if (
       ride.bookingStatus === 'completed' &&
       ride.rideStatus === 'ridePicked'
     ) {
-      // Ride completed - show payment first
       setCompletedRideForPayment(ride);
       setShowPaymentModal(true);
       setOngoingRide(null);
       setShowOngoingRideModal(false);
-
-      // Ride completed - show rating
-      // setCompletedRideData(ride); // Store completed ride data
-      // setOngoingRide(null); // Clear ongoing ride
-      // setAlertType('rating');
-      // setShowAlert(true);
-      // setShowOngoingRideModal(false);
     } else {
-      // Reset if no ongoing ride
       setOngoingRide(null);
       setShowOngoingRideModal(false);
       setCompletedRideForPayment(null);
       setCompletedRideData(null);
-
-      // // Reset if no ongoing ride
-      // setOngoingRide(null);
-      // setShowOngoingRideModal(false);
-      // setCompletedRideData(null);
     }
   };
 
-  // handle payment success
   const handlePaymentSuccess = () => {
     setShowPaymentModal(false);
     setCompletedRideData(completedRideForPayment);
@@ -333,10 +302,6 @@ const Home = () => {
           lat: location.latitude,
           lng: location.longitude,
         });
-
-        // socketServices.on('nearbyDriverList', (nearbyDriverList: any) => {
-        //   setNearbyDrivers(nearbyDriverList);
-        // });
       }
     }, 1000);
 
@@ -371,17 +336,6 @@ const Home = () => {
           }),
         }));
 
-        if (mapRef.current) {
-          mapRef.current.animateToRegion(
-            {
-              latitude,
-              longitude,
-              latitudeDelta: LATITUDE_DELTA,
-              longitudeDelta: LONGITUDE_DELTA,
-            },
-            500,
-          );
-        }
         animate(latitude, longitude);
 
         debouncedLocationUpdate({latitude, longitude});
@@ -405,45 +359,13 @@ const Home = () => {
         }
       },
     );
-
     locationWatcherRef.current = locationWatcher;
-
     return () => {
       if (locationWatcherRef.current) {
         stopWatchingLocation();
       }
     };
   }, [socketInitialized, pickupData]);
-
-  const requestLocationPermission = async () => {
-    try {
-      const hasPermission = await requestLocationPermissions();
-      if (!hasPermission) {
-        setState(prevState => ({...prevState, isLoading: false}));
-        return;
-      }
-      if (hasPermission) {
-        const isLocationEnabled = await checkDeviceLocationServices();
-        if (!isLocationEnabled) {
-          Alert.alert(
-            'Location Services Disabled',
-            'Please enable device location services to track your location',
-            [
-              {text: 'Cancel', style: 'cancel'},
-              {text: 'Open Settings', onPress: openLocationSettings},
-            ],
-          );
-          setState(prevState => ({...prevState, isLoading: false}));
-          return;
-        }
-      } else {
-        setState(prevState => ({...prevState, isLoading: false}));
-      }
-    } catch (error) {
-      console.error('Permission request error:', error);
-      setState(prevState => ({...prevState, isLoading: false}));
-    }
-  };
 
   const loadUserLocalDatas = async () => {
     const localData = await loadUserFromStorage();
@@ -526,11 +448,143 @@ const Home = () => {
     return null;
   };
 
+  const renderRideTypeCard = (type: string, label: string, iconSource: any) => {
+    const isSelected = selectedRideType === type;
+    return (
+      <Pressable
+        onPress={() => setSelectedRideType(type as any)}
+        style={[
+          {
+            flex: 1,
+            alignItems: 'center',
+            paddingVertical: moderateScaleVertical(12),
+            paddingHorizontal: moderateScale(8),
+            borderRadius: moderateScale(12),
+            backgroundColor: isSelected
+              ? colors.themePrimary
+              : isDarkMode
+              ? colors.black2
+              : colors.white,
+            borderWidth: isSelected ? 0 : 1,
+            borderColor: isSelected
+              ? colors.themePrimary
+              : colors.borderColor,
+          },
+        ]}>
+        <Image
+          source={iconSource}
+          style={{
+            width: moderateScale(50),
+            height: moderateScale(50),
+            resizeMode: 'contain',
+            marginBottom: moderateScaleVertical(6),
+          }}
+        />
+        <Text
+          style={{
+            fontFamily: 'Poppins-Medium',
+            fontSize: textScale(11),
+            color: isSelected ? colors.white : colors.charcoalGray,
+          }}>
+          {label}
+        </Text>
+        {isSelected && (
+          <View
+            style={{
+              width: moderateScale(8),
+              height: moderateScale(8),
+              borderRadius: moderateScale(4),
+              backgroundColor: colors.white,
+              marginTop: moderateScaleVertical(4),
+            }}
+          />
+        )}
+      </Pressable>
+    );
+  };
+
+  const getEstimatedFare = () => {
+    const distance = state.distance || 0;
+    const baseFare = 35;
+    const perKmRate = 8;
+    const perMinuteRate = 2;
+    const estimatedFare =
+      baseFare + distance * perKmRate + 10 * perMinuteRate;
+    return estimatedFare;
+  };
+
   return (
     <Container
       statusBarStyle={isDarkMode ? 'light-content' : 'dark-content'}
       statusBarBackgroundColor={isDarkMode ? '#000000' : '#f5f5f5'}
       backgroundColor={isDarkMode ? '#000000' : colors.ivoryYellow}>
+      {/* ======= TOP HEADER BAR ======= */}
+      <Box
+        flexDirection="row"
+        alignItems="center"
+        justifyContent="space-between"
+        px={moderateScale(16)}
+        py={moderateScaleVertical(12)}
+        bgColor={isDarkMode ? colors.black2 : colors.white}
+        shadowColor={isDarkMode ? '#000' : colors.gray4}
+        shadowOffset={{width: 0, height: 2}}
+        shadowOpacity={0.1}
+        shadowRadius={moderateScale(4)}
+        elevation={3}
+        zIndex={10}>
+        {/* Hamburger */}
+        <Pressable
+          onPress={() => navigation.openDrawer()}
+          bgColor={isDarkMode ? colors.dimGray : colors.gray5}
+          w={moderateScale(38)}
+          h={moderateScale(38)}
+          borderRadius={moderateScale(10)}
+          alignItems="center"
+          justifyContent="center">
+          <HamburgerIcon />
+        </Pressable>
+
+        {/* Logo & Brand */}
+        <Box flexDirection="row" alignItems="center" gap={moderateScale(6)}>
+          <View
+            style={{
+              width: moderateScale(36),
+              height: moderateScale(36),
+              borderRadius: moderateScale(9),
+              backgroundColor: colors.themePrimary,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <Text
+              style={{
+                fontFamily: 'Poppins-Bold',
+                fontSize: textScale(18),
+                color: colors.white,
+              }}>
+              C
+            </Text>
+          </View>
+          <Text
+            fontFamily="Poppins-SemiBold"
+            fontSize={textScale(18)}
+            color={isDarkMode ? colors.white : colors.charcoalGray}>
+            Dharam Cab
+          </Text>
+        </Box>
+
+        {/* Notification Bell */}
+        <Pressable
+          onPress={() => navigation.navigate(NavigationString?.Notifications)}
+          bgColor={isDarkMode ? colors.dimGray : colors.gray5}
+          w={moderateScale(38)}
+          h={moderateScale(38)}
+          borderRadius={moderateScale(10)}
+          alignItems="center"
+          justifyContent="center">
+          <Notification />
+        </Pressable>
+      </Box>
+
       <MapView
         style={{flex: 1}}
         ref={mapRef}
@@ -538,7 +592,7 @@ const Home = () => {
           Platform.OS === 'android' ? PROVIDER_GOOGLE : PROVIDER_DEFAULT
         }
         showsUserLocation={true}
-        showsMyLocationButton={true}
+        showsMyLocationButton={false}
         initialRegion={{
           ...state?.curLoc,
           latitudeDelta: LATITUDE_DELTA,
@@ -745,6 +799,374 @@ const Home = () => {
         )}
       </MapView>
 
+{/* ======= BOTTOM RIDE PANEL (Ola-style) ======= */}
+       {!ongoingRide && (
+         <Box
+           position="absolute"
+           bottom={0}
+           left={0}
+           right={0}
+           bgColor={isDarkMode ? colors.black2 : colors.white}
+           borderTopLeftRadius={moderateScale(24)}
+           borderTopRightRadius={moderateScale(24)}
+           shadowColor={isDarkMode ? '#000' : colors.gray}
+           shadowOffset={{width: 0, height: -4}}
+           shadowOpacity={0.15}
+           shadowRadius={moderateScale(12)}
+elevation={8}
+            zIndex={5}
+            height={moderateScale(380)}>
+            <ScrollView
+              scrollEnabled={true}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{paddingBottom: moderateScaleVertical(20)}}
+              keyboardShouldPersistTaps="always"
+              nestedScrollEnabled={true}
+              overScrollMode="always">
+             {/* Pickup Address Bar */}
+             <Pressable
+               onPress={() => {
+                 navigation.navigate(NavigationString.SelectPath, {
+                   fetchCordsValues,
+                   userLocation: state?.curLoc,
+                 });
+               }}
+               flexDirection="row"
+               alignItems="center"
+               px={moderateScale(16)}
+               py={moderateScaleVertical(14)}
+               gap={moderateScale(12)}
+               borderBottomWidth={1}
+               borderBottomColor={
+                 isDarkMode ? colors.dimGray : colors.gray5
+               }>
+               <View
+                 style={{
+                   width: moderateScale(40),
+                   height: moderateScale(40),
+                   borderRadius: moderateScale(20),
+                   backgroundColor: colors.themePrimary,
+                   alignItems: 'center',
+                   justifyContent: 'center',
+                 }}>
+                 <MaterialIcons
+                   name="my-location"
+                   size={scale(18)}
+                   color={colors.white}
+                 />
+               </View>
+               <Box flex={1}>
+                 <Text
+                   fontFamily="Poppins-Medium"
+                   fontSize={textScale(13)}
+                   color={isDarkMode ? colors.white : colors.charcoalGray}
+                   numberOfLines={1}>
+                   {state?.curLoc?.address || 'Getting your location...'}
+                 </Text>
+                 <Text
+                   fontFamily="Poppins-Regular"
+                   fontSize={textScale(11)}
+                   color={isDarkMode ? colors.gray6 : colors.silverGray}
+                   numberOfLines={1}>
+                   Current location
+                 </Text>
+               </Box>
+               {state?.destinationCords?.address ? (
+                 <Box flexDirection="row" alignItems="center" gap={moderateScale(6)}>
+                   <Box
+                     style={{
+                       width: moderateScale(10),
+                       height: moderateScale(10),
+                       borderRadius: moderateScale(5),
+                       backgroundColor: colors.emeraldGreen,
+                     }}
+                   />
+                   <Text
+                     fontFamily="Poppins-Medium"
+                     fontSize={textScale(11)}
+                     color={isDarkMode ? colors.white : colors.dimGray}
+                     numberOfLines={1}
+                     style={{maxWidth: moderateScale(100)}}>
+                     {state?.destinationCords?.address}
+                   </Text>
+                 </Box>
+               ) : (
+                 <View
+                   style={{
+                     width: moderateScale(10),
+                     height: moderateScale(10),
+                     borderRadius: moderateScale(5),
+                     backgroundColor: colors.gray4,
+                   }}
+                 />
+               )}
+             </Pressable>
+
+             {/* Estimated Fare */}
+             {state?.destinationCords?.address && (
+               <View
+                 style={{
+                   flexDirection: 'row',
+                   alignItems: 'center',
+                   justifyContent: 'space-between',
+                   paddingHorizontal: moderateScale(16),
+                   paddingVertical: moderateScaleVertical(12),
+                   backgroundColor: isDarkMode
+                     ? colors.black
+                     : colors.primary3,
+                 }}>
+                 <View>
+                   <Text
+                     fontFamily="Poppins-Regular"
+                     fontSize={textScale(12)}
+                     color={isDarkMode ? colors.gray6 : colors.dimGray}>
+                     Estimated Fare
+                   </Text>
+                   <Text
+                     fontFamily="Poppins-Bold"
+                     fontSize={textScale(24)}
+                     color={isDarkMode ? colors.white : colors.charcoalGray}>
+                     ₹{getEstimatedFare().toFixed(0)}
+                   </Text>
+                 </View>
+                 <View
+                   style={{
+                     paddingHorizontal: moderateScale(12),
+                     paddingVertical: moderateScaleVertical(6),
+                     backgroundColor: isDarkMode
+                       ? colors.dimGray
+                       : colors.white,
+                     borderRadius: moderateScale(20),
+                   }}>
+                   <Text
+                     fontFamily="Poppins-Medium"
+                     fontSize={textScale(10)}
+                     color={isDarkMode ? colors.white : colors.charcoalGray}>
+                     {state?.distance
+                       ? `${Number(state.distance).toFixed(1)} km`
+                       : '---'}
+                   </Text>
+                 </View>
+               </View>
+             )}
+
+             {/* Ride Type Selectors */}
+             {!state?.destinationCords?.address && (
+               <Box mx={moderateScale(16)} mt={moderateScaleVertical(16)}>
+                 <Text
+                   fontFamily="Poppins-Medium"
+                   fontSize={textScale(14)}
+                   color={isDarkMode ? colors.white : colors.charcoalGray}
+                   mb={moderateScaleVertical(10)}>
+                   Choose Ride Type
+                 </Text>
+                 <View style={{flexDirection: 'row', gap: moderateScale(10)}}>
+                   {renderRideTypeCard(
+                     'auto',
+                     'Auto',
+                     Icons.Cycle,
+                   )}
+                   {renderRideTypeCard(
+                     'bike',
+                     'Bike',
+                     Icons.Bike,
+                   )}
+                   {renderRideTypeCard(
+                     'car',
+                     'Car',
+                     Icons.Car,
+                   )}
+                 </View>
+               </Box>
+             )}
+
+             {/* Quick Actions */}
+             {!state?.destinationCords?.address && (
+               <View
+                 style={{
+                   flexDirection: 'row',
+                   justifyContent: 'space-around',
+                   paddingHorizontal: moderateScale(16),
+                   paddingVertical: moderateScaleVertical(16),
+                   borderTopWidth: 1,
+                   borderTopColor: isDarkMode ? colors.dimGray : colors.gray5,
+                   marginBottom:20
+                 }}>
+                 <TouchableOpacity
+                   style={{
+                     alignItems: 'center',
+                     paddingVertical: moderateScaleVertical(8),
+                     paddingHorizontal: moderateScale(14),
+                     borderRadius: moderateScale(12),
+                     backgroundColor: isDarkMode
+                       ? colors.dimGray
+                       : colors.gray5,
+                   }}>
+                   <View
+                     style={{
+                       width: moderateScale(40),
+                       height: moderateScale(40),
+                       borderRadius: moderateScale(20),
+                       backgroundColor: colors.themePrimary,
+                       alignItems: 'center',
+                       justifyContent: 'center',
+                       marginBottom: moderateScaleVertical(6),
+                     }}>
+                     <MaterialIcons
+                       name="schedule"
+                       size={scale(20)}
+                       color={colors.white}
+                     />
+                   </View>
+                   <Text
+                     fontFamily="Poppins-Medium"
+                     fontSize={textScale(10)}
+                     color={isDarkMode ? colors.white : colors.gray}>
+                     Schedule
+                   </Text>
+                 </TouchableOpacity>
+
+                 <TouchableOpacity
+                   style={{
+                     alignItems: 'center',
+                     paddingVertical: moderateScaleVertical(8),
+                     paddingHorizontal: moderateScale(14),
+                     borderRadius: moderateScale(12),
+                     backgroundColor: isDarkMode
+                       ? colors.dimGray
+                       : colors.gray5,
+                   }}>
+                   <View
+                     style={{
+                       width: moderateScale(40),
+                       height: moderateScale(40),
+                       borderRadius: moderateScale(20),
+                       backgroundColor: colors.themeTertiary,
+                       alignItems: 'center',
+                       justifyContent: 'center',
+                       marginBottom: moderateScaleVertical(6),
+                     }}>
+                     <MaterialIcons
+                       name="local-offer"
+                       size={scale(20)}
+                       color={colors.white}
+                     />
+                   </View>
+                   <Text
+                     fontFamily="Poppins-Medium"
+                     fontSize={textScale(10)}
+                     color={isDarkMode ? colors.white : colors.gray}>
+                     Offers
+                   </Text>
+                 </TouchableOpacity>
+
+                 <TouchableOpacity
+                   style={{
+                     alignItems: 'center',
+                     paddingVertical: moderateScaleVertical(8),
+                     paddingHorizontal: moderateScale(14),
+                     borderRadius: moderateScale(12),
+                     backgroundColor: isDarkMode
+                       ? colors.dimGray
+                       : colors.gray5,
+                   }}
+                   onPress={() =>
+                     navigation.navigate(NavigationString.Favourite)
+                   }>
+                   <View
+                     style={{
+                       width: moderateScale(40),
+                       height: moderateScale(40),
+                       borderRadius: moderateScale(20),
+                       backgroundColor: colors.ivoryYellow,
+                       alignItems: 'center',
+                       justifyContent: 'center',
+                       marginBottom: moderateScaleVertical(6),
+                       borderWidth: 1,
+                       borderColor: colors.yellow,
+                     }}>
+                     <MaterialIcons
+                       name="favorite-border"
+                       size={scale(20)}
+                       color={colors.yellow}
+                     />
+                   </View>
+                   <Text
+                     fontFamily="Poppins-Medium"
+                     fontSize={textScale(10)}
+                     color={isDarkMode ? colors.white : colors.gray}>
+                     Favorites
+                   </Text>
+                 </TouchableOpacity>
+
+                 <TouchableOpacity
+                   style={{
+                     alignItems: 'center',
+                     paddingVertical: moderateScaleVertical(8),
+                     paddingHorizontal: moderateScale(14),
+                     borderRadius: moderateScale(12),
+                     backgroundColor: isDarkMode
+                       ? colors.dimGray
+                       : colors.gray5,
+                   }}
+                   onPress={() =>
+                     navigation.navigate(NavigationString.History)
+                   }>
+                   <View
+                     style={{
+                       width: moderateScale(40),
+                       height: moderateScale(40),
+                       borderRadius: moderateScale(20),
+                       backgroundColor: colors.white1,
+                       alignItems: 'center',
+                       justifyContent: 'center',
+                       marginBottom: moderateScaleVertical(6),
+                       borderWidth: 1,
+                       borderColor: colors.gray3,
+                     }}>
+                     <MaterialIcons
+                       name="history"
+                       size={scale(20)}
+                       color={colors.themePrimary}
+                     />
+                   </View>
+                   <Text
+                     fontFamily="Poppins-Medium"
+                     fontSize={textScale(10)}
+                     color={isDarkMode ? colors.white : colors.gray}>
+                     History
+                   </Text>
+                 </TouchableOpacity>
+               </View>
+             )}
+
+             {/* Go Button - shown when destination is set */}
+             {state?.destinationCords?.address && (
+               <View
+                 style={{
+                   flexDirection: 'row',
+                   alignItems: 'center',
+                   paddingHorizontal: moderateScale(16),
+                   paddingVertical: moderateScaleVertical(14),
+                   borderTopWidth: 1,
+                   borderTopColor: isDarkMode ? colors.dimGray : colors.gray5,
+                 }}>
+                 <PrimaryButton
+                   onPress={() => {
+                     navigation.navigate(NavigationString.AvailableTransport, {
+                       transportType: selectedRideType,
+                     });
+                   }}
+                   buttonText="Go"
+                   flex={1}
+                   fontSize={textScale(18)}
+                   borderRadius={moderateScale(12)}
+                 />
+               </View>
+             )}
+           </ScrollView>
+         </Box>
+       )}
       <OngoingRideModal
         visible={showOngoingRideModal && ongoingRide !== null}
         onClose={() => setShowOngoingRideModal(false)}
@@ -788,258 +1210,51 @@ const Home = () => {
           position="absolute"
           bottom={moderateScaleVertical(120)}
           right={moderateScale(15)}
-          bgColor={isDarkMode ? colors.white : colors.themePrimary}
+          bgColor={colors.themePrimary}
           w={moderateScale(50)}
           h={moderateScale(50)}
-          borderRadius={moderateScale(10)}
+          borderRadius={moderateScale(25)}
           alignItems="center"
-          justifyContent="center">
+          justifyContent="center"
+          shadowColor={isDarkMode ? '#000' : colors.themePrimary}
+          shadowOffset={{width: 0, height: 4}}
+          shadowOpacity={0.3}
+          shadowRadius={moderateScale(8)}
+          elevation={6}>
           <MaterialIcons
             name="directions-car"
-            size={scale(20)}
-            color={isDarkMode ? colors.black : colors.black}
+            size={scale(22)}
+            color={colors.white}
           />
-          <Text>Rides</Text>
         </Pressable>
       )}
 
-      <Box
-        position="absolute"
-        flexDirection="row"
-        alignItems="center"
-        gap={deviceWidth * 0.72}
-        py={moderateScaleVertical(15)}
-        px={moderateScale(15)}>
-        <Pressable
-          onPress={() => {
-            navigation.openDrawer();
-          }}
-          bgColor={isDarkMode ? colors.white : colors.themePrimary}
-          w={moderateScale(32)}
-          h={moderateScale(32)}
-          borderRadius={moderateScale(5)}
-          alignItems="center"
-          justifyContent="center">
-          <HamburgerIcon />
-        </Pressable>
-
-        <Pressable
-          onPress={() => navigation.navigate(NavigationString?.Notifications)}
-          bgColor={isDarkMode ? colors.white : colors.themePrimary}
-          w={moderateScale(32)}
-          h={moderateScale(32)}
-          borderRadius={moderateScale(5)}
-          alignItems="center"
-          justifyContent="center">
-          <Notification />
-        </Pressable>
-      </Box>
-
+      {/* ======= MY LOCATION BUTTON ======= */}
       <Pressable
         onPress={() => {
           onCenter();
         }}
-        w={moderateScale(50)}
-        h={moderateScale(50)}
+        w={moderateScale(44)}
+        h={moderateScale(44)}
         position="absolute"
-        bgColor={isDarkMode ? colors.white : colors.themePrimary}
-        bottom={0}
-        mb={
-          ongoingRide ? moderateScaleVertical(55) : moderateScaleVertical(175)
-        }
-        right={0}
+        bgColor={colors.white}
+        bottom={ongoingRide ? moderateScaleVertical(80) : moderateScaleVertical(220)}
+        right={moderateScale(16)}
         justifyContent="center"
         alignItems="center"
-        borderRadius={moderateScale(10)}
+        borderRadius={moderateScale(22)}
+        shadowColor={isDarkMode ? '#000' : colors.gray}
+        shadowOffset={{width: 0, height: 2}}
+        shadowOpacity={0.2}
+        shadowRadius={moderateScale(6)}
+        elevation={4}
         mr={moderateScale(15)}>
         <MaterialIcons
           name="my-location"
-          size={scale(30)}
-          color={colors.black}
+          size={scale(22)}
+          color={colors.themePrimary}
         />
       </Pressable>
-
-      {!ongoingRide && (
-        <Pressable
-          hitSlop={20}
-          onPress={() => {
-            navigation.navigate(NavigationString.SelectPath, {
-              fetchCordsValues,
-              userLocation: state?.curLoc,
-            });
-          }}
-          position="absolute"
-          bottom={0}
-          mb={moderateScaleVertical(110)}
-          flexDirection="row"
-          alignItems="center"
-          bgColor={isDarkMode ? colors.black : colors.ivoryYellow}
-          mx={moderateScale(10)}
-          borderWidth={1}
-          borderRadius={moderateScale(6)}
-          borderColor={colors.themePrimary}
-          pl={moderateScale(10)}
-          h={moderateScale(45)}
-          w={'94%'}>
-          <SearchIcon />
-          <TextInput
-            placeholder="Where would you go?"
-            placeholderTextColor={isDarkMode ? colors.white : colors.grayish}
-            value={state?.destinationCords?.address ?? ''}
-            numberOfLines={1}
-            editable={false}
-            style={{
-              fontSize: textScale(12),
-              lineHeight: textScale(14),
-              fontFamily: 'Poppins-Medium',
-              color: colors.mediumLightGray,
-              flex: 1,
-            }}
-          />
-        </Pressable>
-      )}
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={showLocationRoute}>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'flex-end',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          }}>
-          <View
-            style={{
-              backgroundColor: isDarkMode ? colors.black : '#fff',
-              width: '100%',
-              height: '35%',
-              borderTopLeftRadius: moderateScale(25),
-              borderTopRightRadius: moderateScale(25),
-              paddingTop: moderateScaleVertical(15),
-            }}>
-            <Pressable
-              onPress={() => setShowLocationRoute(false)}
-              alignSelf="flex-end"
-              pr={moderateScale(15)}
-              mb={moderateScaleVertical(10)}>
-              <Icon as={CloseIcon} color="#5A5A5A" w="$4" h="$4" />
-            </Pressable>
-
-            <Text
-              fontFamily={'$poppinsMedium'}
-              fontSize={20}
-              lineHeight={22}
-              color={isDarkMode ? colors.white : colors.charcoalGray}
-              numberOfLines={1}
-              alignSelf="center">
-              Select address
-            </Text>
-            <Box
-              borderBottomWidth={1}
-              borderBottomColor="#DDDDDD"
-              my={moderateScaleVertical(10)}></Box>
-
-            <Box mx={moderateScale(10)} my={moderateScaleVertical(15)}>
-              <Box
-                flexDirection="row"
-                alignItems="center"
-                gap={moderateScale(5)}>
-                <LocationMakerRedIcon style={{alignSelf: 'flex-start'}} />
-                <Box flex={1}>
-                  <Box
-                    flexDirection="row"
-                    alignItems="center"
-                    justifyContent="space-between">
-                    <Text
-                      fontFamily={'$poppinsMedium'}
-                      fontSize={14}
-                      lineHeight={16}
-                      color={isDarkMode ? colors.white : colors.charcoalGray}
-                      numberOfLines={1}>
-                      Current Location
-                    </Text>
-                    <Text
-                      fontFamily={'$poppinsMedium'}
-                      fontSize={14}
-                      lineHeight={16}
-                      color={isDarkMode ? colors.white : colors.charcoalGray}
-                      numberOfLines={1}>
-                      {state.routeDuration}
-                    </Text>
-                  </Box>
-                  <Text
-                    fontFamily={'$poppinsRegular'}
-                    fontSize={12}
-                    lineHeight={14}
-                    color={isDarkMode ? colors.white : colors.silverGray}
-                    numberOfLines={1}>
-                    {state?.curLoc?.address ?? 'N/A'}
-                  </Text>
-                </Box>
-              </Box>
-
-              <BetweenLineIcon style={{marginLeft: moderateScale(11)}} />
-
-              <Box
-                flexDirection="row"
-                alignItems="center"
-                gap={moderateScale(5)}>
-                <LocationMakerYellowIcon style={{alignSelf: 'flex-start'}} />
-                <Box flex={1}>
-                  <Box
-                    flexDirection="row"
-                    alignItems="center"
-                    justifyContent="space-between">
-                    <Text
-                      fontFamily={'$poppinsMedium'}
-                      fontSize={14}
-                      lineHeight={16}
-                      color={isDarkMode ? colors.white : colors.charcoalGray}
-                      numberOfLines={1}>
-                      Destination Location
-                    </Text>
-                    <Text
-                      fontFamily={'$poppinsMedium'}
-                      fontSize={14}
-                      lineHeight={16}
-                      color={isDarkMode ? colors.white : colors.charcoalGray}
-                      numberOfLines={1}>
-                      {state?.destinationCords?.distance
-                        ? `${Number(state?.destinationCords?.distance).toFixed(1)} km`
-                        : state?.distance
-                          ? `${Number(state.distance).toFixed(1)} km`
-                          : 'N/A'}
-                    </Text>
-                  </Box>
-                  <Text
-                    fontFamily={'$poppinsRegular'}
-                    fontSize={12}
-                    lineHeight={14}
-                    color={isDarkMode ? colors.white : colors.silverGray}
-                    numberOfLines={1}>
-                    {state?.destinationCords?.address ?? 'N/A'}
-                  </Text>
-                </Box>
-              </Box>
-            </Box>
-
-            <PrimaryButton
-              buttonText="Confirm Location"
-              onPress={() => {
-                navigation.navigate(NavigationString.AvailableTransport);
-                fetchCordsValues({
-                  latitude: 0,
-                  longitude: 0,
-                  address: '',
-                });
-                setShowLocationRoute(false);
-              }}
-              marginHorizontal={moderateScale(15)}
-            />
-          </View>
-        </View>
-      </Modal>
     </Container>
   );
 };

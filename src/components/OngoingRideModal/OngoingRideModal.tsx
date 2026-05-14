@@ -35,7 +35,7 @@ import { NavigationString } from '../../navigation/navigationStrings';
 import { Dropdown } from 'react-native-element-dropdown';
 import { customerCancelRideReasons } from '../../constants/contants';
 import axios from 'axios';
-import { BASE_URL } from '../../api/Instance';
+import { BASE_URL } from '../../api/Instance.ts';
 import { UPDATE_RIDE_STATUS } from '../../api/ApiEndpoints';
 import { loadUserFromStorage } from '../../store/slice/UserSlice';
 import socketServices from '../../utils/socketServices';

@@ -23,7 +23,7 @@ import {
   EditProfileIcon,
 } from '../components/Icons';
 import {moderateScale, moderateScaleVertical} from '../utils/responsiveSize';
-import {BASE_URL, Instance} from '../api/Instance';
+import {BASE_URL, Instance} from '../api/Instance.ts';
 import {GET_PROFILE, GET_ALL_FAVORITE_ADDRESSES} from '../api/ApiEndpoints';
 import {useTheme} from '../constants/ThemeContext';
 import {

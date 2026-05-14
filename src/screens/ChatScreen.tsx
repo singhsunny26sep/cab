@@ -20,7 +20,7 @@ import { scale } from '../utils/responsiveSize';
 import { useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import socketServices from '../utils/socketServices';
-import { BASE_URL, Instance } from '../api/Instance';
+import { BASE_URL, Instance } from '../api/Instance.ts';
 import { loadUserFromStorage } from '../store/slice/UserSlice';
 import { GET_CHATS_DATA } from '../api/ApiEndpoints';
 

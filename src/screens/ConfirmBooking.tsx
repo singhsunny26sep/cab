@@ -25,7 +25,7 @@ import {moderateScale, moderateScaleVertical, scale} from '../utils/responsiveSi
 import InputText from '../components/TextInput/InputText';
 import PrimaryButton from '../components/Button/PrimaryButton';
 import {NavigationString} from '../navigation/navigationStrings';
-import {BASE_URL, Instance} from '../api/Instance';
+import {BASE_URL, Instance} from '../api/Instance.ts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icons from '../assets/Icons';
 import {useTheme} from '../constants/ThemeContext';
