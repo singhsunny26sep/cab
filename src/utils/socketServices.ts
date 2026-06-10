@@ -40,35 +40,27 @@ class WSService {
       });
 
       console.log('👋 Initializing socket');
-
-      // Setup event handlers
       this.socket.on('connect', () => {
         console.log(
           '✅✅✅✅✅✅ Socket connected successfully!✅✅✅✅✅✅',
           this.socket?.connected,
         );
       });
-
       this.socket.on('disconnect', () => {
         console.log('=== socket disconnected ===');
       });
-
       this.socket.on('connect_error', (error: any) => {
         console.log('=== socket connection error ===', error?.message || error);
       });
-
       this.socket.on('error', (error: any) => {
         console.log('=== socket error ===', error?.message || error);
       });
-
       this.socket.on('reconnect_attempt', (attempt: number) => {
         console.log('=== socket reconnect attempt ===', attempt);
       });
-
       this.socket.on('reconnect_failed', () => {
         console.log('=== socket reconnect failed ===');
       });
-
       return this.socket;
     } catch (error) {
       console.log('=== socket initialization error ===', error);

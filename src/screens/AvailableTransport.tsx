@@ -383,18 +383,21 @@ const AvailableTransport = () => {
           Authorization: token,
         },
       });
-
+      console.log(
+        response.data,
+        'this is car responsedata +++++++++++++++++++++++++++++++++++++++++++++++++++++++++',
+      );
       if (response.data.success) {
         const availableVehicles = response.data.data.filter(
           (item: any) =>
-            item.availability === 'Available' && item.status === 'Active',
+            item.availability === 'Available' && item.status === 'InActive',
         );
         setVehicles(availableVehicles);
       } else {
         setError('Failed to load vehicles.');
       }
-    } catch (err) {
-      console.log('error fetching vehicles -> ', err);
+    } catch (err: any) {
+      console.log('error fetching vehicles -> ', err.response || err);
       setError('An error occurred while fetching the vehicles.');
     } finally {
       setLoading(false);

@@ -331,7 +331,7 @@ const ConfirmBooking = () => {
       statusBarBackgroundColor={isDarkMode ? '#000000' : '#ffffff'}
       backgroundColor={isDarkMode ? '#000000' : '#ffffff'}>
       <AppBar back title="Request for ride" isDarkMode={isDarkMode} />
-
+{}
       <Body>
         <Box
           mx={moderateScale(10)}

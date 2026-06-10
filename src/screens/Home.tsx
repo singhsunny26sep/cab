@@ -387,6 +387,7 @@ const Home = () => {
 
   const renderRideTypeCard = (type: string, label: string, iconSource: any) => {
     const isSelected = selectedRideType === type;
+    const fare = state?.destinationCords?.address ? getEstimatedFare(type) : null;
     return (
       <Pressable onPress={() => setSelectedRideType(type as any)} style={[{
         flex: 1, alignItems: 'center', paddingVertical: moderateScaleVertical(14),
@@ -411,14 +412,28 @@ const Home = () => {
         <Text style={{ fontFamily: fontFamily.semiBold, fontSize: textScale(12),
           color: isSelected ? '#FFFFFF' : isDarkMode ? '#F9FAFB' : '#1F2937',
           marginBottom: moderateScaleVertical(4) }}>{label}</Text>
+        {fare !== null && (
+          <Text style={{ fontFamily: fontFamily.bold, fontSize: textScale(13),
+            color: isSelected ? '#FFFFFF' : colors.themePrimary,
+            marginBottom: moderateScaleVertical(2) }}>₹{fare.toFixed(0)}</Text>
+        )}
         {isSelected && <View style={{ width: moderateScale(24), height: moderateScale(4), borderRadius: moderateScale(2), backgroundColor: '#FFFFFF', marginTop: moderateScaleVertical(4) }} />}
       </Pressable>
     );
   };
 
-  const getEstimatedFare = () => {
+  const getEstimatedFare = (type?: string) => {
     const distance = state.distance || 0;
-    const baseFare = 35, perKmRate = 8, perMinuteRate = 2;
+    let baseFare = 35, perKmRate = 8, perMinuteRate = 2;
+    if (type === 'car' || type === 'taxi') {
+      baseFare = 50;
+      perKmRate = 12;
+      perMinuteRate = 3;
+    } else if (type === 'bike') {
+      baseFare = 20;
+      perKmRate = 5;
+      perMinuteRate = 1;
+    }
     return baseFare + distance * perKmRate + 10 * perMinuteRate;
   };
 
@@ -564,34 +579,16 @@ const Home = () => {
                   {state?.destinationCords?.address ? 'Destination set' : 'Enter destination address'}
                 </Text>
               </View>
-              {state?.destinationCords?.address ? (
-                <Pressable onPress={() => setState(prev => ({ ...prev, destinationCords: { latitude: 0, longitude: 0, address: '' } }))} style={{ padding: moderateScale(4) }}>
-                  <MaterialIcons name="close" size={scale(20)} color={isDarkMode ? '#9CA3AF' : '#6B7280'} />
-                </Pressable>
-              ) : (
-                <MaterialIcons name="keyboard-arrow-right" size={scale(24)} color={isDarkMode ? '#9CA3AF' : '#9CA3AF'} />
-              )}
+             
             </Pressable>
-
-            {/* Fare Card (only when destination set) */}
-            {state?.destinationCords?.address && (
-              <LinearGradient colors={isDarkMode ? ['#374151', '#1F2937'] : [colors.themePrimary + '08', '#FFFFFF']} style={{
-                flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-                marginHorizontal: moderateScale(16), paddingHorizontal: moderateScale(20), paddingVertical: moderateScaleVertical(14),
-                borderRadius: moderateScale(20), marginBottom: moderateScaleVertical(16),
-                borderWidth: 1, borderColor: isDarkMode ? '#4B5563' : colors.themePrimary + '20',
-              }}>
-                <View>
-                  <Text style={{ fontFamily: fontFamily.regular, fontSize: textScale(12), color: isDarkMode ? '#9CA3AF' : '#6B7280', marginBottom: moderateScaleVertical(2) }}>Estimated Fare</Text>
-                  <Text style={{ fontFamily: fontFamily.bold, fontSize: textScale(28), color: isDarkMode ? '#F9FAFB' : '#111827', letterSpacing: -0.5 }}>₹{getEstimatedFare().toFixed(0)}</Text>
+            <View style={{ marginTop: moderateScaleVertical(8), paddingHorizontal: moderateScale(16) }}>
+                <Text style={{ fontFamily: fontFamily.semiBold, fontSize: textScale(16), color: isDarkMode ? '#F9FAFB' : '#111827', marginBottom: moderateScaleVertical(14), paddingLeft: moderateScale(4) }}>Choose your ride</Text>
+                <View style={{ flexDirection: 'row', gap: moderateScale(12) }}>
+                  {renderRideTypeCard('auto', 'Auto', Icons.Cycle)}
+                  {renderRideTypeCard('bike', 'Bike', Icons.Bike)}
+                  {renderRideTypeCard('car', 'Car', Icons.Car)}
                 </View>
-                <View style={{ paddingHorizontal: moderateScale(16), paddingVertical: moderateScaleVertical(8), backgroundColor: isDarkMode ? '#4B5563' : '#FFFFFF', borderRadius: moderateScale(30), shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 }}>
-                  <Text style={{ fontFamily: fontFamily.semiBold, fontSize: textScale(12), color: isDarkMode ? '#F9FAFB' : colors.themePrimary }}>{state?.distance ? `${Number(state.distance).toFixed(1)} km` : '---'}</Text>
-                </View>
-              </LinearGradient>
-            )}
-
-            {/* Ride Type Selection (only when destination NOT set) */}
+              </View>
             {!state?.destinationCords?.address && (
               <View style={{ marginTop: moderateScaleVertical(8), paddingHorizontal: moderateScale(16) }}>
                 <Text style={{ fontFamily: fontFamily.semiBold, fontSize: textScale(16), color: isDarkMode ? '#F9FAFB' : '#111827', marginBottom: moderateScaleVertical(14), paddingLeft: moderateScale(4) }}>Choose your ride</Text>
@@ -655,8 +652,6 @@ const Home = () => {
         setOngoingRide={setOngoingRide} setShowOngoingRideModal={setShowOngoingRideModal} />
       <CustomBottomsheetRideALerts visible={showAlert} onClose={() => { setShowAlert(false); setAlertType(null); if (alertType === 'rating') { setOngoingRide(null); setCompletedRideData(null); setShowOngoingRideModal(false); } }} type={alertType} rideData={alertType === 'rating' ? completedRideData : ongoingRide} />
       <CustomPaymentBottomSheet visible={showPaymentModal} onClose={() => setShowPaymentModal(false)} rideData={completedRideForPayment} onPaymentSuccess={handlePaymentSuccess} />
-
-      {/* Floating Buttons */}
       {ongoingRide && (
         <Pressable onPress={() => setShowOngoingRideModal(!showOngoingRideModal)} style={{
           position: 'absolute', bottom: moderateScaleVertical(120), right: moderateScale(20),
