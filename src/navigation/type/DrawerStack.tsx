@@ -17,16 +17,17 @@ const DrawerStack = () => {
   const { isDarkMode } = useTheme();
 
   return (
-    <Drawer.Navigator drawerContent={props => <CustomDrawer {...props} />} screenOptions={{
-      headerShown: false,
-      drawerStyle:{
-        borderTopRightRadius:moderateScale(3),
-        borderBottomRightRadius:moderateScale(3),
-        width:250,
-        backgroundColor:colors.themePrimary,  
-      },
-      drawerType:'front'
-    }}>
+<Drawer.Navigator drawerContent={props => <CustomDrawer {...props} />} screenOptions={{
+       headerShown: false,
+       drawerStyle:{
+         borderTopRightRadius:moderateScale(3),
+         borderBottomRightRadius:moderateScale(3),
+         width:250,
+         backgroundColor:colors.themePrimary,
+       },
+       drawerType:'front',
+       unmountOnBlur: false,
+     }}>
       <Drawer.Screen name={NavigationString.BottomTabStacks} component={StackRoute.BottomTabStack} />
     </Drawer.Navigator>
   );

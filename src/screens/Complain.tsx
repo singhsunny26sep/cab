@@ -88,7 +88,7 @@ const Complain = () => {
 
             </Box>
 
-            <PrimaryButton buttonText='Back To Home' onPress={() => navigation.navigate(NavigationString.Home)} marginHorizontal={moderateScale(15)} marginVertical={moderateScaleVertical(20)} />
+            <PrimaryButton buttonText='Back To Home' onPress={() => navigation?.reset({ index: 0, routes: [{ name: NavigationString.Home }] })} marginHorizontal={moderateScale(15)} marginVertical={moderateScaleVertical(20)} />
 
 
           </Box>

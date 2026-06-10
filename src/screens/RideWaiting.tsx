@@ -367,8 +367,11 @@ const RideWaiting = () => {
         rejectMessage: selectedCancelReason,
         cancelledBy: 'customer',
       });
-      setSelectedCancelReason(null);
-      navigation.navigate(NavigationString.Home);
+setSelectedCancelReason(null);
+       navigation?.reset({
+         index: 0,
+         routes: [{ name: NavigationString.Home }],
+       });
     } catch (error: any) {
       const errorMessage =
         error?.response?.data?.message ||
@@ -426,7 +429,10 @@ const RideWaiting = () => {
             );
           },
         });
-        navigation.navigate(NavigationString.Home);
+        navigation?.reset({
+           index: 0,
+           routes: [{ name: NavigationString.Home }],
+         });
       } else {
         toast.show({
           placement: 'top',

@@ -161,10 +161,10 @@ const SelectPath = ({route}: any) => {
       distance: toCords.distance,
     });
 
-    if (saved) {
-      fetchCordsValues(toCords);
-      navigation?.navigate(NavigationString.Home);
-    } else {
+if (saved) {
+       fetchCordsValues(toCords);
+       navigation?.popToTop();
+     } else {
       showErrorToast('Failed to save destination. Please try again.');
     }
   };

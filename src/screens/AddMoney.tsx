@@ -301,10 +301,10 @@ const AddMoney = () => {
 
           <PrimaryButton
             buttonText="Back To Home"
-            onPress={() => {
-              handleCloseSuccessModal();
-              navigation.navigate(NavigationString.Home);
-            }}
+onPress={() => {
+               handleCloseSuccessModal();
+               navigation?.popToTop();
+             }}
             marginHorizontal={moderateScale(15)}
             marginVertical={moderateScaleVertical(20)}
           />

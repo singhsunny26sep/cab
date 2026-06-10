@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   Box,
   Pressable,
@@ -20,7 +20,7 @@ import MapView, {
   PROVIDER_DEFAULT,
   PROVIDER_GOOGLE,
 } from 'react-native-maps';
-import { useNavigation} from '@react-navigation/native';
+import { useFocusEffect, useNavigation} from '@react-navigation/native';
 import axios from 'axios';
 import {Container} from '../components/Container';
 import {colors} from '../constants/colors';
@@ -373,11 +373,18 @@ const navigation = useNavigation<any>();
     setUserLocalData({...localData, token: userToken});
   };
 
-  useEffect(() => {
-    onCenter();
-  }, [state.curLoc]);
+useEffect(() => {
+     onCenter();
+   }, [state.curLoc]);
 
-  const fetchCordsValues = async (newToCords: any) => {
+   // Jab bhi Home screen pe focus aaye, map ko current location pe zoom karega
+   useFocusEffect(
+     useCallback(() => {
+       onCenter();
+     }, []),
+   );
+
+   const fetchCordsValues = async (newToCords: any) => {
     setState({
       ...state,
       destinationCords: {
