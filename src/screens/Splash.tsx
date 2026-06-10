@@ -41,7 +41,7 @@ const Splash = () => {
     <Container statusBarBackgroundColor={colors.themePrimary} backgroundColor={colors.themePrimary}>
       <Box flex={1} alignItems='center' justifyContent='center'>
         <Image alt='logo' source={Icons.splashLogo2} w={moderateScale(80)} h={moderateScale(80)} resizeMode='contain' />
-        <Text color='$amber100' fontFamily='$poppinsBold' fontSize={25}>Rio Drive</Text>
+        <Text color='$amber100' fontFamily='$poppinsBold' fontSize={25}>Dharam cab Drive</Text>
       </Box>
     </Container>
   )
