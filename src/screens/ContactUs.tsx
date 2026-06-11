@@ -1,29 +1,43 @@
-import { useState } from 'react'
-import { Box, Text, Textarea, TextareaInput } from '@gluestack-ui/themed'
-import CountryPicker, { Country, CountryCode } from 'react-native-country-picker-modal'
+import { useState } from 'react';
+import { Box, Text, Textarea, TextareaInput, VStack, HStack, Divider, Pressable } from '@gluestack-ui/themed';
+import CountryPicker, { Country, CountryCode } from 'react-native-country-picker-modal';
+import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 
-import { Container } from '../components/Container'
-import { AppBar } from '../components/AppBar'
-import { colors } from '../constants/colors'
-import { moderateScale, moderateScaleVertical } from '../utils/responsiveSize'
-import Body from '../components/Body/Body'
-import InputText from '../components/TextInput/InputText'
-import PrimaryButton from '../components/Button/PrimaryButton'
-import { useTheme } from '../constants/ThemeContext'
+import { Container } from '../components/Container';
+import { AppBar } from '../components/AppBar';
+import { colors } from '../constants/colors';
+import { moderateScale, moderateScaleVertical } from '../utils/responsiveSize';
+import InputText from '../components/TextInput/InputText';
+import PrimaryButton from '../components/Button/PrimaryButton';
+import { useTheme } from '../constants/ThemeContext';
+
+// Simple icon placeholders (replace with your actual icon components)
+const MapPinIcon = () => <Text fontSize={20}>📍</Text>;
+const PhoneIcon = () => <Text fontSize={20}>📞</Text>;
+const EmailIcon = () => <Text fontSize={20}>✉️</Text>;
+const ChatIcon = () => <Text fontSize={20}>💬</Text>;
 
 const ContactUs = () => {
   const { isDarkMode } = useTheme();
 
-  // states
-  const [countryCode, setCountryCode] = useState<CountryCode>('IN')
-  const [selectedGender, setSelectedGender] = useState('')
-  const [country, setCountry] = useState(null)
+  const [countryCode, setCountryCode] = useState<CountryCode>('IN');
+  const [country, setCountry] = useState(null);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [mobile, setMobile] = useState('');
+  const [message, setMessage] = useState('');
 
   const handleCountrySelect = (country: any) => {
-    console.log(country);
-    setCountryCode(country?.cca2)
-    setCountry(country?.callingCode)
-  }
+    setCountryCode(country?.cca2);
+    setCountry(country?.callingCode?.[0]);
+  };
+
+  const handleSend = () => {
+    // Handle send logic
+    console.log({ name, email, mobile, message });
+  };
+
+  // Suppress specific console error (keep as needed)
   const error = console.error;
   console.error = (...args: any) => {
     if (/defaultProps/.test(args[0])) return;
@@ -31,82 +45,273 @@ const ContactUs = () => {
   };
 
   return (
-    <Container statusBarStyle={isDarkMode ? 'light-content' : 'dark-content'} statusBarBackgroundColor={isDarkMode ? '#000000' : '#f5f5f5'}  backgroundColor={isDarkMode ? '#000000' : '#f5f5f5'}>
-      <AppBar back title='Contact Us' isDarkMode/>
+    <Container
+      statusBarStyle={isDarkMode ? 'light-content' : 'dark-content'}
+      statusBarBackgroundColor={isDarkMode ? '#000000' : '#F8F9FF'}
+      backgroundColor={isDarkMode ? '#000000' : '#F8F9FF'}>
+      <AppBar back title="Contact Us" isDarkMode={isDarkMode} />
 
-      <Body contentContainerStyle={{ marginHorizontal: moderateScale(10) }}>
-        <Box alignItems='center' mt={moderateScaleVertical(20)} gap={moderateScaleVertical(20)}>
-          <Text fontFamily={'$poppinsMedium'} fontSize={18} lineHeight={20} color={isDarkMode ? colors.white : colors.charcoalGray} numberOfLines={1}>Contact us for Ride share</Text>
-
-          <Box alignItems='center' gap={moderateScaleVertical(10)}>
-            <Text fontFamily={'$poppinsMedium'} fontSize={16} lineHeight={18} color={isDarkMode ? colors.white : colors.charcoalGray} numberOfLines={1}>Address</Text>
-            <Text fontFamily={'$poppinsMedium'} fontSize={12} lineHeight={20}color={isDarkMode ? colors.white : colors.dimsGray} numberOfLines={3} textAlign='center' mx={moderateScale(15)}>House# 72, Road# 21, Banani, Dhaka-1213 (near Banani Bidyaniketon School &
-              College, beside University of South Asia)</Text>
-
-            <Text fontFamily={'$poppinsMedium'} fontSize={12} lineHeight={20} color={isDarkMode ? colors.white : colors.dimsGray} numberOfLines={3} textAlign='center' mx={moderateScale(15)}>Call : 13301 (24/7) {'\n'}
-              Email : support@pathao.com</Text>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Header */}
+          <Box alignItems="center" mt={moderateScaleVertical(16)} mb={moderateScaleVertical(8)}>
+            <Box
+              bg={isDarkMode ? '#1C1C1E' : colors.themePrimary + '15'}
+              w={moderateScale(70)}
+              h={moderateScale(70)}
+              borderRadius={moderateScale(35)}
+              alignItems="center"
+              justifyContent="center">
+              <ChatIcon />
+            </Box>
+            <Text
+              fontFamily="$poppinsSemiBold"
+              fontSize={20}
+              lineHeight={28}
+              color={isDarkMode ? '#FFFFFF' : '#1C1C1E'}
+              mt={moderateScaleVertical(12)}>
+              Get in Touch
+            </Text>
+            <Text
+              fontFamily="$poppinsRegular"
+              fontSize={14}
+              color={isDarkMode ? '#8E8E93' : '#6C6C70'}
+              textAlign="center"
+              px={moderateScale(30)}>
+              We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+            </Text>
           </Box>
-        </Box>
 
-        <Box gap={moderateScaleVertical(15)} mt={moderateScaleVertical(30)}>
-          <Text fontFamily={'$poppinsMedium'} fontSize={16} lineHeight={18} color={isDarkMode ? colors.white : colors.charcoalGray} numberOfLines={1} textAlign='center'>Send Message</Text>
+          {/* Contact Info Cards */}
+          <Box
+            flexDirection="row"
+            justifyContent="space-between"
+            gap={moderateScale(12)}
+            mx={moderateScale(16)}
+            my={moderateScaleVertical(20)}>
+            {/* Address Card */}
+            <Box
+              flex={1}
+              bg={isDarkMode ? '#1C1C1E' : '#FFFFFF'}
+              borderRadius={moderateScale(16)}
+              p={moderateScale(12)}
+              alignItems="center"
+              shadowColor="#000"
+              shadowOffset={{ width: 0, height: 2 }}
+              shadowOpacity={0.05}
+              shadowRadius={4}
+              elevation={2}>
+              <MapPinIcon />
+              <Text
+                fontFamily="$poppinsMedium"
+                fontSize={12}
+                color={isDarkMode ? '#FFFFFF' : '#1C1C1E'}
+                mt={moderateScaleVertical(6)}>
+                Address
+              </Text>
+              <Text
+                fontFamily="$poppinsRegular"
+                fontSize={10}
+                color={isDarkMode ? '#8E8E93' : '#6C6C70'}
+                textAlign="center"
+                mt={moderateScaleVertical(2)}>
+                House#72, Rd#21, Banani
+              </Text>
+            </Box>
 
-          <InputText
-            textInputProps={{
-              placeholder: 'Name'
-            }}
-            isDarkMode={isDarkMode}
-          />
+            {/* Phone Card */}
+            <Box
+              flex={1}
+              bg={isDarkMode ? '#1C1C1E' : '#FFFFFF'}
+              borderRadius={moderateScale(16)}
+              p={moderateScale(12)}
+              alignItems="center"
+              shadowColor="#000"
+              shadowOffset={{ width: 0, height: 2 }}
+              shadowOpacity={0.05}
+              shadowRadius={4}
+              elevation={2}>
+              <PhoneIcon />
+              <Text
+                fontFamily="$poppinsMedium"
+                fontSize={12}
+                color={isDarkMode ? '#FFFFFF' : '#1C1C1E'}
+                mt={moderateScaleVertical(6)}>
+                Phone
+              </Text>
+              <Text
+                fontFamily="$poppinsRegular"
+                fontSize={10}
+                color={isDarkMode ? '#8E8E93' : '#6C6C70'}
+                textAlign="center">
+                13301 (24/7)
+              </Text>
+            </Box>
 
-          <InputText
-            textInputProps={{
-              placeholder: 'Email'
-            }}
-            isDarkMode={isDarkMode}
-          />
-
-          <Box flexDirection='row' alignItems='center' borderWidth={1} borderColor={colors.silverGray} borderRadius={9} pl={moderateScale(10)} h={moderateScale(56)}>
-            <CountryPicker
-              countryCode={countryCode}
-              onSelect={handleCountrySelect}
-              withAlphaFilter
-              withCallingCode
-              withCallingCodeButton
-              withFilter
-              withFlag
-            />
-
-            <Box flex={1} borderLeftWidth={1} borderLeftColor='#DDDDDD' ml={moderateScale(10)}>
-
-              <InputText
-                borderWith={0}
-                textInputProps={{
-                  placeholder: 'Your mobile number',
-                  keyboardType: 'number-pad'
-                }}
-                isDarkMode={isDarkMode}
-              />
+            {/* Email Card */}
+            <Box
+              flex={1}
+              bg={isDarkMode ? '#1C1C1E' : '#FFFFFF'}
+              borderRadius={moderateScale(16)}
+              p={moderateScale(12)}
+              alignItems="center"
+              shadowColor="#000"
+              shadowOffset={{ width: 0, height: 2 }}
+              shadowOpacity={0.05}
+              shadowRadius={4}
+              elevation={2}>
+              <EmailIcon />
+              <Text
+                fontFamily="$poppinsMedium"
+                fontSize={12}
+                color={isDarkMode ? '#FFFFFF' : '#1C1C1E'}
+                mt={moderateScaleVertical(6)}>
+                Email
+              </Text>
+              <Text
+                fontFamily="$poppinsRegular"
+                fontSize={10}
+                color={isDarkMode ? '#8E8E93' : '#6C6C70'}
+                textAlign="center">
+                support@dharamcab.com
+              </Text>
             </Box>
           </Box>
 
-          <Textarea
-            size="md"
-            isReadOnly={false}
-            isInvalid={false}
-            isDisabled={false}
-            w={'100%'}
-            borderColor={colors.silverGray}
-            $focus-borderColor={colors.silverGray}
-          >
-            <TextareaInput fontFamily='$poppinsMedium'  fontSize={14} lineHeight={16} placeholderTextColor={isDarkMode ? colors.white : colors.silverGray} numberOfLines={5} placeholder="Write your text" />
-          </Textarea>
-        </Box>
+          {/* Form Card */}
+          <Box
+            bg={isDarkMode ? '#1C1C1E' : '#FFFFFF'}
+            borderRadius={moderateScale(24)}
+            mx={moderateScale(16)}
+            p={moderateScale(20)}
+            shadowColor="#000"
+            shadowOffset={{ width: 0, height: 4 }}
+            shadowOpacity={0.08}
+            shadowRadius={12}
+            elevation={4}
+            mb={moderateScaleVertical(20)}>
+            <Text
+              fontFamily="$poppinsSemiBold"
+              fontSize={16}
+              color={isDarkMode ? '#FFFFFF' : '#1C1C1E'}
+              mb={moderateScaleVertical(16)}
+              textAlign="center">
+              Send a Message
+            </Text>
 
-      </Body>
+            <VStack space="md">
+              <InputText
+                textInputProps={{
+                  placeholder: 'Your Name',
+                  value: name,
+                  onChangeText: setName,
+                }}
+                isDarkMode={isDarkMode}
+                style={{
+                  backgroundColor: isDarkMode ? '#2C2C2E' : '#F9F9FB',
+                  borderRadius: moderateScale(14),
+                  borderWidth: 1,
+                  borderColor: isDarkMode ? '#3A3A3C' : '#E9E9EF',
+                }}
+              />
 
-      <PrimaryButton buttonText='Send Message' marginHorizontal={moderateScale(10)} marginVertical={moderateScaleVertical(20)} />
+              <InputText
+                textInputProps={{
+                  placeholder: 'Email Address',
+                  value: email,
+                  onChangeText: setEmail,
+                  keyboardType: 'email-address',
+                  autoCapitalize: 'none',
+                }}
+                isDarkMode={isDarkMode}
+                style={{
+                  backgroundColor: isDarkMode ? '#2C2C2E' : '#F9F9FB',
+                  borderRadius: moderateScale(14),
+                  borderWidth: 1,
+                  borderColor: isDarkMode ? '#3A3A3C' : '#E9E9EF',
+                }}
+              />
+
+              {/* Country Picker + Mobile */}
+              <Box
+                flexDirection="row"
+                alignItems="center"
+                bg={isDarkMode ? '#2C2C2E' : '#F9F9FB'}
+                borderRadius={moderateScale(14)}
+                borderWidth={1}
+                borderColor={isDarkMode ? '#3A3A3C' : '#E9E9EF'}
+                px={moderateScale(12)}>
+                <CountryPicker
+                  countryCode={countryCode}
+                  onSelect={handleCountrySelect}
+                  withAlphaFilter
+                  withCallingCode
+                  withFilter
+                  withFlag
+                />
+                <Box
+                  flex={1}
+                  borderLeftWidth={1}
+                  borderLeftColor={isDarkMode ? '#3A3A3C' : '#E9E9EF'}
+                  ml={moderateScale(10)}
+                  pl={moderateScale(10)}>
+                  <InputText
+                    borderWidth={0}
+                    textInputProps={{
+                      placeholder: 'Mobile Number',
+                      value: mobile,
+                      onChangeText: setMobile,
+                      keyboardType: 'phone-pad',
+                    }}
+                    isDarkMode={isDarkMode}
+                    style={{
+                      backgroundColor: 'transparent',
+                      paddingHorizontal: 0,
+                    }}
+                  />
+                </Box>
+              </Box>
+
+              <Textarea
+                size="md"
+                isReadOnly={false}
+                isInvalid={false}
+                isDisabled={false}
+                w="100%"
+                borderRadius={moderateScale(14)}
+                borderWidth={1}
+                borderColor={isDarkMode ? '#3A3A3C' : '#E9E9EF'}
+                bg={isDarkMode ? '#2C2C2E' : '#F9F9FB'}>
+                <TextareaInput
+                  fontFamily="$poppinsRegular"
+                  fontSize={14}
+                  placeholder="Your message..."
+                  value={message}
+                  onChangeText={setMessage}
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                  placeholderTextColor={isDarkMode ? '#8E8E93' : '#C4C4C4'}
+                />
+              </Textarea>
+            </VStack>
+          </Box>
+
+          <PrimaryButton
+            buttonText="Send Message"
+            onPress={handleSend}
+            marginHorizontal={moderateScale(16)}
+            marginVertical={moderateScaleVertical(16)}
+            bgColor={colors.themePrimary}
+            textColor="#FFFFFF"
+            height={moderateScale(52)}
+            borderRadius={moderateScale(14)}
+          />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Container>
-  )
-}
+  );
+};
 
-export default ContactUs
+export default ContactUs;

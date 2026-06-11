@@ -80,8 +80,8 @@ export const getCurrentLocationOnce = async () => {
               'Location Permission Required',
               'Please enable location permissions in settings',
               [
-                {text: 'Cancel', style: 'cancel'},
-                {text: 'Open Settings', onPress: () => Linking.openSettings()},
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Open Settings', onPress: () => Linking.openSettings() },
               ],
             );
           } else if (
@@ -92,20 +92,19 @@ export const getCurrentLocationOnce = async () => {
               'Location Taking Too Long',
               'Your location is taking longer than usual to find. Please ensure you have a clear view of the sky or try moving to an open area.',
               [
-                {text: 'Cancel', style: 'cancel'},
-                {text: 'Try Again', onPress: () => getCurrentLocationOnce()},
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Try Again', onPress: () => getCurrentLocationOnce() },
               ],
             );
           }
           reject(error);
         },
         {
-          enableHighAccuracy: false,
-          timeout: 10000,
-          maximumAge: 60000,
-
-          distanceFilter: 0,
-          interval: 1000,
+          enableHighAccuracy: true,
+          timeout: 60000,
+          maximumAge: 30000,
+          distanceFilter: 10,
+          interval: 2000,
           fastestInterval: 1000,
           useSignificantChanges: false,
         },
@@ -149,7 +148,7 @@ export const checkDeviceLocationServices = async () => {
           resolve(true);
         }
       },
-      {enableHighAccuracy: false, timeout: 500},
+      {enableHighAccuracy: true, timeout: 500},
     );
   });
 };
@@ -320,7 +319,7 @@ export const watchLocationContinuously = (
         // //   showsBackgroundLocationIndicator: Platform.OS === 'ios',
         //   // timeout: 20000,
 
-        enableHighAccuracy: false,
+        enableHighAccuracy: true,
         timeout: 10000,
         maximumAge: 60000,
 

@@ -33,7 +33,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../store/reduxStore/store';
 import {loadUserFromStorage} from '../store/slice/UserSlice';
 import {CONFIRM_BOOKING, CREATE_FAVORITE_ADDRESS, BOOKING_CHARGES} from '../api/ApiEndpoints';
-import moment from 'moment';
+import moment, { localeData } from 'moment';
 import {getCurrentLocationOnce} from '../utils/locationHelper';
 
 const ConfirmBooking = () => {
@@ -54,7 +54,7 @@ const ConfirmBooking = () => {
     message: '',
     promoCode: ''
   });
-
+console.log(priceDetails,"$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
   const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
   const [userLocalData, setUserLocalData] = useState<any>(null);
   const [promoCode, setPromoCode] = useState<string>('');
@@ -73,7 +73,7 @@ const ConfirmBooking = () => {
       calculateBookingPrice();
     }
   }, [userLocalData]);
-
+console.log(localeData,"this is localData____________________________________________")
   const calculateBookingPrice = async (promo: string = '') => {
     try {
       setCalculatingPrice(true);
@@ -202,13 +202,29 @@ const ConfirmBooking = () => {
         return;
       }
 
-      // Proceed with navigation
       const token = await AsyncStorage.getItem('userToken');
       if (!token) {
+        showErrorToast('User not authenticated');
         return;
       }
+
+      const response = await Instance.post(
+        `${BASE_URL}${CONFIRM_BOOKING.url}`,
+        bookingDatas,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        navigation.navigate(NavigationString.RideWaiting, {bookingData: response.data.data});
+      } else {
+        showErrorToast(response.data.message || 'Booking failed');
+      }
     } catch (error: any) {
-      console.error('Booking failed:', error.response);
+      console.error('Booking failed:', error.response.data);
       Alert.alert(
         'Error',
         'Something went wrong during booking. Please try again.',
@@ -217,12 +233,10 @@ const ConfirmBooking = () => {
       setLoading(false);
     }
   };
-
   const loadUserLocalDatas = async () => {
     const localData = await loadUserFromStorage();
     setUserLocalData(localData);
   };
-
   const showErrorToast = (message: string) => {
     toast.show({
       placement: 'top',
@@ -371,9 +385,7 @@ const ConfirmBooking = () => {
               </Text>
             </Box>
           </Box>
-
           <BetweenLineIcon style={{marginLeft: moderateScale(11)}} />
-
           <Box flexDirection="row" alignItems="center" gap={moderateScale(5)}>
             <LocationMakerYellowIcon style={{alignSelf: 'flex-start'}} />
             <Box flex={1} gap={moderateScaleVertical(5)}>

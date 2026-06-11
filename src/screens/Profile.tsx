@@ -4,8 +4,14 @@ import {DrawerNavigationProp} from '@react-navigation/drawer';
 import {ParamListBase, useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import ImagePicker from 'react-native-image-crop-picker';
-import {ActivityIndicator, Alert} from 'react-native';
+import {ActivityIndicator, Alert, Dimensions} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import LinearGradient from 'react-native-linear-gradient';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 
 import {colors} from '../constants/colors';
 import {Container} from '../components/Container';
@@ -35,6 +41,9 @@ import {
 import {useDispatch} from 'react-redux';
 import {NavigationString} from '../navigation/navigationStrings';
 
+const {width} = Dimensions.get('window');
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
 interface MenuItemProps {
   icon: React.ReactNode;
   title: string;
@@ -43,6 +52,9 @@ interface MenuItemProps {
   showBadge?: boolean;
 }
 
+// ----------------------------------------------------------------------
+// Clean Menu Item with subtle animations and minimal color
+// ----------------------------------------------------------------------
 const MenuItem: React.FC<MenuItemProps> = ({
   icon,
   title,
@@ -51,64 +63,97 @@ const MenuItem: React.FC<MenuItemProps> = ({
   showBadge,
 }) => {
   const {isDarkMode} = useTheme();
+  const scale = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{scale: scale.value}],
+  }));
+
+  const handlePressIn = () => {
+    scale.value = withSpring(0.98, {damping: 10, stiffness: 150});
+  };
+  const handlePressOut = () => {
+    scale.value = withSpring(1, {damping: 10, stiffness: 150});
+  };
+
   return (
-    <Pressable
+    <AnimatedPressable
       onPress={onPress}
-      flexDirection="row"
-      alignItems="center"
-      py={moderateScaleVertical(15)}
-      px={moderateScale(20)}
-      borderBottomWidth={1}
-      borderBottomColor={isDarkMode ? colors.charcoalGray : colors.gray3}>
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      style={animatedStyle}>
       <Box
-        w={moderateScale(40)}
-        h={moderateScale(40)}
-        borderRadius={moderateScale(8)}
-        bgColor={colors.themePrimary}
+        flexDirection="row"
         alignItems="center"
-        justifyContent="center"
-        mr={moderateScale(15)}>
-        {icon}
-      </Box>
-      <Box flex={1}>
-        <Text
-          fontFamily={'$poppinsMedium'}
-          fontSize={16}
-          color={isDarkMode ? colors.white : colors.charcoalGray}>
-          {title}
-        </Text>
-        {subtitle && (
-          <Text
-            fontFamily={'$poppinsRegular'}
-            fontSize={13}
-            color={colors.gray2}
-            mt={moderateScaleVertical(2)}>
-            {subtitle}
-          </Text>
-        )}
-      </Box>
-      {showBadge && (
+        py={moderateScaleVertical(14)}
+        px={moderateScale(20)}
+        bgColor={isDarkMode ? '#1C1C24' : '#FFFFFF'}
+        mx={moderateScale(16)}
+        my={moderateScaleVertical(4)}
+        borderRadius={moderateScale(16)}
+        style={{
+          shadowColor: '#000',
+          shadowOffset: {width: 0, height: 2},
+          shadowOpacity: isDarkMode ? 0.2 : 0.04,
+          shadowRadius: 8,
+          elevation: 2,
+        }}>
+        {/* Icon Container - subtle solid or minimal gradient using themePrimary */}
         <Box
-          w={moderateScale(22)}
-          h={moderateScale(22)}
-          borderRadius={moderateScale(11)}
-          bgColor={colors.alertColor}
+          w={moderateScale(48)}
+          h={moderateScale(48)}
+          borderRadius={moderateScale(14)}
+          bgColor={colors.themePrimary + '15'} // 15% opacity
           alignItems="center"
-          justifyContent="center">
-          <Text color={colors.white} fontSize={12} fontFamily={'$poppinsBold'}>
-            2
-          </Text>
+          justifyContent="center"
+          mr={moderateScale(16)}>
+          {icon}
         </Box>
-      )}
-      <LeftAngleIcon
-        width={moderateScale(20)}
-        height={moderateScale(20)}
-        fill={colors.gray4}
-      />
-    </Pressable>
+
+        <Box flex={1}>
+          <Text
+            fontFamily={'$poppinsSemiBold'}
+            fontSize={16}
+            color={isDarkMode ? colors.white : colors.charcoalGray}>
+            {title}
+          </Text>
+          {subtitle && (
+            <Text
+              fontFamily={'$poppinsRegular'}
+              fontSize={12}
+              color={colors.gray4}
+              mt={moderateScaleVertical(2)}>
+              {subtitle}
+            </Text>
+          )}
+        </Box>
+
+        {showBadge && (
+          <Box
+            w={moderateScale(24)}
+            h={moderateScale(24)}
+            borderRadius={moderateScale(12)}
+            bgColor={colors.alertColor}
+            alignItems="center"
+            justifyContent="center"
+            mr={moderateScale(8)}>
+            <Text color={colors.white} fontSize={12} fontFamily={'$poppinsBold'}>
+              2
+            </Text>
+          </Box>
+        )}
+        <LeftAngleIcon
+          width={moderateScale(18)}
+          height={moderateScale(18)}
+          fill={isDarkMode ? colors.gray4 : colors.gray3}
+        />
+      </Box>
+    </AnimatedPressable>
   );
 };
 
+// ----------------------------------------------------------------------
+// Main Profile Screen - Clean, Modern, Minimal Color
+// ----------------------------------------------------------------------
 type RootStackParamList = {
   Wallet: undefined;
   History: undefined;
@@ -176,7 +221,6 @@ const Profile = () => {
         });
       }
 
-      // Also sync favorite addresses
       try {
         const favoritesResponse = await Instance.get(
           GET_ALL_FAVORITE_ADDRESSES.url,
@@ -215,7 +259,6 @@ const Profile = () => {
           style: 'destructive',
           onPress: async () => {
             await AsyncStorage.clear();
-            // Navigate to login or splash
             navigation.reset({
               index: 0,
               routes: [{name: 'Login'}],
@@ -240,28 +283,27 @@ const Profile = () => {
     await getProfile();
   };
 
-  // Menu items for Uber-style profile with navigation
   const menuItems: MenuItemProps[] = [
     {
-      icon: <WalletIcon width={20} height={20} />,
+      icon: <WalletIcon width={22} height={22} color={colors.themePrimary} />,
       title: 'Payment Methods',
       subtitle: 'Add debit card, credit card, UPI',
       onPress: () => stackNavigation.navigate(NavigationString.Wallet),
     },
     {
-      icon: <HistoryDrawerIcon width={20} height={20} />,
+      icon: <HistoryDrawerIcon width={22} height={22} color={colors.themePrimary} />,
       title: 'Ride History',
       subtitle: 'Your past trips',
       onPress: () => stackNavigation.navigate(NavigationString.History),
     },
     {
-      icon: <LocationDrawerIcon width={20} height={20} />,
+      icon: <LocationDrawerIcon width={22} height={22} color={colors.themePrimary} />,
       title: 'Saved Places',
       subtitle: 'Home, Work, and other places',
       onPress: () => stackNavigation.navigate(NavigationString.Favourite),
     },
     {
-      icon: <OfferIcon width={20} height={20} />,
+      icon: <OfferIcon width={22} height={22} color={colors.themePrimary} />,
       title: 'Promotions',
       subtitle: 'Apply coupon codes',
       onPress: () => stackNavigation.navigate(NavigationString.Offers),
@@ -271,17 +313,17 @@ const Profile = () => {
 
   const settingsItems: MenuItemProps[] = [
     {
-      icon: <SettingDrawerIcon width={20} height={20} />,
+      icon: <SettingDrawerIcon width={22} height={22} color={colors.themePrimary} />,
       title: 'Settings',
       onPress: () => stackNavigation.navigate(NavigationString.Settings),
     },
     {
-      icon: <SupportDrawerIcon width={20} height={20} />,
+      icon: <SupportDrawerIcon width={22} height={22} color={colors.themePrimary} />,
       title: 'Help & Support',
       onPress: () => stackNavigation.navigate(NavigationString.HelpSupport),
     },
     {
-      icon: <AboutUsdrawerIcon width={20} height={20} />,
+      icon: <AboutUsdrawerIcon width={22} height={22} color={colors.themePrimary} />,
       title: 'About Us',
       onPress: () => stackNavigation.navigate(NavigationString.AboutUs),
     },
@@ -290,44 +332,58 @@ const Profile = () => {
   return (
     <Container
       statusBarStyle={isDarkMode ? 'light-content' : 'dark-content'}
-      statusBarBackgroundColor={isDarkMode ? '#000000' : '#ffffff'}
-      backgroundColor={isDarkMode ? '#000000' : '#ffffff'}>
-      {/* Header */}
+      statusBarBackgroundColor={isDarkMode ? '#0A0A0F' : '#F8F9FF'}
+      backgroundColor={isDarkMode ? '#0A0A0F' : '#F8F9FF'}>
+      {/* Glassmorphic Header - Clean */}
       <Box
         flexDirection="row"
         alignItems="center"
         justifyContent="space-between"
-        py={moderateScaleVertical(15)}
-        px={moderateScale(15)}
-        borderBottomWidth={1}
-        borderBottomColor={isDarkMode ? colors.charcoalGray : colors.gray3}>
-        <Box flex={1}>
-          <Pressable
-            onPress={() => {
-              navigation.openDrawer();
-            }}
-            bgColor={colors.themePrimary}
-            w={moderateScale(32)}
-            h={moderateScale(32)}
-            borderRadius={moderateScale(5)}
-            alignItems="center"
-            justifyContent="center">
-            <HamburgerIcon />
-          </Pressable>
-        </Box>
+        py={moderateScaleVertical(16)}
+        px={moderateScale(20)}
+        style={{
+          backgroundColor: isDarkMode
+            ? 'rgba(26,26,36,0.8)'
+            : 'rgba(255,255,255,0.9)',
+          backdropFilter: 'blur(20px)',
+          borderBottomWidth: 0,
+          shadowColor: '#000',
+          shadowOffset: {width: 0, height: 2},
+          shadowOpacity: 0.05,
+          shadowRadius: 10,
+          elevation: 4,
+        }}>
+        <Pressable
+          onPress={() => {
+            navigation.openDrawer();
+          }}
+          bgColor={isDarkMode ? '#2C2C38' : '#FFFFFF'}
+          w={moderateScale(44)}
+          h={moderateScale(44)}
+          borderRadius={moderateScale(16)}
+          alignItems="center"
+          justifyContent="center"
+          style={{
+            shadowColor: '#000',
+            shadowOffset: {width: 0, height: 4},
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            elevation: 5,
+          }}>
+          <HamburgerIcon width={22} height={22} />
+        </Pressable>
 
         <Box alignItems="center" flex={1}>
           <Text
-            fontFamily={'$poppinsMedium'}
-            fontSize={18}
-            lineHeight={20}
+            fontFamily={'$poppinsSemiBold'}
+            fontSize={20}
+            lineHeight={24}
             color={isDarkMode ? colors.white : colors.charcoalGray}
-            numberOfLines={1}>
-            Account
+            letterSpacing={-0.3}>
+            My Profile
           </Text>
         </Box>
-
-        <Box flex={1}></Box>
+        <Box width={moderateScale(44)} />
       </Box>
 
       {loading ? (
@@ -337,22 +393,37 @@ const Profile = () => {
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{paddingBottom: moderateScaleVertical(100)}}>
-          {/* Profile Section - Uber Style */}
+          contentContainerStyle={{paddingBottom: moderateScaleVertical(80)}}>
+          {/* Profile Card - Subtle border, no heavy gradients */}
           <Box
-            bgColor={isDarkMode ? colors.charcoalGray : colors.white}
-            pb={moderateScaleVertical(20)}
-            borderBottomWidth={1}
-            borderBottomColor={isDarkMode ? colors.dimGray : colors.gray3}>
-            {/* Profile Image */}
-            <Box alignItems="center" mt={moderateScaleVertical(25)}>
+            mx={moderateScale(20)}
+            mt={moderateScaleVertical(20)}
+            mb={moderateScaleVertical(24)}
+            bgColor={isDarkMode ? '#1C1C24' : '#FFFFFF'}
+            borderRadius={moderateScale(30)}
+            pt={moderateScaleVertical(28)}
+            pb={moderateScaleVertical(22)}
+            px={moderateScale(20)}
+            alignItems="center"
+            style={{
+              shadowColor: '#000',
+              shadowOffset: {width: 0, height: 4},
+              shadowOpacity: 0.08,
+              shadowRadius: 16,
+              elevation: 6,
+              borderWidth: 1,
+              borderColor: isDarkMode ? '#2C2C38' : '#F0F0F0',
+            }}>
+            {/* Avatar with subtle accent ring */}
+            <Box position="relative">
               <Box
-                w={moderateScale(90)}
-                h={moderateScale(90)}
-                borderRadius={moderateScale(45)}
-                overflow="hidden"
+                w={moderateScale(104)}
+                h={moderateScale(104)}
+                borderRadius={moderateScale(52)}
                 borderWidth={3}
-                borderColor={colors.themePrimary}>
+                borderColor={colors.themePrimary}
+                overflow="hidden"
+                bgColor={isDarkMode ? '#2C2C38' : '#F0F0F8'}>
                 <Image
                   alt="profile"
                   source={{uri: selectedImage}}
@@ -362,31 +433,31 @@ const Profile = () => {
                 />
               </Box>
 
-              {/* Edit Button */}
+              {/* Edit Button - solid themePrimary */}
               <Pressable
-                onPress={() => {
-                  onHandleSelectImg();
-                }}
+                onPress={onHandleSelectImg}
                 position="absolute"
-                right={moderateScale(110)}
-                top={moderateScaleVertical(55)}
-                w={moderateScale(32)}
-                h={moderateScale(32)}
-                borderRadius={moderateScale(16)}
-                bg={colors.themePrimary}
-                alignItems="center"
-                justifyContent="center"
-                borderWidth={2}
-                borderColor={colors.white}>
-                <EditProfileIcon width={16} height={16} />
+                right={moderateScale(0)}
+                bottom={moderateScale(0)}>
+                <Box
+                  w={moderateScale(36)}
+                  h={moderateScale(36)}
+                  borderRadius={moderateScale(18)}
+                  bgColor={colors.themePrimary}
+                  alignItems="center"
+                  justifyContent="center"
+                  borderWidth={2}
+                  borderColor={isDarkMode ? '#1C1C24' : '#FFFFFF'}>
+                  <EditProfileIcon width={18} height={18} color="#FFF" />
+                </Box>
               </Pressable>
             </Box>
 
             {/* User Info */}
-            <Box alignItems="center" mt={moderateScaleVertical(15)}>
+            <Box alignItems="center" mt={moderateScaleVertical(16)}>
               <Text
-                fontFamily={'$poppinsSemiBold'}
-                fontSize={20}
+                fontFamily={'$poppinsBold'}
+                fontSize={24}
                 color={isDarkMode ? colors.white : colors.charcoalGray}>
                 {userLocalData?.profileData?.name || 'User Name'}
               </Text>
@@ -394,55 +465,46 @@ const Profile = () => {
                 fontFamily={'$poppinsRegular'}
                 fontSize={14}
                 color={colors.gray4}
-                mt={moderateScaleVertical(2)}>
+                mt={moderateScaleVertical(4)}>
                 {userLocalData?.profileData?.email || 'user@email.com'}
               </Text>
             </Box>
 
-            {/* Rating Section */}
+            {/* Rating & Trips - clean pills */}
             <Box
               flexDirection="row"
               alignItems="center"
               justifyContent="center"
-              mt={moderateScaleVertical(12)}>
+              mt={moderateScaleVertical(16)}
+              gap={moderateScale(12)}>
               <Box
-                bgColor={colors.themePrimary}
-                px={moderateScale(10)}
-                py={moderateScaleVertical(4)}
-                borderRadius={moderateScale(15)}
-                flexDirection="row"
-                alignItems="center">
+                bgColor={colors.themePrimary + '10'}
+                px={moderateScale(16)}
+                py={moderateScaleVertical(6)}
+                borderRadius={moderateScale(30)}>
                 <Text
-                  fontFamily={'$poppinsBold'}
+                  fontFamily={'$poppinsSemiBold'}
                   fontSize={14}
-                  color={colors.black}>
-                  4.8
-                </Text>
-                <Text
-                  fontFamily={'$poppinsRegular'}
-                  fontSize={12}
-                  color={colors.black}
-                  ml={moderateScale(2)}>
-                  Rating
+                  color={colors.themePrimary}>
+                  4.8 ★ Rating
                 </Text>
               </Box>
               <Box
                 w={1}
-                h={moderateScaleVertical(15)}
-                bgColor={colors.gray4}
-                mx={moderateScale(15)}
+                h={moderateScaleVertical(20)}
+                bgColor={isDarkMode ? colors.dimGray : colors.gray3}
               />
               <Text
-                fontFamily={'$poppinsMedium'}
+                fontFamily={'$poppinsSemiBold'}
                 fontSize={14}
                 color={isDarkMode ? colors.white : colors.charcoalGray}>
-                {userLocalData?.profileData?.totalRides || 0} trips
+                {userLocalData?.profileData?.totalRides || 0} Trips
               </Text>
             </Box>
           </Box>
 
           {/* Menu Items Section */}
-          <Box mt={moderateScaleVertical(10)}>
+          <Box mt={moderateScaleVertical(8)}>
             {menuItems.map((item, index) => (
               <MenuItem
                 key={index}
@@ -456,62 +518,62 @@ const Profile = () => {
           </Box>
 
           {/* Settings Section */}
-          <Box mt={moderateScaleVertical(20)}>
+          <Box mt={moderateScaleVertical(16)} px={moderateScale(20)}>
             <Text
-              fontFamily={'$poppinsMedium'}
-              fontSize={14}
+              fontFamily={'$poppinsSemiBold'}
+              fontSize={13}
               color={colors.gray4}
-              px={moderateScale(20)}
-              mb={moderateScaleVertical(5)}>
+              letterSpacing={1}>
               PREFERENCES
             </Text>
-            <Box
-              bgColor={isDarkMode ? colors.charcoalGray : colors.white}
-              borderTopWidth={1}
-              borderBottomWidth={1}
-              borderColor={isDarkMode ? colors.dimGray : colors.gray3}>
-              {settingsItems.map((item, index) => (
-                <MenuItem
-                  key={index}
-                  icon={item.icon}
-                  title={item.title}
-                  onPress={item.onPress}
-                />
-              ))}
-            </Box>
+          </Box>
+          <Box mt={moderateScaleVertical(8)}>
+            {settingsItems.map((item, index) => (
+              <MenuItem
+                key={index}
+                icon={item.icon}
+                title={item.title}
+                onPress={item.onPress}
+              />
+            ))}
           </Box>
 
-          {/* Logout Section */}
-          <Box mt={moderateScaleVertical(20)} mb={moderateScaleVertical(30)}>
-            <Box
-              bgColor={isDarkMode ? colors.charcoalGray : colors.white}
-              borderTopWidth={1}
-              borderBottomWidth={1}
-              borderColor={isDarkMode ? colors.dimGray : colors.gray3}>
-              <Pressable
-                onPress={handleLogout}
+          {/* Logout - clean with themePrimary background for icon */}
+          <Box mt={moderateScaleVertical(16)} mb={moderateScaleVertical(20)}>
+            <AnimatedPressable onPress={handleLogout}>
+              <Box
                 flexDirection="row"
                 alignItems="center"
-                py={moderateScaleVertical(15)}
-                px={moderateScale(20)}>
+                py={moderateScaleVertical(14)}
+                px={moderateScale(20)}
+                bgColor={isDarkMode ? '#1C1C24' : '#FFFFFF'}
+                mx={moderateScale(16)}
+                borderRadius={moderateScale(16)}
+                style={{
+                  shadowColor: '#000',
+                  shadowOffset: {width: 0, height: 2},
+                  shadowOpacity: isDarkMode ? 0.2 : 0.04,
+                  shadowRadius: 8,
+                  elevation: 2,
+                }}>
                 <Box
-                  w={moderateScale(40)}
-                  h={moderateScale(40)}
-                  borderRadius={moderateScale(8)}
-                  bgColor={colors.lightPink}
+                  w={moderateScale(48)}
+                  h={moderateScale(48)}
+                  borderRadius={moderateScale(14)}
+                  bgColor={colors.alertColor + '15'}
                   alignItems="center"
                   justifyContent="center"
-                  mr={moderateScale(15)}>
-                  <LogoutDrawerIcon width={20} height={20} />
+                  mr={moderateScale(16)}>
+                  <LogoutDrawerIcon width={22} height={22} color={colors.alertColor} />
                 </Box>
                 <Text
-                  fontFamily={'$poppinsMedium'}
+                  fontFamily={'$poppinsSemiBold'}
                   fontSize={16}
                   color={colors.alertColor}>
                   Log Out
                 </Text>
-              </Pressable>
-            </Box>
+              </Box>
+            </AnimatedPressable>
           </Box>
 
           {/* App Version */}
@@ -519,7 +581,7 @@ const Profile = () => {
             <Text
               fontFamily={'$poppinsRegular'}
               fontSize={12}
-              color={colors.gray4}>
+              color={isDarkMode ? colors.gray4 : colors.gray3}>
               Version 1.0.0
             </Text>
           </Box>

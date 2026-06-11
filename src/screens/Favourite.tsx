@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from 'react';
-import {FlatList, ActivityIndicator} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { FlatList, ActivityIndicator, RefreshControl } from 'react-native';
 import {
   Box,
   Image,
@@ -8,16 +8,18 @@ import {
   Toast,
   ToastTitle,
   useToast,
+  HStack,
+  VStack,
+  Divider,
 } from '@gluestack-ui/themed';
-import {DrawerNavigationProp} from '@react-navigation/drawer';
-import {ParamListBase, useNavigation} from '@react-navigation/native';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
+import { ParamListBase, useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 
-import {Container} from '../components/Container';
-import {AppBar} from '../components/AppBar';
-import {colors} from '../constants/colors';
-import {moderateScale, moderateScaleVertical} from '../utils/responsiveSize';
-import {NavigationString} from '../navigation/navigationStrings';
+import { Container } from '../components/Container';
+import { colors } from '../constants/colors';
+import { moderateScale, moderateScaleVertical } from '../utils/responsiveSize';
+import { NavigationString } from '../navigation/navigationStrings';
 import {
   DeleteAddressIcon,
   HamburgerIcon,
@@ -25,40 +27,36 @@ import {
   MapMarkerBlack24Icon,
   PlusIcon,
   LocationMakerRedIcon,
+  NavigationIcon,
 } from '../components/Icons';
-import {useTheme} from '../constants/ThemeContext';
+import { useTheme } from '../constants/ThemeContext';
 import {
   GET_ALL_FAVORITE_ADDRESSES,
   DELETE_FAVORITE_ADDRESS,
 } from '../api/ApiEndpoints';
-import {BASE_URL} from '../api/Instance.ts';
+import { BASE_URL } from '../api/Instance.ts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useDispatch} from 'react-redux';
-import {setFavoriteAddresses} from '../store/slice/UserSlice';
-import {getCurrentLocationOnce} from '../utils/locationHelper';
+import { useDispatch } from 'react-redux';
+import { setFavoriteAddresses } from '../store/slice/UserSlice';
+import { getCurrentLocationOnce } from '../utils/locationHelper';
 
 interface FavoriteAddress {
   _id: string;
   label: string;
   pickup: {
     address: string;
-    coordinates: {
-      lat: number;
-      lng: number;
-    };
+    coordinates: { lat: number; lng: number };
   };
   destination: {
     address: string;
-    coordinates: {
-      lat: number;
-      lng: number;
-    };
+    coordinates: { lat: number; lng: number };
   };
   isDefault: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
+// Reusable Favorite Card Component with modern design
 const FavouriteCard = ({
   item,
   onDelete,
@@ -70,107 +68,109 @@ const FavouriteCard = ({
   onSelect: (item: FavoriteAddress) => void;
   isLoading: boolean;
 }) => {
-  const {isDarkMode} = useTheme();
+  const { isDarkMode } = useTheme();
 
   return (
     <Pressable onPress={() => onSelect(item)}>
       <Box
-        flexDirection="row"
-        alignItems="center"
-        h={moderateScale(77)}
-        bgColor={isDarkMode ? colors.black : colors.white}
-        px={moderateScale(10)}
-        borderRadius={moderateScale(10)}
-        gap={moderateScale(10)}
+        bg={isDarkMode ? '#1C1C1E' : '#FFFFFF'}
+        borderRadius={moderateScale(20)}
+        p={moderateScale(16)}
+        mb={moderateScaleVertical(12)}
+        shadowColor={isDarkMode ? '#000' : '#000'}
+        shadowOffset={{ width: 0, height: 2 }}
+        shadowOpacity={0.06}
+        shadowRadius={6}
+        elevation={3}
         borderWidth={1}
-        borderColor={colors.paleYellow}>
-        <MapMarkerBlack24Icon />
+        borderColor={isDarkMode ? '#2C2C2E' : '#F0F0F5'}>
+        <HStack space="md" alignItems="flex-start">
+          {/* Icon */}
+          <Box
+            bg={isDarkMode ? '#2C2C2E' : '#F3F4F6'}
+            borderRadius={moderateScale(40)}
+            p={moderateScale(8)}>
+            <NavigationIcon width={20} height={20} color={colors.themePrimary} />
+          </Box>
 
-        <Box flex={1} gap={moderateScaleVertical(3)}>
-          <Text
-            fontFamily={'$poppinsSemiBold'}
-            fontSize={16}
-            lineHeight={18}
-            color={isDarkMode ? colors.white : colors.black}
-            numberOfLines={1}>
-            {item.label}
-          </Text>
-          <Text
-            fontFamily={'$poppinsRegular'}
-            fontSize={12}
-            lineHeight={14}
-            color={isDarkMode ? colors.white : '#898989'}
-            numberOfLines={2}>
-            From: {item.pickup.address}
-          </Text>
-          <Text
-            fontFamily={'$poppinsRegular'}
-            fontSize={12}
-            lineHeight={14}
-            color={isDarkMode ? colors.white : '#898989'}
-            numberOfLines={2}>
-            To: {item.destination.address}
-          </Text>
-        </Box>
+          {/* Content */}
+          <VStack flex={1} space="xs">
+            <Text
+              fontFamily="$poppinsSemiBold"
+              fontSize={16}
+              lineHeight={20}
+              color={isDarkMode ? '#FFFFFF' : '#1C1C1E'}>
+              {item.label}
+            </Text>
+            <HStack space="sm" alignItems="center">
+              <MapMarkerBlack24Icon width={12} height={12} />
+              <Text
+                fontFamily="$poppinsRegular"
+                fontSize={12}
+                lineHeight={16}
+                color={isDarkMode ? '#A0A0A0' : '#6B7280'}
+                numberOfLines={1}>
+                {item.pickup.address}
+              </Text>
+            </HStack>
+            <HStack space="sm" alignItems="center" mt={moderateScaleVertical(2)}>
+              <LocationMakerRedIcon width={12} height={12} />
+              <Text
+                fontFamily="$poppinsRegular"
+                fontSize={12}
+                lineHeight={16}
+                color={isDarkMode ? '#A0A0A0' : '#6B7280'}
+                numberOfLines={1}>
+                {item.destination.address}
+              </Text>
+            </HStack>
+          </VStack>
 
-        <Pressable
-          onPress={e => {
-            e.stopPropagation();
-            onDelete(item._id);
-          }}
-          disabled={isLoading}>
-          {isLoading ? (
-            <ActivityIndicator size="small" color={colors.themePrimary} />
-          ) : (
-            <DeleteAddressIcon />
-          )}
-        </Pressable>
+          {/* Delete Button */}
+          <Pressable
+            onPress={(e) => {
+              e.stopPropagation();
+              onDelete(item._id);
+            }}
+            disabled={isLoading}
+            p={moderateScale(6)}>
+            {isLoading ? (
+              <ActivityIndicator size="small" color={colors.themePrimary} />
+            ) : (
+              <DeleteAddressIcon />
+            )}
+          </Pressable>
+        </HStack>
       </Box>
     </Pressable>
   );
 };
 
 const Favourite = () => {
-  // init
   const navigation = useNavigation<DrawerNavigationProp<ParamListBase>>();
-  const {isDarkMode} = useTheme();
+  const { isDarkMode } = useTheme();
   const toast = useToast();
   const dispatch = useDispatch();
 
-   // states
-   const [favorites, setFavorites] = useState<FavoriteAddress[]>([]);
-   const [loading, setLoading] = useState(true);
-   const [deletingId, setDeletingId] = useState<string | null>(null);
-   const [currentLocation, setCurrentLocation] = useState<{
-     lat: number;
-     lng: number;
-     address: string;
-   } | null>(null);
-   const [locationLoading, setLocationLoading] = useState(false);
+  const [favorites, setFavorites] = useState<FavoriteAddress[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<{
+    lat: number;
+    lng: number;
+    address: string;
+  } | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
 
-  const showErrorToast = (message: string) => {
+  const showToast = (message: string, type: 'success' | 'error') => {
     toast.show({
       placement: 'top',
-      render: ({id}: any) => {
-        return (
-          <Toast nativeID={'toast-' + id} action="error" variant="accent">
-            <ToastTitle>{message}</ToastTitle>
-          </Toast>
-        );
-      },
-    });
-  };
-
-  const showSuccessToast = (message: string) => {
-    toast.show({
-      placement: 'top',
-      render: ({id}: any) => {
-        return (
-          <Toast nativeID={'toast-' + id} action="success" variant="accent">
-            <ToastTitle>{message}</ToastTitle>
-          </Toast>
-        );
-      },
+      render: ({ id }: any) => (
+        <Toast nativeID={`toast-${id}`} action={type} variant="accent">
+          <ToastTitle>{message}</ToastTitle>
+        </Toast>
+      ),
     });
   };
 
@@ -180,29 +180,20 @@ const Favourite = () => {
       const token = await AsyncStorage.getItem('userToken');
       const response = await axios.get(
         `${BASE_URL}${GET_ALL_FAVORITE_ADDRESSES.url}`,
-        {
-          headers: {
-            Authorization: token,
-          },
-        },
+        { headers: { Authorization: token } }
       );
       const favoriteData = response.data;
       setFavorites(favoriteData);
       dispatch(setFavoriteAddresses(favoriteData));
-      await AsyncStorage.setItem(
-        'favoriteAddresses',
-        JSON.stringify(favoriteData),
-      );
+      await AsyncStorage.setItem('favoriteAddresses', JSON.stringify(favoriteData));
 
-      // If no favorites, fetch current location
-      if (favoriteData.length === 0) {
-        fetchCurrentLocation();
-      }
+      if (favoriteData.length === 0) fetchCurrentLocation();
     } catch (error: any) {
-      console.error('Error fetching favorite addresses:', error?.response);
-      showErrorToast('Failed to load favorite addresses');
+      console.error('Error fetching favorites:', error?.response);
+      showToast('Failed to load favorites', 'error');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -210,7 +201,7 @@ const Favourite = () => {
     try {
       setLocationLoading(true);
       const location = await getCurrentLocationOnce();
-      if (location && location.address) {
+      if (location?.address) {
         setCurrentLocation({
           lat: location.coordinates.latitude,
           lng: location.coordinates.longitude,
@@ -218,7 +209,7 @@ const Favourite = () => {
         });
       }
     } catch (error) {
-      console.error('Error getting current location:', error);
+      console.error('Location error:', error);
     } finally {
       setLocationLoading(false);
     }
@@ -228,76 +219,139 @@ const Favourite = () => {
     try {
       setDeletingId(id);
       const token = await AsyncStorage.getItem('userToken');
-
       await axios.delete(`${BASE_URL}${DELETE_FAVORITE_ADDRESS.url}/${id}`, {
-        headers: {
-          Authorization: token,
-        },
+        headers: { Authorization: token },
       });
-      showSuccessToast('Address deleted successfully');
-      fetchFavoriteAddresses(); // Refresh the list after deletion
+      showToast('Address deleted successfully', 'success');
+      fetchFavoriteAddresses();
     } catch (error) {
-      console.error('Error deleting favorite address:', error);
-      showErrorToast('Failed to delete address');
+      showToast('Failed to delete address', 'error');
     } finally {
       setDeletingId(null);
     }
   };
 
-  const handleSelectAddress = (item: FavoriteAddress | null, isCurrentLocation: boolean = false) => {
+  const handleSelectAddress = (
+    item: FavoriteAddress | null,
+    isCurrentLocation = false
+  ) => {
     if (isCurrentLocation && currentLocation) {
-      // Navigate with current location data
       navigation.navigate(NavigationString.Home, {
         favoriteData: {
           _id: 'current-location',
           label: 'Current Location',
           pickup: {
             address: currentLocation.address,
-            coordinates: {
-              lat: currentLocation.lat,
-              lng: currentLocation.lng,
-            },
+            coordinates: { lat: currentLocation.lat, lng: currentLocation.lng },
           },
-          destination: {
-            address: '',
-            coordinates: {
-              lat: currentLocation.lat,
-              lng: currentLocation.lng,
-            },
-          },
+          destination: { address: '', coordinates: { lat: 0, lng: 0 } },
           isDefault: true,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         },
       });
     } else if (item) {
-      navigation.navigate(NavigationString.Home, {favoriteData: item});
+      navigation.navigate(NavigationString.Home, { favoriteData: item });
     }
   };
 
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchFavoriteAddresses();
+  };
+
   useEffect(() => {
-    const loadCachedFavorites = async () => {
+    const loadCached = async () => {
       try {
-        const cachedFavorites = await AsyncStorage.getItem('favoriteAddresses');
-        if (cachedFavorites) {
-          setFavorites(JSON.parse(cachedFavorites));
-          dispatch(setFavoriteAddresses(JSON.parse(cachedFavorites)));
+        const cached = await AsyncStorage.getItem('favoriteAddresses');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          setFavorites(parsed);
+          dispatch(setFavoriteAddresses(parsed));
         }
       } catch (error) {
-        console.error('Error loading cached favorites:', error);
+        console.error('Cache error:', error);
       }
     };
-
-    loadCachedFavorites();
+    loadCached();
     fetchFavoriteAddresses();
   }, []);
+
+  const EmptyState = () => (
+    <Box flex={1} justifyContent="center" alignItems="center" px={moderateScale(30)}>
+      <Box
+        bg={isDarkMode ? '#1C1C1E' : '#F3F4F6'}
+        borderRadius={moderateScale(60)}
+        p={moderateScale(20)}
+        mb={moderateScaleVertical(20)}>
+        <HeartIcon width={48} height={48} opacity={0.5} />
+      </Box>
+      <Text
+        fontFamily="$poppinsSemiBold"
+        fontSize={20}
+        color={isDarkMode ? '#FFFFFF' : '#1C1C1E'}
+        textAlign="center">
+        No saved routes yet
+      </Text>
+      <Text
+        fontFamily="$poppinsRegular"
+        fontSize={14}
+        color={isDarkMode ? '#A0A0A0' : '#6B7280'}
+        textAlign="center"
+        mt={moderateScaleVertical(8)}>
+        Save your frequent trips for one‑tap booking.
+      </Text>
+    </Box>
+  );
+
+  const CurrentLocationCard = () => (
+    <Box px={moderateScale(16)} pt={moderateScaleVertical(12)}>
+      <Text
+        fontFamily="$poppinsSemiBold"
+        fontSize={14}
+        color={isDarkMode ? '#A0A0A0' : '#6B7280'}
+        mb={moderateScaleVertical(8)}>
+        SUGGESTED
+      </Text>
+      <Pressable onPress={() => handleSelectAddress(null, true)}>
+        <Box
+          bg={isDarkMode ? '#1C1C1E' : '#FFFFFF'}
+          borderRadius={moderateScale(20)}
+          p={moderateScale(16)}
+          borderWidth={1}
+          borderColor={colors.themePrimary}
+          shadowColor={colors.themePrimary}
+          shadowOffset={{ width: 0, height: 2 }}
+          shadowOpacity={0.1}
+          shadowRadius={4}
+          elevation={2}>
+          <HStack space="md" alignItems="center">
+            <Box
+              bg={colors.themePrimary + '20'}
+              borderRadius={moderateScale(40)}
+              p={moderateScale(10)}>
+              <LocationMakerRedIcon width={24} height={24} />
+            </Box>
+            <VStack flex={1}>
+              <Text fontFamily="$poppinsSemiBold" fontSize={16} color={isDarkMode ? '#FFF' : '#1C1C1E'}>
+                Current Location
+              </Text>
+              <Text fontFamily="$poppinsRegular" fontSize={12} color={isDarkMode ? '#A0A0A0' : '#6B7280'} mt={2}>
+                {currentLocation?.address}
+              </Text>
+            </VStack>
+          </HStack>
+        </Box>
+      </Pressable>
+    </Box>
+  );
 
   if (loading && favorites.length === 0) {
     return (
       <Container
         statusBarStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        statusBarBackgroundColor={isDarkMode ? '#000000' : '#f5f5f5'}
-        backgroundColor={isDarkMode ? '#000000' : '#f5f5f5'}>
+        statusBarBackgroundColor={isDarkMode ? '#000000' : '#F8F9FF'}
+        backgroundColor={isDarkMode ? '#000000' : '#F8F9FF'}>
         <Box flex={1} justifyContent="center" alignItems="center">
           <ActivityIndicator size="large" color={colors.themePrimary} />
         </Box>
@@ -308,49 +362,51 @@ const Favourite = () => {
   return (
     <Container
       statusBarStyle={isDarkMode ? 'light-content' : 'dark-content'}
-      statusBarBackgroundColor={isDarkMode ? '#000000' : '#f5f5f5'}
-      backgroundColor={isDarkMode ? '#000000' : '#f5f5f5'}>
+      statusBarBackgroundColor={isDarkMode ? '#000000' : '#F8F9FF'}
+      backgroundColor={isDarkMode ? '#000000' : '#F8F9FF'}>
+      {/* Modern Header */}
       <Box
         flexDirection="row"
         alignItems="center"
-        px={moderateScale(15)}
-        pt={moderateScale(10)}>
-        <Box w={moderateScale(32)} h={moderateScale(32)}>
-          <Pressable
-            onPress={() => {
-              navigation.openDrawer();
-            }}
-            bgColor={colors.themePrimary}
-            w={moderateScale(32)}
-            h={moderateScale(32)}
-            borderRadius={moderateScale(5)}
-            alignItems="center"
-            justifyContent="center">
-            <HamburgerIcon />
-          </Pressable>
-        </Box>
+        justifyContent="space-between"
+        px={moderateScale(20)}
+        pt={moderateScaleVertical(12)}
+        pb={moderateScaleVertical(8)}>
+        <Pressable
+          onPress={() => navigation.openDrawer()}
+          bg={isDarkMode ? '#1C1C1E' : '#FFFFFF'}
+          w={moderateScale(40)}
+          h={moderateScale(40)}
+          borderRadius={moderateScale(12)}
+          alignItems="center"
+          justifyContent="center"
+          shadowColor="#000"
+          shadowOffset={{ width: 0, height: 2 }}
+          shadowOpacity={0.05}
+          shadowRadius={4}
+          elevation={2}>
+          <HamburgerIcon />
+        </Pressable>
         <Text
-          flex={1}
-          fontFamily={'$poppinsMedium'}
-          fontSize={18}
-          lineHeight={20}
-          color={isDarkMode ? colors.white : colors.charcoalGray}
-          numberOfLines={1}
-          textAlign="center">
-          Favourite
+          fontFamily="$poppinsSemiBold"
+          fontSize={20}
+          color={isDarkMode ? '#FFFFFF' : '#1C1C1E'}>
+          Favourites
         </Text>
         <Pressable
-          px={moderateScale(10)}
-          h={moderateScale(32)}
-          flexDirection="row"
+          onPress={() => navigation.navigate(NavigationString.AddFavoriteAddress)}
+          bg={isDarkMode ? '#1C1C1E' : '#FFFFFF'}
+          w={moderateScale(40)}
+          h={moderateScale(40)}
+          borderRadius={moderateScale(12)}
           alignItems="center"
-          onPress={() => {
-            navigation.openDrawer();
-          }}
-          // bgColor={colors.paleYellow}
-          borderRadius={moderateScale(5)}
-          justifyContent="space-around">
-          {/* <PlusIcon /> */}
+          justifyContent="center"
+          shadowColor="#000"
+          shadowOffset={{ width: 0, height: 2 }}
+          shadowOpacity={0.05}
+          shadowRadius={4}
+          elevation={2}>
+          <PlusIcon />
         </Pressable>
       </Box>
 
@@ -361,84 +417,15 @@ const Favourite = () => {
               <ActivityIndicator size="large" color={colors.themePrimary} />
             </Box>
           ) : currentLocation ? (
-            <Box flex={1} px={moderateScale(15)} pt={moderateScaleVertical(20)}>
-              <Text
-                fontFamily={'$poppinsMedium'}
-                fontSize={16}
-                color={isDarkMode ? colors.white : colors.charcoalGray}
-                mb={moderateScaleVertical(10)}
-                px={moderateScale(5)}>
-                Suggested
-              </Text>
-              <Pressable
-                onPress={() => handleSelectAddress(null, true)}
-                bgColor={isDarkMode ? colors.black : colors.white}
-                borderWidth={1}
-                borderColor={colors.paleYellow}
-                borderRadius={moderateScale(10)}
-                p={moderateScale(12)}>
-                <Box flexDirection="row" alignItems="center" gap={moderateScale(10)}>
-                  <Box
-                    w={moderateScale(40)}
-                    h={moderateScale(40)}
-                    borderRadius={moderateScale(20)}
-                    bgColor={colors.paleYellow}
-                    alignItems="center"
-                    justifyContent="center">
-                    <LocationMakerRedIcon width={moderateScale(20)} height={moderateScale(20)} />
-                  </Box>
-                  <Box flex={1}>
-                    <Text
-                      fontFamily={'$poppinsSemiBold'}
-                      fontSize={16}
-                      lineHeight={18}
-                      color={isDarkMode ? colors.white : colors.black}
-                      numberOfLines={1}>
-                      Current Location
-                    </Text>
-                    <Text
-                      fontFamily={'$poppinsRegular'}
-                      fontSize={12}
-                      lineHeight={14}
-                      color={isDarkMode ? '#9CA3AF' : '#6B7280'}
-                      numberOfLines={2}
-                      mt={moderateScaleVertical(2)}>
-                      {currentLocation.address}
-                    </Text>
-                  </Box>
-                </Box>
-              </Pressable>
-            </Box>
+            <CurrentLocationCard />
           ) : (
-            <Box
-              flex={1}
-              justifyContent="center"
-              alignItems="center"
-              gap={moderateScaleVertical(15)}>
-              <Box opacity={0.4}>
-                <HeartIcon width={moderateScale(64)} height={moderateScale(64)} />
-              </Box>
-              <Text
-                fontFamily={'$poppinsMedium'}
-                fontSize={16}
-                color={isDarkMode ? colors.white : colors.black}>
-                No favorite addresses yet
-              </Text>
-              <Text
-                fontFamily={'$poppinsRegular'}
-                fontSize={12}
-                color={isDarkMode ? '#9CA3AF' : '#6B7280'}
-                textAlign="center"
-                px={moderateScale(40)}>
-                Save your frequent routes for{'\n'}faster booking experience
-              </Text>
-            </Box>
+            <EmptyState />
           )}
         </Box>
       ) : (
         <FlatList
           data={favorites}
-          renderItem={({item}: {item: FavoriteAddress}) => (
+          renderItem={({ item }) => (
             <FavouriteCard
               item={item}
               onDelete={handleDeleteAddress}
@@ -446,14 +433,20 @@ const Favourite = () => {
               isLoading={deletingId === item._id}
             />
           )}
-          keyExtractor={item => item._id}
+          keyExtractor={(item) => item._id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
-            marginHorizontal: moderateScale(15),
-            gap: moderateScaleVertical(15),
-            paddingBottom: moderateScaleVertical(90),
-            marginTop: moderateScaleVertical(20),
+            paddingHorizontal: moderateScale(16),
+            paddingTop: moderateScaleVertical(16),
+            paddingBottom: moderateScaleVertical(80),
           }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          ListHeaderComponent={
+            currentLocation && favorites.length > 0 ? <CurrentLocationCard /> : null
+          }
+          ListEmptyComponent={<EmptyState />}
         />
       )}
     </Container>

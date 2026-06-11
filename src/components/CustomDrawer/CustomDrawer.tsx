@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from 'react';
-import {TouchableHighlight} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { TouchableHighlight, Dimensions } from 'react-native';
 import {
   DrawerContentScrollView,
   DrawerItemList,
@@ -10,11 +10,12 @@ import {
   Box,
   Image,
   Text,
+  Pressable,
 } from '@gluestack-ui/themed';
-import {ParamListBase, useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {colors} from '../../constants/colors';
-import {moderateScale, moderateScaleVertical} from '../../utils/responsiveSize';
+import { ParamListBase, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { colors } from '../../constants/colors';
+import { moderateScale, moderateScaleVertical } from '../../utils/responsiveSize';
 import {
   AboutUsdrawerIcon,
   ComplainDrawerIcon,
@@ -26,52 +27,28 @@ import {
   SettingDrawerIcon,
   SupportDrawerIcon,
 } from '../Icons';
-import {NavigationString} from '../../navigation/navigationStrings';
+import { NavigationString } from '../../navigation/navigationStrings';
 import images from '../../assets/images';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useTheme} from '../../constants/ThemeContext';
-import {loadUserFromStorage} from '../../store/slice/UserSlice';
+import { useTheme } from '../../constants/ThemeContext';
+import { loadUserFromStorage } from '../../store/slice/UserSlice';
+
+const { width } = Dimensions.get('window');
 
 const CustomDrawer = (props: any) => {
   const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
-  const {isDarkMode} = useTheme();
-  const [showProfile, setshowProfile] = useState<any>(true);
+  const { isDarkMode } = useTheme();
   const [userLocalData, setUserLocalData] = useState<any>(null);
-  const [profile, setProfile] = useState({
-    name: '',
-    email: '',
-    imgUrl: '',
-  });
 
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
         const localData = await loadUserFromStorage();
-        console.warn('local data at drawer....', localData);
         setUserLocalData(localData);
-        // const token = await AsyncStorage.getItem('userToken');
-        // if (!token) {
-        //   console.error('No token found');
-        //   return;
-        // }
-
-        // const response = await Instance.get(GET_PROFILE.url, {
-        //   headers: {
-        //     Authorization: token,
-        //   },
-        // });
-
-        // if (response.data.success) {
-        //   const { name, email, imgUrl } = response.data.data;
-        //   setProfile({ name, email, imgUrl });
-        // } else {
-        //   console.error('Failed to fetch profile data');
-        // }
       } catch (error) {
         console.error('Error fetching profile data:', error);
       }
     };
-
     fetchProfileData();
   }, []);
 
@@ -80,291 +57,186 @@ const CustomDrawer = (props: any) => {
       await AsyncStorage.clear();
       navigation.reset({
         index: 0,
-        routes: [{name: NavigationString.SignIn}],
+        routes: [{ name: NavigationString.SignIn }],
       });
     } catch (error) {
       console.error('Error during logout:', error);
     }
   };
 
+  // Determine background colors based on theme
+  const drawerBgColor = isDarkMode ? '#1A1A1A' : '#FFFFFF';
+  const cardBgColor = isDarkMode ? '#2C2C2C' : '#F7F7FC';
+  const textColor = isDarkMode ? '#FFFFFF' : '#1C1C1E';
+  const subtitleColor = isDarkMode ? '#A0A0A0' : '#8E8E93';
+  const activeHighlight = isDarkMode ? '#3A3A3A' : '#E8E8ED';
+
   return (
-    <Box style={{width:200}}  flex={1}>
-      <Box 
-        ml={moderateScale(15)}
-        gap={moderateScaleVertical(20)}
-        mt={moderateScaleVertical(85)}
-        mb={moderateScaleVertical(25)}>
-        {showProfile ? (
+    <Box flex={1} bg={drawerBgColor}>
+      {/* Header Section with Gradient Background */}
+      <Box
+        bg={isDarkMode ? '#2C2C2E' : '#6C5CE7'}
+        pt={moderateScaleVertical(60)}
+        pb={moderateScaleVertical(30)}
+        px={moderateScale(20)}
+        borderBottomLeftRadius={moderateScale(30)}
+        borderBottomRightRadius={moderateScale(30)}>
+        <Box alignItems="center">
+          {/* Profile Image */}
           <Box
-            w={moderateScale(70)}
-            h={moderateScale(70)}
-            borderRadius={moderateScale(35)}
-            overflow="hidden">
+            w={moderateScale(80)}
+            h={moderateScale(80)}
+            borderRadius={moderateScale(40)}
+            overflow="hidden"
+            borderWidth={3}
+            borderColor="white"
+            mb={moderateScaleVertical(12)}>
             <Image
-              alt="icon"
+              alt="profile"
               source={
                 userLocalData?.profileData?.imgUrl
-                  ? {uri: userLocalData?.profileData?.imgUrl}
+                  ? { uri: userLocalData.profileData.imgUrl }
                   : images.user
               }
-              resizeMode="contain"
-              w={'100%'}
-              h={'100%'}
+              resizeMode="cover"
+              w="100%"
+              h="100%"
             />
           </Box>
-        ) : (
-          <Avatar
-            bgColor={colors.themePrimary}
-            w={moderateScale(70)}
-            h={moderateScale(70)}
-            borderRadius={moderateScale(35)}>
-            <AvatarFallbackText>Sunny Kumar</AvatarFallbackText>
-          </Avatar>
-        )}
 
-        <Box>
+          {/* User Info */}
           <Text
-            fontFamily="$poppinsMedium"
+            fontFamily="$poppinsSemiBold"
             fontSize={18}
-            lineHeight={20}
-            color={isDarkMode ? colors.white : colors.white}
+            lineHeight={24}
+            color="#FFFFFF"
             numberOfLines={1}>
-            {userLocalData?.profileData?.name || 'Guest'}
+            {userLocalData?.profileData?.name || 'Guest User'}
           </Text>
           <Text
-            fontFamily={'$poppinsMedium'}
+            fontFamily="$poppinsRegular"
             fontSize={12}
-            lineHeight={14}
-            color={isDarkMode ? colors.white : colors.white}
+            lineHeight={16}
+            color="rgba(255,255,255,0.8)"
             numberOfLines={1}>
-            {userLocalData?.profileData?.email || 'Guest@mail.com'}{' '}
+            {userLocalData?.profileData?.email || 'guest@example.com'}
           </Text>
         </Box>
       </Box>
 
+      {/* Drawer Items List */}
       <DrawerContentScrollView
         {...props}
-        contentContainerStyle={{marginLeft: moderateScale(5), paddingTop: 0}}>
-        {/* <DrawerItemList {...props} /> */}
-        <TouchableHighlight
-          onPress={() => {
-            navigation.navigate(NavigationString.Profile);
-          }}
-          underlayColor={colors.paleGray}>
-          <Box
-            flexDirection="row"
-            alignItems="center"
-            gap={moderateScale(10)}
-            px={moderateScale(10)}
-            py={moderateScaleVertical(18)}
-            borderBottomWidth={1}
-            borderBottomColor="#E8E8E8">
-            <EditProfileIcon />
-            <Text
-              fontFamily={'$poppinsMedium'}
-              fontSize={12}
-              lineHeight={14}
-              color={isDarkMode ? colors.white : colors.white}>
-              Edit Profile
-            </Text>
-          </Box>
-        </TouchableHighlight>
+        contentContainerStyle={{
+          paddingTop: moderateScaleVertical(20),
+          paddingBottom: moderateScaleVertical(20),
+        }}>
+        <Box px={moderateScale(16)}>
+          {/* Menu Items */}
+          <MenuItem
+            icon={<EditProfileIcon color={isDarkMode ? '#FFFFFF' : '#6C5CE7'} />}
+            label="Edit Profile"
+            onPress={() => navigation.navigate(NavigationString.Profile)}
+            highlightColor={activeHighlight}
+            textColor={textColor}
+          />
+          <MenuItem
+            icon={<LocationDrawerIcon color={isDarkMode ? '#FFFFFF' : '#6C5CE7'} />}
+            label="Address"
+            onPress={() => navigation.navigate(NavigationString.Favourite)}
+            highlightColor={activeHighlight}
+            textColor={textColor}
+          />
+          <MenuItem
+            icon={<HistoryDrawerIcon color={isDarkMode ? '#FFFFFF' : '#6C5CE7'} />}
+            label="History"
+            onPress={() => navigation.navigate(NavigationString.History)}
+            highlightColor={activeHighlight}
+            textColor={textColor}
+          />
+          <MenuItem
+            icon={<ComplainDrawerIcon color={isDarkMode ? '#FFFFFF' : '#6C5CE7'} />}
+            label="Complain"
+            onPress={() => navigation.navigate(NavigationString.Complain)}
+            highlightColor={activeHighlight}
+            textColor={textColor}
+          />
+          <MenuItem
+            icon={<RefferDrawerIcon color={isDarkMode ? '#FFFFFF' : '#6C5CE7'} />}
+            label="Referral"
+            onPress={() => navigation.navigate(NavigationString.Referral)}
+            highlightColor={activeHighlight}
+            textColor={textColor}
+          />
+          <MenuItem
+            icon={<AboutUsdrawerIcon color={isDarkMode ? '#FFFFFF' : '#6C5CE7'} />}
+            label="About Us"
+            onPress={() => navigation.navigate(NavigationString.AboutUs)}
+            highlightColor={activeHighlight}
+            textColor={textColor}
+          />
+          <MenuItem
+            icon={<SettingDrawerIcon color={isDarkMode ? '#FFFFFF' : '#6C5CE7'} />}
+            label="Settings"
+            onPress={() => navigation.navigate(NavigationString.Settings)}
+            highlightColor={activeHighlight}
+            textColor={textColor}
+          />
+          <MenuItem
+            icon={<SupportDrawerIcon color={isDarkMode ? '#FFFFFF' : '#6C5CE7'} />}
+            label="Help & Support"
+            onPress={() => navigation.navigate(NavigationString.HelpSupport)}
+            highlightColor={activeHighlight}
+            textColor={textColor}
+          />
 
-        <TouchableHighlight
-          onPress={() => {
-            navigation.navigate(NavigationString.Favourite);
-          }}
-          underlayColor={colors.paleGray}>
-          <Box
-            flexDirection="row"
-            alignItems="center"
-            gap={moderateScale(10)}
-            px={moderateScale(10)}
-            py={moderateScaleVertical(18)}
-            borderBottomWidth={1}
-            borderBottomColor="#E8E8E8">
-            <LocationDrawerIcon />
-            <Text
-              fontFamily={'$poppinsMedium'}
-              fontSize={12}
-              lineHeight={14}
-              color={isDarkMode ? colors.white : colors.white}>
-              Address
-            </Text>
+          {/* Logout Item with Red Accent */}
+          <Box mt={moderateScaleVertical(20)}>
+            <MenuItem
+              icon={<LogoutDrawerIcon color="#FF3B30" />}
+              label="Logout"
+              onPress={handleLogout}
+              highlightColor={activeHighlight}
+              textColor="#FF3B30"
+              isLogout
+            />
           </Box>
-        </TouchableHighlight>
-
-        <TouchableHighlight
-          onPress={() => {
-            navigation.navigate(NavigationString.History);
-          }}
-          underlayColor={colors.paleGray}>
-          <Box
-            flexDirection="row"
-            alignItems="center"
-            gap={moderateScale(10)}
-            px={moderateScale(10)}
-            py={moderateScaleVertical(18)}
-            borderBottomWidth={1}
-            borderBottomColor="#E8E8E8">
-            <HistoryDrawerIcon />
-            <Text
-              fontFamily={'$poppinsMedium'}
-              fontSize={12}
-              lineHeight={14}
-              color={isDarkMode ? colors.white : colors.white}>
-              History
-            </Text>
-          </Box>
-        </TouchableHighlight>
-
-        <TouchableHighlight
-          onPress={() => {
-            navigation.navigate(NavigationString.Complain);
-          }}
-          underlayColor={colors.paleGray}>
-          <Box
-            flexDirection="row"
-            alignItems="center"
-            gap={moderateScale(10)}
-            px={moderateScale(10)}
-            py={moderateScaleVertical(18)}
-            borderBottomWidth={1}
-            borderBottomColor="#E8E8E8">
-            <ComplainDrawerIcon />
-            <Text
-              fontFamily={'$poppinsMedium'}
-              fontSize={12}
-              lineHeight={14}
-              color={isDarkMode ? colors.white : colors.white}>
-              Complain
-            </Text>
-          </Box>
-        </TouchableHighlight>
-
-        <TouchableHighlight
-          onPress={() => {
-            navigation.navigate(NavigationString.Referral);
-          }}
-          underlayColor={colors.paleGray}>
-          <Box
-            flexDirection="row"
-            alignItems="center"
-            gap={moderateScale(10)}
-            px={moderateScale(10)}
-            py={moderateScaleVertical(18)}
-            borderBottomWidth={1}
-            borderBottomColor="#E8E8E8">
-            <RefferDrawerIcon />
-            <Text
-              fontFamily={'$poppinsMedium'}
-              fontSize={12}
-              lineHeight={14}
-              color={isDarkMode ? colors.white : colors.white}>
-              Referral
-            </Text>
-          </Box>
-        </TouchableHighlight>
-
-        <TouchableHighlight
-          onPress={() => {
-            navigation.navigate(NavigationString.AboutUs);
-          }}
-          underlayColor={colors.paleGray}>
-          <Box
-            flexDirection="row"
-            alignItems="center"
-            gap={moderateScale(10)}
-            px={moderateScale(10)}
-            py={moderateScaleVertical(18)}
-            borderBottomWidth={1}
-            borderBottomColor="#E8E8E8">
-            <AboutUsdrawerIcon />
-            <Text
-              fontFamily={'$poppinsMedium'}
-              fontSize={12}
-              lineHeight={14}
-              color={isDarkMode ? colors.white : colors.white}>
-              About Us
-            </Text>
-          </Box>
-        </TouchableHighlight>
-
-        <TouchableHighlight
-          onPress={() => {
-            navigation.navigate(NavigationString.Settings);
-          }}
-          underlayColor={colors.paleGray}>
-          <Box
-            flexDirection="row"
-            alignItems="center"
-            gap={moderateScale(10)}
-            px={moderateScale(10)}
-            py={moderateScaleVertical(18)}
-            borderBottomWidth={1}
-            borderBottomColor="#E8E8E8">
-            <SettingDrawerIcon />
-            <Text
-              fontFamily={'$poppinsMedium'}
-              fontSize={12}
-              lineHeight={14}
-              color={isDarkMode ? colors.white : colors.white}>
-              Settings
-            </Text>
-          </Box>
-        </TouchableHighlight>
-
-        <TouchableHighlight
-          onPress={() => {
-            navigation.navigate(NavigationString.HelpSupport);
-          }}
-          underlayColor={colors.paleGray}>
-          <Box
-            flexDirection="row"
-            alignItems="center"
-            gap={moderateScale(10)}
-            px={moderateScale(10)}
-            py={moderateScaleVertical(18)}
-            borderBottomWidth={1}
-            borderBottomColor="#E8E8E8">
-            <SupportDrawerIcon />
-            <Text
-              fontFamily={'$poppinsMedium'}
-              fontSize={12}
-              lineHeight={14}
-              color={isDarkMode ? colors.white : colors.white}>
-              Help and Support
-            </Text>
-          </Box>
-        </TouchableHighlight>
-
-        <TouchableHighlight
-          onPress={handleLogout}
-          underlayColor={colors.paleGray}>
-          <Box
-            flexDirection="row"
-            alignItems="center"
-            gap={moderateScale(10)}
-            px={moderateScale(10)}
-            py={moderateScaleVertical(18)}>
-            <LogoutDrawerIcon />
-            <Text
-              fontFamily={'$poppinsMedium'}
-              fontSize={12}
-              lineHeight={14}
-              color={isDarkMode ? colors.white : colors.white}>
-              Logout
-            </Text>
-          </Box>
-        </TouchableHighlight>
-      </DrawerContentScrollView>
-      {/* <TouchableHighlight onPress={() => { console.log('Logout'); }} underlayColor={colors.paleGray}>
-        <Box flexDirection='row' alignItems='center' gap={moderateScale(10)} px={moderateScale(10)} py={moderateScaleVertical(10)} borderTopWidth={1} borderTopColor={colors.gray8}>
-          <EditProfileIcon />
-          <Text fontFamily={'$poppinsMedium'} fontSize={18} lineHeight={20} color={colors.dimGray} >Share</Text>
         </Box>
-      </TouchableHighlight> */}
+      </DrawerContentScrollView>
     </Box>
+  );
+};
+
+// Reusable Menu Item Component
+const MenuItem = ({ icon, label, onPress, highlightColor, textColor, isLogout = false }: any) => {
+  return (
+    <TouchableHighlight
+      onPress={onPress}
+      underlayColor={highlightColor}
+      style={{
+        borderRadius: moderateScale(12),
+        marginBottom: moderateScaleVertical(4),
+      }}>
+      <Box
+        flexDirection="row"
+        alignItems="center"
+        gap={moderateScale(14)}
+        px={moderateScale(14)}
+        py={moderateScaleVertical(14)}
+        borderRadius={moderateScale(12)}>
+        <Box width={moderateScale(24)} height={moderateScale(24)}>
+          {icon}
+        </Box>
+        <Text
+          fontFamily={isLogout ? "$poppinsMedium" : "$poppinsMedium"}
+          fontSize={14}
+          lineHeight={20}
+          color={textColor}
+          fontWeight={isLogout ? "500" : "400"}>
+          {label}
+        </Text>
+      </Box>
+    </TouchableHighlight>
   );
 };
 
