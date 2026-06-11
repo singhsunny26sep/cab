@@ -353,13 +353,13 @@ export const ProfileColorIcon = (props: SvgProps) => (
 
 export const HamburgerIcon = (props: SvgProps) => (
   <Svg
-    width={24}
-    height={24}
+    width={28}
+    height={28}
     fill="none"
     {...props}
   >
     <Path
-      stroke="#f3e7e7"
+      stroke="#2915e2"
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}

@@ -499,16 +499,11 @@ const Home = () => {
           paddingHorizontal: 20,
           paddingTop: Platform.OS === 'ios' ? 56 : 20,
           paddingBottom: 16,
+          alignItems: 'center',
         }}>
         <Pressable
           onPress={() => navigation.openDrawer()}
           style={{
-            width: 44,
-            height: 44,
-            borderRadius: 14,
-            backgroundColor: isDarkMode ? '#374151' : '#FFF',
-            alignItems: 'center',
-            justifyContent: 'center',
           }}>
           <HamburgerIcon />
         </Pressable>
@@ -780,7 +775,6 @@ const Home = () => {
                 </TouchableOpacity>
               </View>
             )}
-            
             {state.destinationCords?.address && (
               <View style={{paddingHorizontal: 20, marginTop: 12}}>
                 <PrimaryButton
