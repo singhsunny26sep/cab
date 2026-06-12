@@ -68,27 +68,27 @@ export default function CallScreen({}) {
       <Container statusBarStyle="dark-content" statusBarBackgroundColor={colors.white}>
          <AppBar back/>
          <View style={{marginTop:scale(100)}}>
-          <Image 
-            source={{ uri: 'https://i2.pngimg.me/thumb/f/720/m2H7K9A0b1d3b1m2.jpg'}} 
+          <Image
+            source={{ uri: 'https://i2.pngimg.me/thumb/f/720/m2H7K9A0b1d3b1m2.jpg'}}
             style={styles.profileImage}
           />
-          <Text  
-            fontFamily='$poppinsBold' 
-            textAlign='center' 
-            lineHeight={scale(30)} 
-            mt={moderateScale(10)} 
-            fontSize={scale(25)} 
-            color='$black'
+          <Text
+            fontFamily="$poppinsBold"
+            textAlign="center"
+            lineHeight={scale(30)}
+            mt={moderateScale(10)}
+            fontSize={scale(25)}
+            color="$black"
           >
           Sergio Ramasis
           </Text>
-          <Text  
-            fontFamily='$poppinsRegular' 
-            textAlign='center' 
-            lineHeight={scale(25)} 
-            mt={moderateScale(10)} 
-            fontSize={scale(15)} 
-            color='grey'
+          <Text
+            fontFamily="$poppinsRegular"
+            textAlign="center"
+            lineHeight={scale(25)}
+            mt={moderateScale(10)}
+            fontSize={scale(15)}
+            color="grey"
           >
             {isCallReceived ? formatTime(timer) : 'Calling.....'}
           </Text>
@@ -98,29 +98,29 @@ export default function CallScreen({}) {
            {/* <TouchableOpacity style={styles.roundButton}>
              <Image source={Icons.Camera} style={styles.iconStyle}/>
            </TouchableOpacity> */}
-           
-           <TouchableOpacity 
+
+           <TouchableOpacity
              style={styles.roundButton}
              onPress={handleMuteToggle}
            >
-             <Image 
-               source={isMuted ? Icons.Unmute : Icons.Mute} 
+             <Image
+               source={isMuted ? Icons.Unmute : Icons.Mute}
                style={styles.iconStyle}
                tintColor={isMuted ? colors.primary : undefined}
              />
            </TouchableOpacity>
-           
-           <TouchableOpacity 
+
+           <TouchableOpacity
              style={[styles.callButton, isCallReceived && styles.activeCallButton]}
              onPress={handleCallReceive}
            >
-             <Image 
-               source={Icons.Call} 
-               style={styles.callIconStyle} 
+             <Image
+               source={Icons.Call}
+               style={styles.callIconStyle}
                tintColor={Colors.white}
              />
            </TouchableOpacity>
-           
+
            {/* <TouchableOpacity style={styles.roundButton}>
              <Image source={Icons.Video} style={styles.iconStyle}/>
            </TouchableOpacity>
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     height: scale(130),
     width: scale(130),
     borderRadius: moderateScale(100),
-    alignSelf: 'center'
+    alignSelf: 'center',
   },
   bottomContainer: {
     position: 'absolute',

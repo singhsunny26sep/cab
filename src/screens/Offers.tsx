@@ -1,28 +1,28 @@
-import React, { useRef, useState } from 'react'
-import { FlatList, Modal, View, Alert, Platform, Clipboard, Dimensions } from 'react-native'
-import { Box, CircleIcon, CloseIcon, Icon, Image, Pressable, Text, GluestackUIProvider } from '@gluestack-ui/themed'
+import React, { useRef, useState } from 'react';
+import { FlatList, Modal, View, Alert, Platform, Clipboard, Dimensions } from 'react-native';
+import { Box, CircleIcon, CloseIcon, Icon, Image, Pressable, Text, GluestackUIProvider } from '@gluestack-ui/themed';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { Line, Svg } from 'react-native-svg';
 import LinearGradient from 'react-native-linear-gradient';
-import Animated, { 
-  useAnimatedStyle, 
-  useSharedValue, 
-  withSpring, 
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
   withTiming,
   interpolate,
   Extrapolate,
-  runOnJS
+  runOnJS,
 } from 'react-native-reanimated';
 
-import { Container } from '../components/Container'
-import { AppBar } from '../components/AppBar'
-import { colors } from '../constants/colors'
-import { moderateScale, moderateScaleVertical } from '../utils/responsiveSize'
-import Icons from '../assets/Icons'
-import { CopyIcon, HamburgerIcon, OfferInfoIcon, ShopingBagIcon } from '../components/Icons'
-import { shadowStyle } from '../constants/contants'
-import PrimaryButton from '../components/Button/PrimaryButton'
+import { Container } from '../components/Container';
+import { AppBar } from '../components/AppBar';
+import { colors } from '../constants/colors';
+import { moderateScale, moderateScaleVertical } from '../utils/responsiveSize';
+import Icons from '../assets/Icons';
+import { CopyIcon, HamburgerIcon, OfferInfoIcon, ShopingBagIcon } from '../components/Icons';
+import { shadowStyle } from '../constants/contants';
+import PrimaryButton from '../components/Button/PrimaryButton';
 import { useTheme } from '../constants/ThemeContext';
 
 const { width, height } = Dimensions.get('window');
@@ -36,7 +36,7 @@ const OfferCard = ({ item, index, open }: { item: any, index: number, open: (ite
   const { isDarkMode } = useTheme();
   const scale = useSharedValue(1);
   const glowOpacity = useSharedValue(0);
-  
+
   // Vibrant gradient palettes based on index
   const gradients = [
     ['#FF6B6B', '#FF8E53'], // Coral
@@ -49,25 +49,25 @@ const OfferCard = ({ item, index, open }: { item: any, index: number, open: (ite
     ['#FF9A9E', '#FECFEF'], // Soft Pink
   ];
   const gradientColors = gradients[index % gradients.length];
-  
+
   const animatedCardStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
-  
+
   const animatedGlowStyle = useAnimatedStyle(() => ({
     opacity: glowOpacity.value,
   }));
-  
+
   const handlePressIn = () => {
     scale.value = withSpring(0.97, { damping: 10, stiffness: 150 });
     glowOpacity.value = withTiming(0.15, { duration: 200 });
   };
-  
+
   const handlePressOut = () => {
     scale.value = withSpring(1, { damping: 10, stiffness: 150 });
     glowOpacity.value = withTiming(0, { duration: 300 });
   };
-  
+
   return (
     <AnimatedPressable
       onPress={() => open(item)}
@@ -93,7 +93,7 @@ const OfferCard = ({ item, index, open }: { item: any, index: number, open: (ite
             animatedGlowStyle,
           ]}
         />
-        
+
         <LinearGradient
           colors={gradientColors}
           start={{ x: 0, y: 0 }}
@@ -104,8 +104,8 @@ const OfferCard = ({ item, index, open }: { item: any, index: number, open: (ite
           }}
         >
           <Box
-            flexDirection='row'
-            alignItems='center'
+            flexDirection="row"
+            alignItems="center"
             height={moderateScale(100)}
             bgColor={isDarkMode ? '#1C1C24' : '#FFFFFF'}
             borderRadius={moderateScale(23)}
@@ -132,7 +132,7 @@ const OfferCard = ({ item, index, open }: { item: any, index: number, open: (ite
             >
               <ShopingBagIcon width={32} height={32} color="#FFF" />
             </LinearGradient>
-            
+
             <Box flex={1} gap={moderateScaleVertical(6)}>
               <Text
                 fontFamily={'$poppinsBold'}
@@ -153,7 +153,7 @@ const OfferCard = ({ item, index, open }: { item: any, index: number, open: (ite
               >
                 {item.subtitle}
               </Text>
-              <Box flexDirection='row' alignItems='center' gap={8} mt={2}>
+              <Box flexDirection="row" alignItems="center" gap={8} mt={2}>
                 <LinearGradient
                   colors={gradientColors}
                   start={{ x: 0, y: 0 }}
@@ -161,15 +161,15 @@ const OfferCard = ({ item, index, open }: { item: any, index: number, open: (ite
                   style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 }}
                 >
                   <Text fontSize={10} fontFamily={'$poppinsBold'} color="#FFF">
-                    {item.badge || "LIMITED"}
+                    {item.badge || 'LIMITED'}
                   </Text>
                 </LinearGradient>
                 <Text fontSize={11} fontFamily={'$poppinsMedium'} color={colors.themePrimary}>
-                  ✨ {item.discount || "Up to 40% off"}
+                  ✨ {item.discount || 'Up to 40% off'}
                 </Text>
               </Box>
             </Box>
-            
+
             {/* Animated Arrow */}
             <Box opacity={0.7}>
               <Text fontSize={24} color={gradientColors[0]}>→</Text>
@@ -178,7 +178,7 @@ const OfferCard = ({ item, index, open }: { item: any, index: number, open: (ite
         </LinearGradient>
       </Box>
     </AnimatedPressable>
-  )
+  );
 };
 
 // ----------------------------------------------------------------------
@@ -191,43 +191,43 @@ const Offers = () => {
   const [selectedOffer, setSelectedOffer] = useState<any>(null);
   const modalScale = useSharedValue(0);
   const modalOpacity = useSharedValue(0);
-  
+
   // Premium offers data with rich fields
   const offersData = [
-    { id: "1", title: "Flash Sale 40%", subtitle: "Limited time blowout", code: "FLASH40", badge: "HOT", discount: "40% OFF", gradient: ['#FF6B6B', '#FF8E53'] },
-    { id: "2", title: "Free Shipping", subtitle: "No minimum order", code: "SHIPFREE", badge: "POPULAR", discount: "₹0 Delivery", gradient: ['#4FACFE', '#00F2FE'] },
-    { id: "3", title: "Buy 1 Get 1", subtitle: "On selected styles", code: "BOGO", badge: "BEST DEAL", discount: "BOGO", gradient: ['#FA709A', '#FEE140'] },
-    { id: "4", title: "New User Bonus", subtitle: "First purchase extra", code: "WELCOME200", badge: "EXCLUSIVE", discount: "₹200 OFF", gradient: ['#667EEA', '#764BA2'] },
-    { id: "5", title: "Weekend Cashback", subtitle: "10% instant back", code: "WEEKEND10", badge: "LIMITED", discount: "10% CB", gradient: ['#43E97B', '#38F9D7'] },
-    { id: "6", title: "Student Special", subtitle: "Valid with ID", code: "STUDENT25", badge: "VERIFIED", discount: "25% OFF", gradient: ['#F093FB', '#F5576C'] },
+    { id: '1', title: 'Flash Sale 40%', subtitle: 'Limited time blowout', code: 'FLASH40', badge: 'HOT', discount: '40% OFF', gradient: ['#FF6B6B', '#FF8E53'] },
+    { id: '2', title: 'Free Shipping', subtitle: 'No minimum order', code: 'SHIPFREE', badge: 'POPULAR', discount: '₹0 Delivery', gradient: ['#4FACFE', '#00F2FE'] },
+    { id: '3', title: 'Buy 1 Get 1', subtitle: 'On selected styles', code: 'BOGO', badge: 'BEST DEAL', discount: 'BOGO', gradient: ['#FA709A', '#FEE140'] },
+    { id: '4', title: 'New User Bonus', subtitle: 'First purchase extra', code: 'WELCOME200', badge: 'EXCLUSIVE', discount: '₹200 OFF', gradient: ['#667EEA', '#764BA2'] },
+    { id: '5', title: 'Weekend Cashback', subtitle: '10% instant back', code: 'WEEKEND10', badge: 'LIMITED', discount: '10% CB', gradient: ['#43E97B', '#38F9D7'] },
+    { id: '6', title: 'Student Special', subtitle: 'Valid with ID', code: 'STUDENT25', badge: 'VERIFIED', discount: '25% OFF', gradient: ['#F093FB', '#F5576C'] },
   ];
-  
+
   const openModalWithAnimation = (offer: any) => {
     setSelectedOffer(offer);
     setShowInfoDetails(true);
     modalScale.value = withSpring(1, { damping: 12, stiffness: 100 });
     modalOpacity.value = withTiming(1, { duration: 200 });
   };
-  
+
   const closeModal = () => {
     modalScale.value = withTiming(0, { duration: 200 });
     modalOpacity.value = withTiming(0, { duration: 200 });
     setTimeout(() => setShowInfoDetails(false), 250);
   };
-  
+
   const copyToClipboard = (code: string) => {
     Clipboard.setString(code);
-    Alert.alert("✨ Copied!", `Promo code ${code} applied successfully`, [{ text: "Awesome" }]);
+    Alert.alert('✨ Copied!', `Promo code ${code} applied successfully`, [{ text: 'Awesome' }]);
   };
-  
+
   const modalBackdropStyle = useAnimatedStyle(() => ({
     opacity: modalOpacity.value,
   }));
-  
+
   const modalContentStyle = useAnimatedStyle(() => ({
     transform: [{ scale: modalScale.value }],
   }));
-  
+
   const renderHeader = () => (
     <Box mb={moderateScaleVertical(24)} px={moderateScale(6)}>
       <Text
@@ -254,7 +254,7 @@ const Offers = () => {
       </Box>
     </Box>
   );
-  
+
   return (
     <Container
       statusBarStyle={isDarkMode ? 'light-content' : 'dark-content'}
@@ -263,9 +263,9 @@ const Offers = () => {
     >
       {/* Glassmorphic Header */}
       <Box
-        flexDirection='row'
-        alignItems='center'
-        justifyContent='space-between'
+        flexDirection="row"
+        alignItems="center"
+        justifyContent="space-between"
         py={moderateScaleVertical(16)}
         px={moderateScale(20)}
         style={{
@@ -280,13 +280,13 @@ const Offers = () => {
         }}
       >
         <Pressable
-          onPress={() => { navigation.openDrawer() }}
+          onPress={() => { navigation.openDrawer(); }}
           bgColor={isDarkMode ? '#2C2C38' : '#FFFFFF'}
           width={moderateScale(44)}
           height={moderateScale(44)}
           borderRadius={moderateScale(16)}
-          alignItems='center'
-          justifyContent='center'
+          alignItems="center"
+          justifyContent="center"
           style={{
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 4 },
@@ -297,8 +297,8 @@ const Offers = () => {
         >
           <HamburgerIcon width={22} height={22} />
         </Pressable>
-        
-        <Box alignItems='center' flex={1}>
+
+        <Box alignItems="center" flex={1}>
           <Text
             fontFamily={'$poppinsSemiBold'}
             fontSize={20}
@@ -311,7 +311,7 @@ const Offers = () => {
         </Box>
         <Box width={moderateScale(44)} />
       </Box>
-      
+
       <FlatList
         data={offersData}
         renderItem={({ item, index }) => (
@@ -326,7 +326,7 @@ const Offers = () => {
         }}
         ListHeaderComponent={renderHeader}
       />
-      
+
       {/* Premium Modal with Glassmorphism & Spring Animation */}
       <Modal
         animationType="none"
@@ -353,7 +353,7 @@ const Offers = () => {
                 paddingBottom={Platform.OS === 'ios' ? moderateScaleVertical(40) : moderateScaleVertical(24)}
               >
                 {/* Drag Handle */}
-                <Box alignItems='center' py={moderateScaleVertical(12)}>
+                <Box alignItems="center" py={moderateScaleVertical(12)}>
                   <Box
                     width={moderateScale(50)}
                     height={moderateScale(5)}
@@ -361,21 +361,21 @@ const Offers = () => {
                     borderRadius={10}
                   />
                 </Box>
-                
+
                 <Box px={moderateScale(24)}>
                   {/* Premium Badge & Close */}
-                  <Box flexDirection='row' justifyContent='space-between' alignItems='center' mb={moderateScaleVertical(8)}>
+                  <Box flexDirection="row" justifyContent="space-between" alignItems="center" mb={moderateScaleVertical(8)}>
                     <LinearGradient
                       colors={selectedOffer?.gradient || ['#FF6B6B', '#FF8E53']}
                       style={{ paddingHorizontal: 14, paddingVertical: 6, borderRadius: 30 }}
                     >
-                      <Text fontFamily={'$poppinsBold'} fontSize={12} color="#FFF">{selectedOffer?.badge || "HOT OFFER"}</Text>
+                      <Text fontFamily={'$poppinsBold'} fontSize={12} color="#FFF">{selectedOffer?.badge || 'HOT OFFER'}</Text>
                     </LinearGradient>
                     <Pressable onPress={closeModal} p={8}>
                       <Icon as={CloseIcon} color={isDarkMode ? '#A0A0B8' : '#8E8E9A'} size={24} />
                     </Pressable>
                   </Box>
-                  
+
                   {/* Main Offer Title */}
                   <Text
                     fontFamily={'$poppinsBold'}
@@ -395,12 +395,12 @@ const Offers = () => {
                   >
                     {selectedOffer?.subtitle}
                   </Text>
-                  
+
                   {/* Hero Illustration */}
-                  <Box alignItems='center' my={moderateScaleVertical(24)}>
+                  <Box alignItems="center" my={moderateScaleVertical(24)}>
                     <OfferInfoIcon width={100} height={100} />
                   </Box>
-                  
+
                   {/* Promo Code Card with Glass Effect */}
                   <LinearGradient
                     colors={['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.02)']}
@@ -411,9 +411,9 @@ const Offers = () => {
                     }}
                   >
                     <Box
-                      flexDirection='row'
-                      alignItems='center'
-                      justifyContent='space-between'
+                      flexDirection="row"
+                      alignItems="center"
+                      justifyContent="space-between"
                       bgColor={isDarkMode ? 'rgba(42,42,54,0.8)' : 'rgba(240,240,248,0.8)'}
                       borderRadius={moderateScale(23)}
                       px={moderateScale(20)}
@@ -430,12 +430,12 @@ const Offers = () => {
                       >
                         {selectedOffer?.code}
                       </Text>
-                      <Pressable onPress={() => copyToClipboard(selectedOffer?.code || "")}>
+                      <Pressable onPress={() => copyToClipboard(selectedOffer?.code || '')}>
                         <CopyIcon width={28} height={28} color={selectedOffer?.gradient?.[0] || colors.themePrimary} />
                       </Pressable>
                     </Box>
                   </LinearGradient>
-                  
+
                   {/* Decorative Line */}
                   <Box my={moderateScaleVertical(20)}>
                     <Svg height="2" width="100%">
@@ -451,19 +451,19 @@ const Offers = () => {
                       />
                     </Svg>
                   </Box>
-                  
+
                   {/* Terms Section */}
                   <Box gap={moderateScaleVertical(12)}>
                     <Text fontFamily={'$poppinsSemiBold'} fontSize={18} color={isDarkMode ? '#FFFFFF' : '#1A1A2E'}>
                       📜 Terms apply
                     </Text>
                     {[
-                      "Valid on minimum order of ₹999",
-                      "Cannot be clubbed with other offers",
-                      "Valid till 31st Dec 2025",
-                      "One time use per customer"
+                      'Valid on minimum order of ₹999',
+                      'Cannot be clubbed with other offers',
+                      'Valid till 31st Dec 2025',
+                      'One time use per customer',
                     ].map((term, idx) => (
-                      <Box flexDirection='row' gap={moderateScale(12)} key={idx} alignItems="center">
+                      <Box flexDirection="row" gap={moderateScale(12)} key={idx} alignItems="center">
                         <Icon as={CircleIcon} color={selectedOffer?.gradient?.[0] || colors.themePrimary} size={6} />
                         <Text fontFamily={'$poppinsMedium'} fontSize={13} lineHeight={18} color={isDarkMode ? '#B0B0C0' : '#5A5A6E'} flex={1}>
                           {term}
@@ -471,7 +471,7 @@ const Offers = () => {
                       </Box>
                     ))}
                   </Box>
-                  
+
                   {/* Glowing Action Button */}
                   <Box mt={moderateScaleVertical(28)} mb={moderateScaleVertical(12)}>
                     <LinearGradient
@@ -490,7 +490,7 @@ const Offers = () => {
                     >
                       <Pressable
                         onPress={() => {
-                          copyToClipboard(selectedOffer?.code || "");
+                          copyToClipboard(selectedOffer?.code || '');
                           closeModal();
                         }}
                         style={({ pressed }) => ({
@@ -502,7 +502,7 @@ const Offers = () => {
                           bgColor={isDarkMode ? '#1C1C24' : '#FFFFFF'}
                           py={moderateScaleVertical(16)}
                           borderRadius={moderateScale(40)}
-                          alignItems='center'
+                          alignItems="center"
                         >
                           <Text fontFamily={'$poppinsBold'} fontSize={18} color={selectedOffer?.gradient?.[0] || colors.themePrimary}>
                             Apply & Enjoy 🎁
@@ -518,7 +518,7 @@ const Offers = () => {
         </Animated.View>
       </Modal>
     </Container>
-  )
+  );
 };
 
 export default Offers;

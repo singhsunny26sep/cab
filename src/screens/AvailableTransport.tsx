@@ -126,10 +126,10 @@ const VehicleCard = ({item, type, index}: {item: any; type: string; index: numbe
   const getFuelOrType = () => (type === 'parcel' ? item.type : item.fuelType);
   const getSpecs = () => {
     const parts = [];
-    if (item.transmissionType) parts.push(item.transmissionType);
+    if (item.transmissionType) {parts.push(item.transmissionType);}
     const fuelOrType = getFuelOrType();
-    if (fuelOrType) parts.push(fuelOrType);
-    if (item.vehicleNo) parts.push(item.vehicleNo.slice(-4));
+    if (fuelOrType) {parts.push(fuelOrType);}
+    if (item.vehicleNo) {parts.push(item.vehicleNo.slice(-4));}
     return parts.join(' • ');
   };
 
@@ -155,7 +155,7 @@ const VehicleCard = ({item, type, index}: {item: any; type: string; index: numbe
           shadowRadius: 16,
           elevation: 6,
         }}>
-        
+
         {/* Header: Vehicle info + rating */}
         <Box flexDirection="row" justifyContent="space-between" alignItems="center" mb={moderateScaleVertical(8)}>
           <Box flex={1}>
@@ -205,7 +205,7 @@ const VehicleCard = ({item, type, index}: {item: any; type: string; index: numbe
 
         {/* Action Buttons */}
         <Box flexDirection="row" alignItems="center" gap={moderateScale(12)} mt={moderateScaleVertical(12)}>
-          
+
           <PrimaryButton
             buttonText="Ride now"
             onPress={() => navigation.navigate(NavigationString.VehicleDetail, {vehicle: item})}
@@ -254,7 +254,7 @@ const AvailableTransport = () => {
       const response = await Instance.get(url, {headers: {Authorization: token}});
 
 
-      console.log(response.data,"this is card response")
+      console.log(response.data,'this is card response');
       if (response.data.success) {
         const availableVehicles = response.data.data.filter(
           (item: any) => item.availability === 'Available' && item.status === 'InActive',
@@ -297,7 +297,7 @@ const AvailableTransport = () => {
 
   const renderEmpty = () => (
     <Box flex={1} justifyContent="center" alignItems="center" py={moderateScaleVertical(80)}>
-    
+
       <Text fontFamily="$poppinsMedium" fontSize={16} color={colors.textSecondary} mt={moderateScaleVertical(16)}>
         No {activeTab}s available nearby
       </Text>
@@ -326,7 +326,7 @@ const AvailableTransport = () => {
       statusBarStyle={isDarkMode ? 'light-content' : 'dark-content'}
       statusBarBackgroundColor={colors.background}
       backgroundColor={colors.background}>
-      
+
       {/* Parallax Header Gradient */}
       <LinearGradient
         colors={[colors.gradientStart, colors.gradientEnd]}
@@ -383,7 +383,7 @@ const AvailableTransport = () => {
             tintColor={colors.primary}
           />
         }>
-        
+
         {/* Header Title (only visible when scrolled to top) */}
         <Box pt={moderateScaleVertical(80)} px={moderateScale(20)}>
           <Text fontFamily="$poppinsBold" fontSize={34} color="white">
@@ -437,7 +437,7 @@ const AvailableTransport = () => {
                       style={{tintColor: isActive ? '#FFF' : colors.textSecondary}}
                     />
                     <Text
-                      fontFamily={isActive ? "$poppinsSemiBold" : "$poppinsMedium"}
+                      fontFamily={isActive ? '$poppinsSemiBold' : '$poppinsMedium'}
                       fontSize={13}
                       color={isActive ? '#FFF' : colors.textSecondary}>
                       {type.label}

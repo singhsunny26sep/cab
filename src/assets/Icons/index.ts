@@ -30,4 +30,4 @@ export default {
   CarTop1:require('./car-top1.png'),
   CarTop2:require('./car-top2.png'),
   BikeTop1:require('./bike-top1.png'),
-}
+};

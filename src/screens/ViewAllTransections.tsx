@@ -91,15 +91,15 @@ const ViewAllTransactions = () => {
         setHasMore(true);
         setRefreshing(true);
       } else {
-        if (!hasMore) return;
+        if (!hasMore) {return;}
         setLoading(true);
       }
-      
+
       setError(null);
-      
+
       const token = await AsyncStorage.getItem('userToken');
       const url = `${BASE_URL}${GET_TRANSACTIONS_HISTORIES.url}?page=${isRefreshing ? 1 : page}`;
-      
+
       const response = await Instance.get(url, {
         headers: {
           Authorization: token,
@@ -108,7 +108,7 @@ const ViewAllTransactions = () => {
 
       if (response.status === 200) {
         const newTransactions = response.data.data;
-        
+
         if (isRefreshing) {
           setTransactions(newTransactions);
         } else {
@@ -119,7 +119,7 @@ const ViewAllTransactions = () => {
           );
           setTransactions(prev => [...prev, ...uniqueNewTransactions]);
         }
-        
+
         // Check if there are more pages
         if (page >= response.data.totalPages) {
           setHasMore(false);
@@ -151,8 +151,8 @@ const ViewAllTransactions = () => {
   };
 
   const renderFooter = () => {
-    if (!loading || refreshing) return null;
-    
+    if (!loading || refreshing) {return null;}
+
     return (
       <Box py={moderateScaleVertical(20)}>
         <ActivityIndicator size="small" color={colors.themePrimary} />
@@ -161,8 +161,8 @@ const ViewAllTransactions = () => {
   };
 
   const renderEmpty = () => {
-    if (loading) return null;
-    
+    if (loading) {return null;}
+
     return (
       <Box flex={1} justifyContent="center" alignItems="center" py={moderateScaleVertical(20)}>
         <Text

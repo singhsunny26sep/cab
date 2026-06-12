@@ -43,10 +43,10 @@
 // }
 
 // export default InputText;
-import { Box, Input, Text } from "@gluestack-ui/themed";
-import { TextInput, TextInputProps } from 'react-native'
-import { colors } from "../../constants/colors";
-import { moderateScale, textScale } from "../../utils/responsiveSize";
+import { Box, Input, Text } from '@gluestack-ui/themed';
+import { TextInput, TextInputProps } from 'react-native';
+import { colors } from '../../constants/colors';
+import { moderateScale, textScale } from '../../utils/responsiveSize';
 
 export interface InputTextProps {
   label?: string;
@@ -57,7 +57,7 @@ export interface InputTextProps {
   handleKeyPress?: () => void;
   borderWith?: number;
   secureTextEntry?: boolean;
-  isDarkMode?: boolean; 
+  isDarkMode?: boolean;
 }
 
 function InputText(props: InputTextProps) {
@@ -67,21 +67,21 @@ function InputText(props: InputTextProps) {
     <Input h={height} borderRadius={9} borderWidth={borderWith} borderColor="#B8B8B8" alignItems="center">
       {left}
       <TextInput
-        placeholder={textInputProps?.placeholder ?? ""}
+        placeholder={textInputProps?.placeholder ?? ''}
         onSubmitEditing={handleKeyPress}
         returnKeyType="done"
-        placeholderTextColor={isDarkMode ? colors.white : '#D0D0D0'} 
+        placeholderTextColor={isDarkMode ? colors.white : '#D0D0D0'}
         secureTextEntry={secureTextEntry}
         style={[
-          { 
-            fontSize: textScale(14), 
-            color: isDarkMode ? colors.white : colors.black, 
-            fontFamily: 'Poppins-Medium', 
-            paddingLeft: moderateScale(15), 
-            flex: 1, 
-            lineHeight: textScale(25), 
-            paddingVertical: moderateScale(5) 
-          }
+          {
+            fontSize: textScale(14),
+            color: isDarkMode ? colors.white : colors.black,
+            fontFamily: 'Poppins-Medium',
+            paddingLeft: moderateScale(15),
+            flex: 1,
+            lineHeight: textScale(25),
+            paddingVertical: moderateScale(5),
+          },
         ]}
         {...textInputProps}
       />

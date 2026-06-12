@@ -6,4 +6,4 @@ export default {
   availableCar : require('./availableCar.png'),
   detailCar : require('./detailCar.png'),
   user: require('./user.png'),
-}
+};

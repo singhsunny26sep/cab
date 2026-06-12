@@ -50,14 +50,14 @@ const CustomBottomsheetRideALerts: React.FC<RideAlertProps> = ({
         if (!hasShownConfirmation) {
           setInternalVisible(true);
           setHasShownConfirmation(true);
-          
+
           // Auto-close after 3 seconds
           autoCloseTimerRef.current = setTimeout(() => {
             setInternalVisible(false);
             onClose();
           }, 3000);
         }
-      } 
+      }
       // For rating type, always show
       else if (type === 'rating') {
         setInternalVisible(true);
@@ -83,7 +83,7 @@ const CustomBottomsheetRideALerts: React.FC<RideAlertProps> = ({
 
   const handleSubmitRating = async () => {
     try {
-      if (!rideData?._id || !rating) return;
+      if (!rideData?._id || !rating) {return;}
 
       const response = await axios.post(
         `${BASE_URL}${CREATE_RATING.url}`,

@@ -39,7 +39,7 @@ const DeleteAccount = () => {
     setLoading(true);
     try {
       const token = await AsyncStorage.getItem('userToken');
-      
+
       const url = `${BASE_URL}${DELETE_PROFILE.url}`;
       const response = await Instance.delete(url, {
         headers: {

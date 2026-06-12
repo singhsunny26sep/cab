@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StackRoute } from '../navigationRoutes';
 import { NavigationString } from '../navigationStrings';
@@ -49,7 +49,7 @@ const MainNavigation = () => {
       <Stack.Screen name={NavigationString.ChatScreen} component={StackRoute.ChatScreen}/>
       <Stack.Screen name={NavigationString.CallScreen} component={StackRoute.CallScreen}/>
     </Stack.Navigator>
-  )
-}
+  );
+};
 
-export default MainNavigation
+export default MainNavigation;

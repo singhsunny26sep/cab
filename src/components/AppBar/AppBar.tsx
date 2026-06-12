@@ -15,35 +15,35 @@ type AppBarProps = {
   fontFamily?: any;
   backgroundColor?: string;
   textColor?: string;
-  isDarkMode?: boolean; 
+  isDarkMode?: boolean;
 };
 
 export function AppBar(props: AppBarProps) {
-  const { 
-    left, 
-    right, 
-    back, 
-    title, 
-    elevation = 5, 
-    onCustomBackPress = undefined, 
-    fontFamily, 
-    backgroundColor = '#fff', 
-    textColor = '#2A2A2A', 
-    isDarkMode = false 
+  const {
+    left,
+    right,
+    back,
+    title,
+    elevation = 5,
+    onCustomBackPress = undefined,
+    fontFamily,
+    backgroundColor = '#fff',
+    textColor = '#2A2A2A',
+    isDarkMode = false,
   } = props;
 
   const navigation = useNavigation();
 
   const headerBackgroundColor = isDarkMode ? '#000000' : backgroundColor;
-  const headerTextColor = isDarkMode ? '#ffffff' : textColor; 
+  const headerTextColor = isDarkMode ? '#ffffff' : textColor;
 
   return (
     <Box flexDirection={'row'} backgroundColor={headerBackgroundColor} height={50}>
       {back ? (
         <Box marginLeft={1} alignItems={'center'} justifyContent={'center'} flex={2} bgColor={headerBackgroundColor}>
-          <Pressable hitSlop={22} onPress={onCustomBackPress ?? navigation.goBack} flexDirection='row' alignItems='center' gap={moderateScale(2)}>
+          <Pressable hitSlop={22} onPress={onCustomBackPress ?? navigation.goBack} flexDirection="row" alignItems="center" gap={moderateScale(2)}>
             <LeftAngleIcon />
-            <Text fontFamily='$poppinsRegular' color={isDarkMode ? '#ffffff' : '#414141'} lineHeight={24} fontSize={16}>
+            <Text fontFamily="$poppinsRegular" color={isDarkMode ? '#ffffff' : '#414141'} lineHeight={24} fontSize={16}>
               {'Back'}
             </Text>
           </Pressable>
@@ -51,8 +51,8 @@ export function AppBar(props: AppBarProps) {
       ) : (
         left
       )}
-      <Box flex={8} justifyContent='center' alignItems='center' marginLeft={!back ? 25 : 0}>
-        <Text fontFamily='$poppinsMedium' color={headerTextColor} lineHeight={20} fontSize={18}>
+      <Box flex={8} justifyContent="center" alignItems="center" marginLeft={!back ? 25 : 0}>
+        <Text fontFamily="$poppinsMedium" color={headerTextColor} lineHeight={20} fontSize={18}>
           {title}
         </Text>
       </Box>

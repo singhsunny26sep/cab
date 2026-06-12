@@ -1,1 +1,1 @@
-export * from './AddressPickup'
+export * from './AddressPickup';

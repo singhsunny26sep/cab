@@ -1,18 +1,18 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  mapLangLogArr: []
-}
+  mapLangLogArr: [],
+};
 
 const bookingSlice = createSlice({
   name: 'booking',
   initialState,
   reducers: {
     handleMapLangLogArr: (state, action) => {
-      state.mapLangLogArr.push(action.payload)
-    }
-  }
-})
+      state.mapLangLogArr.push(action.payload);
+    },
+  },
+});
 
-export const { handleMapLangLogArr } = bookingSlice.actions
-export default bookingSlice.reducer 
+export const { handleMapLangLogArr } = bookingSlice.actions;
+export default bookingSlice.reducer;

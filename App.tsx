@@ -23,19 +23,19 @@ const App = () => {
       try {
         // Initialize notifications
         await initNotifications();
-        
+
         // Initialize socket when we have a token
         const userData = await loadUserFromStorage();
         const userToken: any = await AsyncStorage.getItem('userToken');
-        console.log("userData in app file>>>>>>>>>>>>>>", userData);
-        console.log("userData in app file>>>>>>>>>>>>>>", userToken);
+        console.log('userData in app file>>>>>>>>>>>>>>', userData);
+        console.log('userData in app file>>>>>>>>>>>>>>', userToken);
         // console.log("userData?.token && !socketInitialized >>>>>>>>>>>>>>", userToken && !socketInitialized);
-        
+
         if (userToken && !socketInitialized) {
           // console.log("Initializing socket with user token", userData?.token);
-          console.log("Initializing socket with user token>>>>>>>>>>>>>>>>>>>>>>>", userToken);
+          console.log('Initializing socket with user token>>>>>>>>>>>>>>>>>>>>>>>', userToken);
           await socketServices.initializeSocket(userToken);
-          console.log(" socketServices.isConnected() at app >>>>>>>>>>>>>>>>>>>>>>>", socketServices.isConnected());
+          console.log(' socketServices.isConnected() at app >>>>>>>>>>>>>>>>>>>>>>>', socketServices.isConnected());
           socketInitialized = true;
         }
       } catch (error) {
@@ -47,7 +47,7 @@ const App = () => {
       try {
         // Create notification channel (Android)
         // await createNotificationChannel();
-        
+
         // Check permission
         const hasPermission = await checkNotificationPermission();
         if (!hasPermission) {

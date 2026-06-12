@@ -19,7 +19,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   useEffect(() => {
     const loadThemePreference = async () => {
       const savedTheme = await AsyncStorage.getItem('isDarkMode');
-      
+
       if (savedTheme !== null) {
         setIsDarkMode(JSON.parse(savedTheme)); // Parse and set the saved preference
       } else {

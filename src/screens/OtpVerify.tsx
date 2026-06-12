@@ -116,7 +116,7 @@ console.log('Verifying OTP with email:', email, 'and sessionId:', route.params?.
   };
 
   const handleResendOtp = async () => {
-    if (resendDisabled) return;
+    if (resendDisabled) {return;}
     try {
       // setLoading(true);
       const response = await Instance.post(SIGNUP.url, {

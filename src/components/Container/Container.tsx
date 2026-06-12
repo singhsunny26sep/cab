@@ -10,8 +10,8 @@ export interface ContainerProps {
   statusBarBackgroundColor?: string;
   statusBarStyle?: StatusBarStyle;
   fullScreen?: boolean;
-  isDarkMode?: boolean; 
-};
+  isDarkMode?: boolean;
+}
 
 export function Container(props: ContainerProps) {
   const {
@@ -19,8 +19,8 @@ export function Container(props: ContainerProps) {
     backgroundColor = '#ffffff',
     fullScreen,
     statusBarBackgroundColor,
-    statusBarStyle = "light-content",
-    isDarkMode = false, 
+    statusBarStyle = 'light-content',
+    isDarkMode = false,
   } = props;
 
   const statusBarBackgroundColorIos = statusBarBackgroundColor || (isDarkMode ? '#000000' : '#ffffff');

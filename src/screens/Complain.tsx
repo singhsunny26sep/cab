@@ -1,20 +1,20 @@
-import { StyleSheet, Modal } from 'react-native'
+import { StyleSheet, Modal } from 'react-native';
 import { } from 'react-native';
-import { Box, ChevronDownIcon, Icon, Pressable, Text, Textarea, TextareaInput, Image, CloseIcon } from '@gluestack-ui/themed'
-import React, { useState } from 'react'
-import { ParamListBase, useNavigation, } from '@react-navigation/native';
+import { Box, ChevronDownIcon, Icon, Pressable, Text, Textarea, TextareaInput, Image, CloseIcon } from '@gluestack-ui/themed';
+import React, { useState } from 'react';
+import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Dropdown } from 'react-native-element-dropdown'
-import { responsiveHeight, responsiveWidth } from 'react-native-responsive-dimensions'
+import { Dropdown } from 'react-native-element-dropdown';
+import { responsiveHeight, responsiveWidth } from 'react-native-responsive-dimensions';
 
-import { Container } from '../components/Container'
-import { AppBar } from '../components/AppBar'
-import { colors } from '../constants/colors'
-import { moderateScale, moderateScaleVertical, textScale } from '../utils/responsiveSize'
-import { ComplainType } from '../constants/contants'
-import InputText from '../components/TextInput/InputText'
-import PrimaryButton from '../components/Button/PrimaryButton'
-import Icons from '../assets/Icons'
+import { Container } from '../components/Container';
+import { AppBar } from '../components/AppBar';
+import { colors } from '../constants/colors';
+import { moderateScale, moderateScaleVertical, textScale } from '../utils/responsiveSize';
+import { ComplainType } from '../constants/contants';
+import InputText from '../components/TextInput/InputText';
+import PrimaryButton from '../components/Button/PrimaryButton';
+import Icons from '../assets/Icons';
 import { NavigationString } from '../navigation/navigationStrings';
 import { useTheme } from '../constants/ThemeContext';
 
@@ -24,12 +24,12 @@ const Complain = () => {
   const { isDarkMode } = useTheme();
 
   // states
-  const [selectedComplainType, setSelectedComplainType] = useState('')
-  const [showModal, setShowModal] = useState(false)
+  const [selectedComplainType, setSelectedComplainType] = useState('');
+  const [showModal, setShowModal] = useState(false);
 
   return (
-    <Container statusBarStyle={isDarkMode ? 'light-content' : 'dark-content'} statusBarBackgroundColor={isDarkMode ? '#000000' : '#ffffff'} backgroundColor={isDarkMode ? colors.black :colors.white}>
-      <AppBar back title='Complain' isDarkMode={isDarkMode}/>
+    <Container statusBarStyle={isDarkMode ? 'light-content' : 'dark-content'} statusBarBackgroundColor={isDarkMode ? '#000000' : '#ffffff'} backgroundColor={isDarkMode ? colors.black : colors.white}>
+      <AppBar back title="Complain" isDarkMode={isDarkMode}/>
 
       <Box mx={moderateScale(15)} mt={moderateScaleVertical(25)} gap={moderateScaleVertical(20)}>
         <Dropdown
@@ -41,10 +41,10 @@ const Complain = () => {
           valueField="value"
           placeholder={'Select Complain Type'}
           // value={formik.values.bookingfor}
-          onChange={(item) => { setSelectedComplainType(item?.value) }}
-          renderRightIcon={() => <Icon as={ChevronDownIcon} size="lg" mr='$2' />}
+          onChange={(item) => { setSelectedComplainType(item?.value); }}
+          renderRightIcon={() => <Icon as={ChevronDownIcon} size="lg" mr="$2" />}
           selectedTextProps={{ numberOfLines: 1 }}
-          renderItem={(item) => { return (<Text fontFamily='$poppinsMedium' fontSize={14} lineHeight={16} color={colors.black} numberOfLines={1} style={{ paddingHorizontal: responsiveWidth(2.5), paddingVertical: responsiveHeight(1.5) }} >{item?.label}</Text>) }}
+          renderItem={(item) => { return (<Text fontFamily="$poppinsMedium" fontSize={14} lineHeight={16} color={colors.black} numberOfLines={1} style={{ paddingHorizontal: responsiveWidth(2.5), paddingVertical: responsiveHeight(1.5) }} >{item?.label}</Text>); }}
           itemTextStyle={localStyles.selectedTextStyle}
           itemContainerStyle={localStyles.itemContainerStyle}
         />
@@ -58,11 +58,11 @@ const Complain = () => {
           borderColor={colors.silverGray}
           $focus-borderColor={colors.silverGray}
         >
-          <TextareaInput fontFamily='$poppinsMedium' fontSize={14} lineHeight={16} placeholderTextColor={isDarkMode ? colors.white :colors.silverGray} numberOfLines={5} placeholder="Write your complain here (minimum 10 characters)" />
+          <TextareaInput fontFamily="$poppinsMedium" fontSize={14} lineHeight={16} placeholderTextColor={isDarkMode ? colors.white : colors.silverGray} numberOfLines={5} placeholder="Write your complain here (minimum 10 characters)" />
         </Textarea>
 
 
-        <PrimaryButton onPress={() => setShowModal(true)} buttonText='Submit' />
+        <PrimaryButton onPress={() => setShowModal(true)} buttonText="Submit" />
 
       </Box>
 
@@ -71,24 +71,24 @@ const Complain = () => {
         transparent={true}
         visible={showModal}
       >
-        <Box flex={1} justifyContent='center' alignItems='center' backgroundColor='rgba(0, 0, 0, 0.5)' >
+        <Box flex={1} justifyContent="center" alignItems="center" backgroundColor="rgba(0, 0, 0, 0.5)" >
           <Box backgroundColor={isDarkMode ? colors.black : colors.white} w={'92%'} h={'42%'} borderRadius={moderateScale(10)}>
 
 
-            <Box alignItems='center' justifyContent='center' gap={moderateScaleVertical(20)}>
-              <Pressable hitSlop={20} onPress={() => setShowModal(false)} alignSelf='flex-end' mr={moderateScale(20)} mt={moderateScaleVertical(20)}>
+            <Box alignItems="center" justifyContent="center" gap={moderateScaleVertical(20)}>
+              <Pressable hitSlop={20} onPress={() => setShowModal(false)} alignSelf="flex-end" mr={moderateScale(20)} mt={moderateScaleVertical(20)}>
                 <Icon as={CloseIcon} w="$4" h="$4" />
               </Pressable>
-              <Image alt='icon' source={Icons.RightTick} resizeMode='contain' w={moderateScale(124)} h={moderateScale(124)} />
+              <Image alt="icon" source={Icons.RightTick} resizeMode="contain" w={moderateScale(124)} h={moderateScale(124)} />
 
-              <Box alignItems='center' justifyContent='center' gap={moderateScaleVertical(10)}>
+              <Box alignItems="center" justifyContent="center" gap={moderateScaleVertical(10)}>
                 <Text fontFamily={'$poppinsMedium'} fontSize={20} lineHeight={22} color={isDarkMode ? colors.white : colors.charcoalGray} numberOfLines={1}>Send successful</Text>
-                <Text fontFamily={'$poppinsMedium'} fontSize={12} lineHeight={14} color={isDarkMode ? colors.white : colors.charcoalGray} numberOfLines={2} textAlign='center'>Your complain has been send successful</Text>
+                <Text fontFamily={'$poppinsMedium'} fontSize={12} lineHeight={14} color={isDarkMode ? colors.white : colors.charcoalGray} numberOfLines={2} textAlign="center">Your complain has been send successful</Text>
               </Box>
 
             </Box>
 
-            <PrimaryButton buttonText='Back To Home' onPress={() => navigation?.reset({ index: 0, routes: [{ name: NavigationString.Home }] })} marginHorizontal={moderateScale(15)} marginVertical={moderateScaleVertical(20)} />
+            <PrimaryButton buttonText="Back To Home" onPress={() => navigation?.reset({ index: 0, routes: [{ name: NavigationString.Home }] })} marginHorizontal={moderateScale(15)} marginVertical={moderateScaleVertical(20)} />
 
 
           </Box>
@@ -97,10 +97,10 @@ const Complain = () => {
 
 
     </Container>
-  )
-}
+  );
+};
 
-export default Complain
+export default Complain;
 
 const localStyles = StyleSheet.create({
 
@@ -128,4 +128,4 @@ const localStyles = StyleSheet.create({
   itemContainerStyle: {
     // borderBottomWidth: 1,
   },
-})
+});

@@ -52,9 +52,9 @@ const ConfirmBooking = () => {
     discountType: '',
     promoApplied: false,
     message: '',
-    promoCode: ''
+    promoCode: '',
   });
-console.log(priceDetails,"$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+console.log(priceDetails,'$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
   const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
   const [userLocalData, setUserLocalData] = useState<any>(null);
   const [promoCode, setPromoCode] = useState<string>('');
@@ -73,7 +73,7 @@ console.log(priceDetails,"$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
       calculateBookingPrice();
     }
   }, [userLocalData]);
-console.log(localeData,"this is localData____________________________________________")
+console.log(localeData,'this is localData____________________________________________');
   const calculateBookingPrice = async (promo: string = '') => {
     try {
       setCalculatingPrice(true);
@@ -86,7 +86,7 @@ console.log(localeData,"this is localData_______________________________________
       const payload = {
         rideType: vehicle?.type.toLowerCase(),
         promoCode: promo || '',
-        distance: userLocalData?.dropDetails?.distance
+        distance: userLocalData?.dropDetails?.distance,
       };
 
       const response = await Instance.post(
@@ -98,7 +98,7 @@ console.log(localeData,"this is localData_______________________________________
           },
         }
       );
-      console.log("response for calculateBookingPrice ===>", response?.data)
+      console.log('response for calculateBookingPrice ===>', response?.data);
       if (response.data.success) {
         setPriceDetails({
           baseAmount: response.data.baseAmount,
@@ -107,7 +107,7 @@ console.log(localeData,"this is localData_______________________________________
           discountType: response.data.discountType,
           promoApplied: response.data.promoApplied,
           message: response.data.message,
-          promoCode: response.data.promoApplied ? promo : ''
+          promoCode: response.data.promoApplied ? promo : '',
         });
 
         if (response.data.promoApplied) {
@@ -123,9 +123,9 @@ console.log(localeData,"this is localData_______________________________________
           discountType: response.data.discountType || '',
           promoApplied: false,
           message: response.data.message,
-          promoCode: ''
+          promoCode: '',
         });
-        
+
         if (promo) {
           showErrorToast(response.data.message);
         }
@@ -140,7 +140,7 @@ console.log(localeData,"this is localData_______________________________________
         discountType: '',
         promoApplied: false,
         message: 'Failed to calculate booking price',
-        promoCode: ''
+        promoCode: '',
       });
     } finally {
       setCalculatingPrice(false);
@@ -191,8 +191,8 @@ console.log(localeData,"this is localData_______________________________________
         priceDetails: {
           baseAmount: priceDetails.baseAmount,
           discount: priceDetails.discountValue,
-          payableAmount: priceDetails.payablePrice
-        }
+          payableAmount: priceDetails.payablePrice,
+        },
       };
       setBookingData(bookingDatas);
 
@@ -332,7 +332,7 @@ console.log(localeData,"this is localData_______________________________________
   useEffect(() => {
     loadUserLocalDatas();
   }, []);
-  
+
   useEffect(() => {
     if (bookingData) {
       navigation.navigate(NavigationString.RideWaiting, {bookingData});
@@ -433,31 +433,31 @@ console.log(localeData,"this is localData_______________________________________
                   placeholder: 'Enter Promo Code',
                   value: promoCode,
                   onChangeText: text => setPromoCode(text.toUpperCase()),
-                  editable: !priceDetails.promoApplied
+                  editable: !priceDetails.promoApplied,
                 }}
               />
             </Box>
 
             {priceDetails.promoApplied ? (
-              <PrimaryButton 
-                buttonText="Remove" 
+              <PrimaryButton
+                buttonText="Remove"
                 onPress={handleRemovePromoCode}
                 backgroundColor={colors.error}
               />
             ) : (
-              <PrimaryButton 
-                buttonText="Apply" 
+              <PrimaryButton
+                buttonText="Apply"
                 onPress={handleApplyPromoCode}
                 loading={calculatingPrice}
               />
             )}
           </Box>
-          
+
           {/* Applied promo code display */}
           {priceDetails.promoApplied && (
-            <Box 
-              flexDirection="row" 
-              alignItems="center" 
+            <Box
+              flexDirection="row"
+              alignItems="center"
               justifyContent="space-between"
               // backgroundColor={colors.Amber}
               padding={moderateScale(10)}
@@ -554,7 +554,7 @@ console.log(localeData,"this is localData_______________________________________
               </Text>
             </Box>
           )}
-          
+
           <Box height={1} marginVertical={4}>
             <Box
               borderBottomWidth={1}

@@ -132,7 +132,7 @@ const CustomPaymentBottomSheet: React.FC<PaymentBottomSheetProps> = ({
   const handleExternalPayment = async () => {
     try {
       const orderId = await createRazorpayOrder();
-      if (!orderId) return;
+      if (!orderId) {return;}
 
       const result = await initiatePayment({
         amount: rideData?.fareAmount.toString() || '0',

@@ -1,1 +1,1 @@
-export * from './CustomDrawer'
+export * from './CustomDrawer';

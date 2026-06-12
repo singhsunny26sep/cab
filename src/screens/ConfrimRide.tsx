@@ -80,7 +80,7 @@ const ConfrimRide = () => {
       longitudeDelta: LONGITUDE_DELTA,
     })
   );
-  const [modalVisible, setModalVisible] = useState(true); 
+  const [modalVisible, setModalVisible] = useState(true);
 
   const onCenter = () => {
     if (mapRef.current) {
@@ -127,13 +127,13 @@ const ConfrimRide = () => {
       <Modal
         animationType="slide"
         transparent={true}
-        visible={modalVisible} 
-        onRequestClose={handleCloseModal} 
+        visible={modalVisible}
+        onRequestClose={handleCloseModal}
       >
-        <Box flex={1} justifyContent='flex-end' backgroundColor='rgba(0, 0, 0, 0.2)'>
-          <Box style={[styles.modalContent,{ backgroundColor:isDarkMode ? colors.black : colors.white,}]}>
+        <Box flex={1} justifyContent="flex-end" backgroundColor="rgba(0, 0, 0, 0.2)">
+          <Box style={[styles.modalContent,{ backgroundColor:isDarkMode ? colors.black : colors.white}]}>
             <Box borderBottomWidth={0.5}>
-              <Box flexDirection="row" alignItems="center" justifyContent='space-between' padding={scale(16)}>
+              <Box flexDirection="row" alignItems="center" justifyContent="space-between" padding={scale(16)}>
                 <Text fontFamily={'$poppinsRegular'} fontSize={15} lineHeight={20} color={isDarkMode ? colors.white : colors.charcoalGray} numberOfLines={1}>
                   Your driver is coming in 12:00
                 </Text>
@@ -144,18 +144,18 @@ const ConfrimRide = () => {
             </Box>
             <Box borderBottomWidth={0.9} paddingBottom={verticalScale(15)}>
      <Box flexDirection="row" alignItems="center" justifyContent="space-between" marginHorizontal={scale(15)} mt={moderateScale(10)}>
-     <Image 
-      source={{uri:'https://cdn.pixabay.com/photo/2022/09/13/05/34/boy-handsome-pose-ideas-7450990_640.jpg'}}  
+     <Image
+      source={{uri:'https://cdn.pixabay.com/photo/2022/09/13/05/34/boy-handsome-pose-ideas-7450990_640.jpg'}}
       style={{height: scale(80), width: scale(80), borderRadius: moderateScale(8), marginRight: moderateScale(10)}}/>
     <Box flex={1}>
     <Text fontFamily={'$poppinsSemiBold'} fontSize={15} lineHeight={20} color={isDarkMode ? colors.white : colors.charcoalGray}>
       Sergio Ramasis
     </Text>
-     <Box flexDirection='row' alignItems='center' marginTop={moderateScale(5)}>
+     <Box flexDirection="row" alignItems="center" marginTop={moderateScale(5)}>
       <LocationMakerRedIcon />
       <Text marginLeft={moderateScale(5)} color={isDarkMode ? colors.white : colors.charcoalGray}>800M (Junagadh)</Text>
       </Box>
-       <Box flexDirection='row' alignItems='center' marginTop={moderateScale(5)}>
+       <Box flexDirection="row" alignItems="center" marginTop={moderateScale(5)}>
         <Box marginLeft={moderateScale(3)}>
           <ReviewStarIcon />
         </Box>
@@ -164,21 +164,21 @@ const ConfrimRide = () => {
   </Box>
   </Box>
   </Box>
-  <Box mt={scale(10)} flexDirection='row' justifyContent='space-between' marginHorizontal={scale(15)}>
+  <Box mt={scale(10)} flexDirection="row" justifyContent="space-between" marginHorizontal={scale(15)}>
     <Text fontFamily={'$poppinsRegular'} fontSize={18} lineHeight={30}color={isDarkMode ? colors.white : colors.charcoalGray}>
-      Payment Method    
+      Payment Method
     </Text>
     <Text fontFamily={'$poppinsMedium'} fontSize={25} lineHeight={30} color={isDarkMode ? colors.white : colors.charcoalGray}>
     {'\u20B9'}2000
     </Text>
   </Box>
-  <Box flexDirection='row' marginHorizontal={scale(5)} mt={moderateScale(20)}>
+  <Box flexDirection="row" marginHorizontal={scale(5)} mt={moderateScale(20)}>
   <TouchableOpacity  onPress={() => navigation.navigate(NavigationString.CallScreen)}  >
     <Box
       borderRadius={moderateScale(100)}
       padding={scale(10)}
-      justifyContent='center'
-      alignItems='center'
+      justifyContent="center"
+      alignItems="center"
       marginLeft={moderateScale(10)}
       borderWidth={scale(1)}
       borderColor={colors.yellow}>
@@ -193,8 +193,8 @@ const ConfrimRide = () => {
     <Box
       borderRadius={moderateScale(100)}
       padding={scale(10)}
-      justifyContent='center'
-      alignItems='center'
+      justifyContent="center"
+      alignItems="center"
       marginLeft={moderateScale(10)}
       borderWidth={scale(1)}
       borderColor={colors.yellow}>
@@ -209,11 +209,11 @@ const ConfrimRide = () => {
     <Box
       borderRadius={moderateScale(5)}
       padding={scale(10)}
-      justifyContent='flex-end'
-      alignItems='center'
+      justifyContent="flex-end"
+      alignItems="center"
       marginLeft={moderateScale(10)}
       backgroundColor={colors.yellow}
-      ml={moderateScale(150)}> 
+      ml={moderateScale(150)}>
       <Text style={{ color: colors.white, fontSize: scale(15) }}>Cancel Ride</Text>
     </Box>
   </TouchableOpacity>
@@ -236,8 +236,8 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: moderateScale(20),
     borderTopRightRadius: moderateScale(20),
   },
-  
- 
+
+
 });
 
 export default ConfrimRide;

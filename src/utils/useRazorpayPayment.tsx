@@ -51,7 +51,7 @@ const useRazorpayPayment = () => {
     onFailure?: (error: any) => void
   ): Promise<PaymentResult> => {
     setIsProcessing(true);
-    
+
     const paymentOptions: any = {
       description: options.description,
       image: options.image || 'https://your-logo-url.png',
@@ -71,11 +71,11 @@ const useRazorpayPayment = () => {
     try {
       const data = await RazorpayCheckout.open(paymentOptions);
       console.log(`Payment Success: ${JSON.stringify(data)}`);
-      
+
       if (onSuccess) {
         onSuccess(data);
       }
-      
+
       setIsProcessing(false);
       return { success: true, data };
     } catch (error: any) {
@@ -91,11 +91,11 @@ const useRazorpayPayment = () => {
       }
 
       showErrorToast(errorMessage);
-      
+
       if (onFailure) {
         onFailure(error);
       }
-      
+
       setIsProcessing(false);
       return { success: false, error };
     }

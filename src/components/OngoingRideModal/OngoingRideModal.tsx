@@ -49,7 +49,7 @@ const OngoingRideModal = ({
   remainDurationForPickup,
   isRideStarted,
   setOngoingRide,
-  setShowOngoingRideModal
+  setShowOngoingRideModal,
 }: {
   visible: boolean;
   isRideStarted: boolean;
@@ -118,7 +118,7 @@ const OngoingRideModal = ({
       onClose();
       setShowCancelAlert(false);
       setSelectedCancelReason(null);
-      setShowOngoingRideModal(false)
+      setShowOngoingRideModal(false);
       setOngoingRide(null);
     } catch (error) {
       console.error('Error rejecting ride:', error);
@@ -189,18 +189,18 @@ const OngoingRideModal = ({
 
   const confirmCancelRide = () => {
     Alert.alert(
-      "Confirm Cancellation",
+      'Confirm Cancellation',
       `Are you sure you want to cancel the ride?${selectedCancelReason ? `\nReason: ${selectedCancelReason}` : ''}`,
       [
         {
-          text: "Cancel",
+          text: 'Cancel',
           onPress: () => setShowCancelAlert(false),
-          style: "cancel"
+          style: 'cancel',
         },
-        { 
-          text: "Confirm", 
-          onPress: () => {handleRejectRide()}
-        }
+        {
+          text: 'Confirm',
+          onPress: () => {handleRejectRide();},
+        },
       ]
     );
   };
@@ -264,8 +264,8 @@ const OngoingRideModal = ({
                 Ride PIN
               </Text>
               <Text
-                textAlign='center'
-                textAlignVertical='center'
+                textAlign="center"
+                textAlignVertical="center"
                 fontFamily="$poppinsSemiBold"
                 fontSize={textScale(18)}
                 borderWidth={scale(2)}
@@ -286,10 +286,10 @@ const OngoingRideModal = ({
                 fontFamily="$poppinsMedium"
                 fontSize={textScale(14)}
                 color={isDarkMode ? colors.white : colors.black}>
-                Ride Details - {!isRideStarted ? "Waiting for driver reach" : "Ride Started"}
+                Ride Details - {!isRideStarted ? 'Waiting for driver reach' : 'Ride Started'}
               </Text>
               <Box flexDirection="row" alignItems="center" mt={moderateScale(5)}>
-                {isRideStarted ? 
+                {isRideStarted ?
                 <Text
                   ml={moderateScale(5)}
                   fontFamily="$poppinsRegular"
@@ -302,7 +302,7 @@ const OngoingRideModal = ({
                   fontFamily="$poppinsRegular"
                   fontSize={textScale(12)}
                   color={isDarkMode ? colors.white : colors.black}>📌 {remainDurationForPickup?.toFixed(1)} km • {remainTimeForPickup?.toFixed(2)} min
-                </Text> 
+                </Text>
                 }
               </Box>
               <Text
@@ -310,7 +310,7 @@ const OngoingRideModal = ({
                 fontFamily="$poppinsRegular"
                 fontSize={textScale(12)}
                 color={isDarkMode ? colors.white : colors.black}>
-                {rideData?.rideCategory === 'car' || rideData?.rideCategory === 'taxi' ? "🚗" : "🚲"}  {rideData?.rideCategory?.toUpperCase()} • {rideData?.type}
+                {rideData?.rideCategory === 'car' || rideData?.rideCategory === 'taxi' ? '🚗' : '🚲'}  {rideData?.rideCategory?.toUpperCase()} • {rideData?.type}
               </Text>
             </Box>
 

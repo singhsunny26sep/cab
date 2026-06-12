@@ -228,11 +228,11 @@ const MenuItem = ({ icon, label, onPress, highlightColor, textColor, isLogout = 
           {icon}
         </Box>
         <Text
-          fontFamily={isLogout ? "$poppinsMedium" : "$poppinsMedium"}
+          fontFamily={isLogout ? '$poppinsMedium' : '$poppinsMedium'}
           fontSize={14}
           lineHeight={20}
           color={textColor}
-          fontWeight={isLogout ? "500" : "400"}>
+          fontWeight={isLogout ? '500' : '400'}>
           {label}
         </Text>
       </Box>

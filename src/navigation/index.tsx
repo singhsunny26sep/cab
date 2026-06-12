@@ -1,5 +1,5 @@
 
-import React from 'react'
+import React from 'react';
 import {  NavigationContainer } from '@react-navigation/native';
 import MainNavigation from './type/MainStack';
 
@@ -9,7 +9,7 @@ const AppNavigator = () => {
     <NavigationContainer>
       <MainNavigation />
     </NavigationContainer>
-  )
-}
+  );
+};
 
-export default AppNavigator
+export default AppNavigator;

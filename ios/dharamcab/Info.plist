@@ -33,13 +33,13 @@
 	</dict>
 	
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>AdiyaCab would like to use your Location</string>
+	<string>DharamCab would like to use your Location</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>AdiyaCab would like to use your Location</string>
+	<string>DharamCab would like to use your Location</string>
 	<key>NSLocationUsageDescription</key>
-	<string>AdiyaCab would like to use your Location</string>
+	<string>DharamCab would like to use your Location</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>AdiyaCab would like to use your Location</string>
+	<string>DharamCab would like to use your Location</string>
 
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string/>

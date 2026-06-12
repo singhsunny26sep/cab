@@ -1,4 +1,4 @@
-package com.adiyacab
+package com.dharamcab
 
 import android.app.Application
 import com.facebook.react.PackageList

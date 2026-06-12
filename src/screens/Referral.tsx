@@ -49,8 +49,8 @@ const Referral = () => {
 
   const handleInvitePress = async () => {
     try {
-      if (!referralCode) return;
-      
+      if (!referralCode) {return;}
+
       const shareOptions = {
         message: `Join me on Cabs using my referral code ${referralCode} and let's both earn ₹50! Download the app now and use my code when signing up.\n\n\ncode: ${referralCode}`,
         title: 'Earn ₹50 with my referral',

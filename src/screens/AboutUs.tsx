@@ -32,7 +32,7 @@ const AboutUs = () => {
     {
       title: 'Contact Us',
       description:
-        'Have questions or need assistance? Our support team is available round the clock to help you. Reach out to us through the app or email us at support@adiyacab.com. We value your feedback and continuously work to improve our services.',
+        'Have questions or need assistance? Our support team is available round the clock to help you. Reach out to us through the app or email us at support@dharamcab.com. We value your feedback and continuously work to improve our services.',
     },
   ];
 

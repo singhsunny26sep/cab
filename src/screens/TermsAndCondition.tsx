@@ -1,7 +1,7 @@
-import { View,  ActivityIndicator } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { View,  ActivityIndicator } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import { useTheme } from '@gluestack-style/react';
-import { Box, ScrollView, Toast, ToastTitle, useToast,Text, } from '@gluestack-ui/themed';
+import { Box, ScrollView, Toast, ToastTitle, useToast,Text } from '@gluestack-ui/themed';
 import { BASE_URL, Instance } from '../api/Instance.ts';
 import { GET_TERMS_CONDITIONS } from '../api/ApiEndpoints';
 import { Container } from '../components/Container';
@@ -15,16 +15,16 @@ const TermsAndCondition = () => {
       const toast = useToast();
       const [loading, setLoading] = useState<boolean>(false);
       const [termsData, setTermsData] = useState<any>(null);
-    
+
       useEffect(() => {
         fetchTerms();
       }, []);
-    
+
       const fetchTerms = async () => {
         setLoading(true);
         try {
           // const token = await AsyncStorage.getItem('userToken');
-    
+
           const url = `${BASE_URL}${GET_TERMS_CONDITIONS.url}`;
           const response = await Instance.get(url, {
             // headers: {
@@ -98,7 +98,7 @@ const TermsAndCondition = () => {
         </ScrollView>
       )}
     </Container>
-  )
-}
+  );
+};
 
-export default TermsAndCondition
+export default TermsAndCondition;

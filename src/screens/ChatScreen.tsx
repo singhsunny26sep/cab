@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  StyleSheet, 
-  Text, 
-  View, 
-  TextInput, 
-  FlatList, 
-  KeyboardAvoidingView, 
-  Platform, 
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
   TouchableOpacity,
-  ActivityIndicator 
+  ActivityIndicator,
 } from 'react-native';
 import { Container } from '../components/Container';
 import { colors } from '../constants/colors';
@@ -54,7 +54,7 @@ export default function ChatScreen({ route }: ChatScreenProps) {
   const flatListRef = useRef<FlatList>(null);
   const messageIdRef = useRef<Set<string>>(new Set());
 
-  console.log("booking Id ", bookingId)
+  console.log('booking Id ', bookingId);
 
   // Load user data and initialize socket
   useEffect(() => {
@@ -77,7 +77,7 @@ export default function ChatScreen({ route }: ChatScreenProps) {
 
   // Initialize socket when token is available
   useEffect(() => {
-    if (!userLocalData?.token) return;
+    if (!userLocalData?.token) {return;}
 
     const initializeSocket = async () => {
       try {
@@ -103,32 +103,32 @@ export default function ChatScreen({ route }: ChatScreenProps) {
 
   // Load messages and setup socket listeners
   useEffect(() => {
-    if (!socketInitialized || !bookingId) return;
+    if (!socketInitialized || !bookingId) {return;}
 
     // console.log("url -> ", `${BASE_URL}${GET_CHATS_DATA.url}${bookingId}`);
     // console.log("token -> ", userLocalData?.token);
 
     const loadMessages = async () => {
       try {
-        setLoadingMessages(true);        
+        setLoadingMessages(true);
         const url = `${BASE_URL}${GET_CHATS_DATA.url}${bookingId}`;
         // const url = `http://192.168.31.250:5000/api/chat/${bookingId}`;
         const response = await Instance.get(url, {
           headers: {
-            Authorization: `Bearer ${userLocalData?.token}`
+            Authorization: `Bearer ${userLocalData?.token}`,
           },
         });
-        
+
         setClientInfo(response?.data?.clientInfo);
         setDriverInfo(response?.data?.riderInfo);
-        
+
         // Clear existing message IDs and add new ones
         messageIdRef.current.clear();
         const newMessages = response.data.messages.map((msg: Message) => {
           messageIdRef.current.add(msg._id);
           return msg;
         });
-        
+
         setMessages(newMessages);
         scrollToBottom();
       } catch (error: any) {
@@ -167,7 +167,7 @@ export default function ChatScreen({ route }: ChatScreenProps) {
   };
 
   const handleSendMessage = () => {
-    if (message.trim() === '') return;
+    if (message.trim() === '') {return;}
 
     const tempId = Date.now().toString();
     const newMessage = {
@@ -175,7 +175,7 @@ export default function ChatScreen({ route }: ChatScreenProps) {
       senderType: 'CLIENT' as const,
       bookingId,
       message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     // Optimistically update UI
@@ -187,7 +187,7 @@ export default function ChatScreen({ route }: ChatScreenProps) {
     socketServices.emit('sendMessage', {
       senderType: 'CLIENT',
       bookingId,
-      message
+      message,
     });
   };
 
@@ -201,7 +201,7 @@ export default function ChatScreen({ route }: ChatScreenProps) {
     const profileImage = isMe ? clientInfo?.imgUrl : driverInfo?.profileImgUrl;
 
     return (
-      <Box 
+      <Box
         flexDirection="row"
         alignItems="flex-end"
         my={moderateScale(4)}
@@ -209,7 +209,7 @@ export default function ChatScreen({ route }: ChatScreenProps) {
         alignSelf={isMe ? 'flex-end' : 'flex-start'}
       >
         {!isMe && profileImage && (
-          <Image 
+          <Image
             source={{ uri: profileImage }}
             alt="Profile"
             borderRadius={100}
@@ -219,27 +219,27 @@ export default function ChatScreen({ route }: ChatScreenProps) {
             marginHorizontal={scale(5)}
           />
         )}
-        <Box 
+        <Box
           bg={isMe ? '$amber400' : '#F0F0F0'}
           px={moderateScale(15)}
           py={moderateScale(10)}
           borderRadius={moderateScale(10)}
           maxWidth="75%"
           style={[
-            isMe 
-              ? styles.myMessageContainer 
-              : styles.otherMessageContainer
+            isMe
+              ? styles.myMessageContainer
+              : styles.otherMessageContainer,
           ]}
         >
           <Text style={[
-            styles.messageText, 
-            isMe && styles.myMessageText
+            styles.messageText,
+            isMe && styles.myMessageText,
           ]}>
             {item.message}
           </Text>
           <Text style={[
             styles.timeText,
-            isMe && styles.myTimeText
+            isMe && styles.myTimeText,
           ]}>
             {formatTime(item.timestamp)}
           </Text>
@@ -251,11 +251,11 @@ export default function ChatScreen({ route }: ChatScreenProps) {
   if (initializingSocket || loadingMessages) {
     return (
       <Container statusBarStyle="dark-content" statusBarBackgroundColor={colors.white}>
-        <AppBar back title={driverInfo?.name || "Loading..."} />
+        <AppBar back title={driverInfo?.name || 'Loading...'} />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.themePrimary} />
           <Text style={styles.loadingText}>
-            {initializingSocket ? "Connecting to chat..." : "Loading messages..."}
+            {initializingSocket ? 'Connecting to chat...' : 'Loading messages...'}
           </Text>
         </View>
       </Container>
@@ -263,14 +263,14 @@ export default function ChatScreen({ route }: ChatScreenProps) {
   }
 
   return (
-    <Container 
-      statusBarStyle="dark-content" 
+    <Container
+      statusBarStyle="dark-content"
       statusBarBackgroundColor={colors.white}>
-      <AppBar 
-        back 
-        title={driverInfo?.name} 
+      <AppBar
+        back
+        title={driverInfo?.name}
       />
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.container}>
         <FlatList
@@ -289,9 +289,9 @@ export default function ChatScreen({ route }: ChatScreenProps) {
           }
         />
 
-        <Box 
-          flexDirection="row" 
-          p={moderateScale(12)} 
+        <Box
+          flexDirection="row"
+          p={moderateScale(12)}
           borderTopWidth={1}
           borderTopColor="#E8E8E8"
           bg={colors.white}
@@ -307,13 +307,13 @@ export default function ChatScreen({ route }: ChatScreenProps) {
             multiline
             maxLength={1000}
           />
-          
+
           <TouchableOpacity onPress={handleSendMessage}>
-            <Image 
-              source={Icons.Navigation} 
+            <Image
+              source={Icons.Navigation}
               style={[
                 styles.sendIcon,
-                message.length > 0 && styles.activeSendIcon
+                message.length > 0 && styles.activeSendIcon,
               ]}
               alt="Send message"
             />
@@ -357,14 +357,14 @@ const styles = StyleSheet.create({
   },
   myMessageText: {
     color: colors.white,
-    fontFamily:'$poppinsRegular'
+    fontFamily:'$poppinsRegular',
   },
   timeText: {
     fontSize: moderateScale(11),
     color: '#888',
     marginTop: moderateScale(4),
     alignSelf: 'flex-end',
-    fontFamily:'$poppinsMedium'
+    fontFamily:'$poppinsMedium',
   },
   myTimeText: {
     color: 'rgba(255,255,255,0.8)',
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
     color: '#2C2C2C',
     fontFamily: '$poppinsRegular',
     marginHorizontal: moderateScale(8),
-    borderWidth:moderateScale(0.5)
+    borderWidth:moderateScale(0.5),
   },
   sendIcon: {
     height: scale(28),

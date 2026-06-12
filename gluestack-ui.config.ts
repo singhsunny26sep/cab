@@ -239,7 +239,7 @@ const config = createConfig({
       poppinsSemiBold : 'Poppins-SemiBold',
       poppinsBold : 'Poppins-Bold',
       poppinsExtraBold : 'Poppins-ExtraBold',
-    }
+    },
   },
   components: defaultConfig.components,
 } as const);

@@ -38,13 +38,13 @@ const ChangePassword = () => {
 
   const checkStrength = (pwd: string) => {
     let score = 0;
-    if (pwd.length >= 8) score++;
-    if (/[A-Z]/.test(pwd)) score++;
-    if (/[0-9]/.test(pwd)) score++;
-    if (/[^A-Za-z0-9]/.test(pwd)) score++;
-    if (pwd.length === 0) return 0;
-    if (score <= 2) return 1;
-    if (score === 3) return 2;
+    if (pwd.length >= 8) {score++;}
+    if (/[A-Z]/.test(pwd)) {score++;}
+    if (/[0-9]/.test(pwd)) {score++;}
+    if (/[^A-Za-z0-9]/.test(pwd)) {score++;}
+    if (pwd.length === 0) {return 0;}
+    if (score <= 2) {return 1;}
+    if (score === 3) {return 2;}
     return 3;
   };
 
@@ -54,16 +54,16 @@ const ChangePassword = () => {
   };
 
   const getStrengthColor = () => {
-    if (strength === 1) return '#FF3B30';
-    if (strength === 2) return '#FF9500';
-    if (strength === 3) return '#34C759';
+    if (strength === 1) {return '#FF3B30';}
+    if (strength === 2) {return '#FF9500';}
+    if (strength === 3) {return '#34C759';}
     return isDarkMode ? '#636366' : '#C4C4C4';
   };
 
   const getStrengthText = () => {
-    if (strength === 1) return 'Weak';
-    if (strength === 2) return 'Medium';
-    if (strength === 3) return 'Strong';
+    if (strength === 1) {return 'Weak';}
+    if (strength === 2) {return 'Medium';}
+    if (strength === 3) {return 'Strong';}
     return '';
   };
 
@@ -72,7 +72,7 @@ const ChangePassword = () => {
   };
 
   const handleSave = () => {
-    if (!isFormValid()) return;
+    if (!isFormValid()) {return;}
     console.log('Password changed');
   };
 

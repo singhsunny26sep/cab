@@ -1,23 +1,23 @@
-import React, { useEffect, useState } from 'react'
-import { Box, Pressable, Text } from '@gluestack-ui/themed'
+import React, { useEffect, useState } from 'react';
+import { Box, Pressable, Text } from '@gluestack-ui/themed';
 import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import { Container } from '../components/Container'
-import { colors } from '../constants/colors'
-import { moderateScale, moderateScaleVertical } from '../utils/responsiveSize'
-import InputText from '../components/TextInput/InputText'
-import { GmailIcon, AppleLogoIcon } from '../components/Icons'
-import PrimaryButton from '../components/Button/PrimaryButton'
+import { Container } from '../components/Container';
+import { colors } from '../constants/colors';
+import { moderateScale, moderateScaleVertical } from '../utils/responsiveSize';
+import InputText from '../components/TextInput/InputText';
+import { GmailIcon, AppleLogoIcon } from '../components/Icons';
+import PrimaryButton from '../components/Button/PrimaryButton';
 import { NavigationString } from '../navigation/navigationStrings';
 import axios from 'axios';
 import { BASE_URL2, Instance2 } from '../api/Instance.ts';
 import { SEND_OTP_CONTACT, VALIDATE_REFERRAL } from '../api/ApiEndpoints';
 import { getFCMToken } from '../utils/notifications';
-import CountryPicker, { CountryCode } from 'react-native-country-picker-modal'
+import CountryPicker, { CountryCode } from 'react-native-country-picker-modal';
 
 const SignIn = () => {
-  // init 
+  // init
   const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
 
   // state
@@ -100,7 +100,7 @@ const SignIn = () => {
 
    const handleSignIn = async () => {
      try {
-       if (!validateForm()) return;
+       if (!validateForm()) {return;}
 
         setError({ general: '' });
         setLoading(true);
@@ -141,14 +141,14 @@ const SignIn = () => {
    };
 
   return (
-    <Container statusBarStyle='dark-content' statusBarBackgroundColor={colors.white}>
+    <Container statusBarStyle="dark-content" statusBarBackgroundColor={colors.white}>
       <Box mx={moderateScale(15)} gap={moderateScaleVertical(20)} mt={moderateScaleVertical(30)}>
         <Text fontFamily={'$poppinsMedium'} fontSize={24} lineHeight={26} color={colors.charcoalGray} numberOfLines={1}>
           Sign In
         </Text>
 
         {/* Mobile Number Field with Country Picker */}
-        <Box flexDirection='row' alignItems='center' borderWidth={1} borderColor={colors.silverGray} borderRadius={9} pl={moderateScale(10)} h={moderateScale(56)}>
+        <Box flexDirection="row" alignItems="center" borderWidth={1} borderColor={colors.silverGray} borderRadius={9} pl={moderateScale(10)} h={moderateScale(56)}>
           <CountryPicker
             countryCode={countryCode}
             onSelect={handleCountrySelect}
@@ -159,7 +159,7 @@ const SignIn = () => {
             withFlag
           />
 
-          <Box flex={1} borderLeftWidth={1} borderLeftColor='#DDDDDD' ml={moderateScale(10)}>
+          <Box flex={1} borderLeftWidth={1} borderLeftColor="#DDDDDD" ml={moderateScale(10)}>
             <InputText
               borderWith={0}
               textInputProps={{
@@ -211,29 +211,29 @@ const SignIn = () => {
           </Text>
         ) : null}
 
-        <PrimaryButton buttonText='Sign In' onPress={handleSignIn} loading={loading} />
+        <PrimaryButton buttonText="Sign In" onPress={handleSignIn} loading={loading} />
 
-        <Box flexDirection='row' alignItems='center' gap={moderateScale(4)} mx={moderateScale(15)}>
-          <Box borderBottomWidth={1} borderBottomColor={colors.silverGray} flex={1}></Box>
+        <Box flexDirection="row" alignItems="center" gap={moderateScale(4)} mx={moderateScale(15)}>
+          <Box borderBottomWidth={1} borderBottomColor={colors.silverGray} flex={1} />
           <Text fontFamily={'$poppinsMedium'} fontSize={16} lineHeight={18} color={colors.silverGray} numberOfLines={1}>
             or
           </Text>
-          <Box borderBottomWidth={1} borderBottomColor={colors.silverGray} flex={1}></Box>
+          <Box borderBottomWidth={1} borderBottomColor={colors.silverGray} flex={1} />
         </Box>
 
-        <Box flexDirection='row' alignItems='center' alignSelf='center' gap={moderateScale(15)}>
-          <Pressable borderWidth={1} w={moderateScale(40)} h={moderateScale(40)} borderRadius={moderateScale(8)} borderColor='#D0D0D0' alignItems='center' justifyContent='center'>
+        <Box flexDirection="row" alignItems="center" alignSelf="center" gap={moderateScale(15)}>
+          <Pressable borderWidth={1} w={moderateScale(40)} h={moderateScale(40)} borderRadius={moderateScale(8)} borderColor="#D0D0D0" alignItems="center" justifyContent="center">
             <GmailIcon />
           </Pressable>
 
-          <Pressable borderWidth={1} w={moderateScale(40)} h={moderateScale(40)} borderRadius={moderateScale(8)} borderColor='#D0D0D0' alignItems='center' justifyContent='center'>
+          <Pressable borderWidth={1} w={moderateScale(40)} h={moderateScale(40)} borderRadius={moderateScale(8)} borderColor="#D0D0D0" alignItems="center" justifyContent="center">
             <AppleLogoIcon />
           </Pressable>
         </Box>
       </Box>
 
-      <Box flexDirection='row' alignItems='center' alignSelf='center' mt={moderateScaleVertical(60)}>
-        <Text fontFamily={'$poppinsMedium'} fontSize={16} lineHeight={18} color={colors.charcoalGray} numberOfLines={2} alignSelf='center'>
+      <Box flexDirection="row" alignItems="center" alignSelf="center" mt={moderateScaleVertical(60)}>
+        <Text fontFamily={'$poppinsMedium'} fontSize={16} lineHeight={18} color={colors.charcoalGray} numberOfLines={2} alignSelf="center">
           Already have an account ?
         </Text>
         <Pressable onPress={() => navigation.navigate(NavigationString.SignUp)}>

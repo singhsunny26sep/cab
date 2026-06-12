@@ -105,10 +105,10 @@ const Home = () => {
   const mapRef = useRef<MapView>(null);
   const markerRef = useRef<any>(null);
   const locationWatcherRef = useRef<any>(null);
-  
+
   const [isMapReady, setIsMapReady] = useState(false);
   const [isMapLayoutRendered, setIsMapLayoutRendered] = useState(false);
-  
+
   const initialZoomDoneRef = useRef(false);
   const latestLocationRef = useRef<{latitude: number; longitude: number} | null>(null);
 
@@ -146,8 +146,8 @@ const Home = () => {
 
   // ---------- Enforced Camera Controller API ----------
   const forceCameraZoom = useCallback((lat: number, lng: number) => {
-    if (!mapRef.current) return;
-    
+    if (!mapRef.current) {return;}
+
     console.log(`🚀 Forcing Zoom Camera to Target: ${lat}, ${lng}`);
     mapRef.current.animateCamera(
       {
@@ -163,7 +163,7 @@ const Home = () => {
   const zoomToCurrentLocation = useCallback(() => {
     const lat = latestLocationRef.current?.latitude || state.curLoc.latitude;
     const lng = latestLocationRef.current?.longitude || state.curLoc.longitude;
-    
+
     if (lat && lng) {
       forceCameraZoom(lat, lng);
     }
@@ -173,14 +173,14 @@ const Home = () => {
   useEffect(() => {
     if (isMapReady && isMapLayoutRendered && userLocalData?.pickupDetails) {
       const {latitude, longitude, address} = userLocalData.pickupDetails;
-      
-      console.log("🎯 Auto Zooming Map to Stored App Data Location");
-      
+
+      console.log('🎯 Auto Zooming Map to Stored App Data Location');
+
       latestLocationRef.current = {latitude, longitude};
-      
+
       setState(prev => ({
         ...prev,
-        curLoc: {latitude, longitude, address: address || prev.curLoc.address}
+        curLoc: {latitude, longitude, address: address || prev.curLoc.address},
       }));
 
       state.coordinate.setValue({
@@ -211,11 +211,11 @@ const Home = () => {
       const {latitude, longitude} = locationData.coordinates;
       const {formatted} = locationData.address;
       const pickupDetails = {latitude, longitude, address: formatted};
-      
+
       latestLocationRef.current = {latitude, longitude};
       setPickupData(pickupDetails);
       await saveUserToStorage({...userLocalData, pickupDetails});
-      
+
       setState(prev => ({
         ...prev,
         curLoc: {latitude, longitude, address: formatted},
@@ -253,7 +253,7 @@ const Home = () => {
           latitudeDelta: LATITUDE_DELTA,
           longitudeDelta: LONGITUDE_DELTA,
           useNativeDriver: false,
-          duration: 600
+          duration: 600,
         })
         .start();
     }
@@ -274,10 +274,10 @@ const Home = () => {
 
       const initializeLocation = async () => {
         const freshLocation = await getLocationOnce();
-        if (!isActive) return;
+        if (!isActive) {return;}
         if (!freshLocation) {
           retryTimeout = setTimeout(() => {
-            if (isActive) initializeLocation();
+            if (isActive) {initializeLocation();}
           }, 3000);
         }
       };
@@ -285,18 +285,18 @@ const Home = () => {
       initializeLocation();
 
       const startWatcher = () => {
-        if (locationWatcherRef.current) stopWatchingLocation();
-        
+        if (locationWatcherRef.current) {stopWatchingLocation();}
+
         const watcher = watchLocationContinuously(
           (location: any) => {
-            if (!isActive) return;
+            if (!isActive) {return;}
             const {latitude, longitude} = location;
-            
+
             latestLocationRef.current = {latitude, longitude};
 
             setState(prev => ({
               ...prev,
-              curLoc: {...prev.curLoc, latitude, longitude}
+              curLoc: {...prev.curLoc, latitude, longitude},
             }));
 
             animateMarker(latitude, longitude);
@@ -304,7 +304,7 @@ const Home = () => {
             // Dynamically Lock Map View Camera if route is not generated
             if (followUser && isMapReady && isMapLayoutRendered && !showLocationRoute) {
               mapRef.current?.animateCamera({
-                center: {latitude, longitude}
+                center: {latitude, longitude},
               });
             }
 
@@ -326,7 +326,7 @@ const Home = () => {
         );
         locationWatcherRef.current = watcher;
       };
-      
+
       startWatcher();
 
       return () => {
@@ -351,7 +351,7 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    if (!userLocalData?.token) return;
+    if (!userLocalData?.token) {return;}
     const initSocket = async () => {
       if (socketServices.isConnected()) {
         setSocketInitialized(true);
@@ -374,13 +374,13 @@ const Home = () => {
     const ride = data.data?.[0];
     handleRideStatusChange(ride);
   };
-  
+
   const handleDriverBookingResponse = (data: any) => {
     handleRideStatusChange(data?.data);
   };
-  
+
   const handleRideStatusChange = (ride: any) => {
-    if (!ride) return;
+    if (!ride) {return;}
     if (ride.bookingStatus === 'ongoing' && ride.rideStatus === 'rideNotPicked') {
       setOngoingRide(ride);
       setShowOngoingRideModal(true);
@@ -408,8 +408,8 @@ const Home = () => {
 
   const getEstimatedFare = (type?: string) => {
     const distance = state.distance || 0;
-    if (type === 'car') return 50 + distance * 12;
-    if (type === 'bike') return 20 + distance * 5;
+    if (type === 'car') {return 50 + distance * 12;}
+    if (type === 'bike') {return 20 + distance * 5;}
     return 35 + distance * 8;
   };
 
@@ -489,7 +489,7 @@ const Home = () => {
     <Container
       statusBarStyle={isDarkMode ? 'light-content' : 'dark-content'}
       backgroundColor={isDarkMode ? '#111827' : '#F9FAFB'}>
-      
+
       {/* Header */}
       <LinearGradient
         colors={isDarkMode ? ['#1F2937', '#111827'] : ['#FFF', '#F9FAFB']}
@@ -546,7 +546,7 @@ const Home = () => {
         initialRegion={DEFAULT_RANCHI_REGION}
         onLayout={() => setIsMapLayoutRendered(true)}
         onMapReady={() => setIsMapReady(true)}>
-        
+
         <Marker.Animated
           ref={markerRef}
           coordinate={state.coordinate as any}
@@ -562,7 +562,7 @@ const Home = () => {
             <MaterialIcons name="my-location" size={16} color="white" />
           </View>
         </Marker.Animated>
-        
+
         {showLocationRoute && state.destinationCords.latitude !== 0 && (
           <Marker coordinate={state.destinationCords} title="Destination">
             <View
@@ -577,30 +577,30 @@ const Home = () => {
             </View>
           </Marker>
         )}
-        
-        {showLocationRoute && state.destinationCords.latitude !== 0 && (
-          <MapView
-            origin={state.curLoc}
-            destination={state.destinationCords}
-            apikey={GOOGLE_API_KEY}
-            strokeWidth={10}
-            
-            strokeColor={colors.themePrimary}
-            edgePadding={{top: 50, right: 50, bottom: 300, left: 50}}
-            onReady={result => {
-              setState(prev => ({
-                ...prev,
-                distance: result.distance,
-                routeDuration: result.duration.toString(),
-              }));
-              mapRef.current?.fitToCoordinates(result.coordinates, {
-                edgePadding: {top: 50, right: 50, bottom: 320, left: 50},
-                animated: true,
-              });
-            }}
-            onError={err => console.log('Directions error:', err)}
-          />
-        )}
+
+{showLocationRoute && state.destinationCords.latitude !== 0 && (
+           <MapViewDirections
+             origin={state.curLoc}
+             destination={state.destinationCords}
+             apikey={GOOGLE_API_KEY}
+             strokeWidth={10}
+             
+             strokeColor={colors.themePrimary}
+             edgePadding={{top: 50, right: 50, bottom: 300, left: 50}}
+             onReady={result => {
+               setState(prev => ({
+                 ...prev,
+                 distance: result.distance,
+                 routeDuration: result.duration.toString(),
+               }));
+               mapRef.current?.fitToCoordinates(result.coordinates, {
+                 edgePadding: {top: 50, right: 50, bottom: 320, left: 50},
+                 animated: true,
+               });
+             }}
+             onError={err => console.log('Directions error:', err)}
+           />
+         )}
       </MapView>
 
       {/* Bottom Sheet UI Option Panels */}
@@ -672,7 +672,7 @@ const Home = () => {
               </View>
               <MaterialIcons name="keyboard-arrow-right" size={24} color="#9CA3AF" />
             </Pressable>
-            
+
             <Pressable
               onPress={() =>
                 navigation.navigate(NavigationString.SelectPath, {
@@ -718,7 +718,7 @@ const Home = () => {
                 </Text>
               </View>
             </Pressable>
-            
+
             <View style={{marginTop: 8, paddingHorizontal: 16}}>
               <Text style={{fontFamily: fontFamily.semiBold, fontSize: 16, marginBottom: 14, paddingLeft: 4}}>
                 Choose your ride
@@ -822,7 +822,7 @@ const Home = () => {
           setShowAlert(true);
         }}
       />
-      
+
       {ongoingRide && (
         <Pressable
           onPress={() => setShowOngoingRideModal(!showOngoingRideModal)}

@@ -5,7 +5,7 @@ export const store = configureStore({
   reducer: {
     user: userSignupSlice,
   },
-})
+});
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

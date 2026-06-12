@@ -206,7 +206,7 @@ const RideWaiting = () => {
     }
 
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (timerRef.current) {clearInterval(timerRef.current);}
     };
   }, [timerActive]);
   useEffect(() => {
@@ -706,7 +706,7 @@ setSelectedCancelReason(null);
             <Box
               alignItems="flex-end"
               mb={moderateScale(10)}
-              marginRight={moderateScale(10)}></Box>
+              marginRight={moderateScale(10)} />
           </Box>
           <Box
             mt={scale(10)}

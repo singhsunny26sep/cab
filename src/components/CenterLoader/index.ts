@@ -1,1 +1,1 @@
-export * from './CenterLoader'
+export * from './CenterLoader';

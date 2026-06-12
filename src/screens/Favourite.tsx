@@ -187,7 +187,7 @@ const Favourite = () => {
       dispatch(setFavoriteAddresses(favoriteData));
       await AsyncStorage.setItem('favoriteAddresses', JSON.stringify(favoriteData));
 
-      if (favoriteData.length === 0) fetchCurrentLocation();
+      if (favoriteData.length === 0) {fetchCurrentLocation();}
     } catch (error: any) {
       console.error('Error fetching favorites:', error?.response);
       showToast('Failed to load favorites', 'error');

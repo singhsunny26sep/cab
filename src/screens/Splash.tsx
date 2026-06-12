@@ -1,14 +1,14 @@
-import { useEffect } from 'react'
-import { Box, Image,Text} from '@gluestack-ui/themed'
-import { ParamListBase, useNavigation } from '@react-navigation/native'
-import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useEffect } from 'react';
+import { Box, Image,Text} from '@gluestack-ui/themed';
+import { ParamListBase, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { Container } from '../components/Container'
-import { colors } from '../constants/colors'
-import Icons from '../assets/Icons'
-import { moderateScale } from '../utils/responsiveSize'
-import { NavigationString } from '../navigation/navigationStrings'
+import { Container } from '../components/Container';
+import { colors } from '../constants/colors';
+import Icons from '../assets/Icons';
+import { moderateScale } from '../utils/responsiveSize';
+import { NavigationString } from '../navigation/navigationStrings';
 
 const Splash = () => {
   const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
@@ -18,7 +18,7 @@ const Splash = () => {
       try {
         const userToken = await AsyncStorage.getItem('userToken');
         console.log('Splash Screen Token:', userToken);
-        
+
         setTimeout(() => {
           if (userToken) {
             navigation.replace(NavigationString.DrawerStacks);
@@ -35,16 +35,16 @@ const Splash = () => {
     };
 
     checkUserAuth();
-  }, [navigation])
+  }, [navigation]);
 
   return (
     <Container statusBarBackgroundColor={colors.themePrimary} backgroundColor={colors.themePrimary}>
-      <Box flex={1} alignItems='center' justifyContent='center'>
-        <Image alt='logo' source={Icons.splashLogo2} w={moderateScale(80)} h={moderateScale(80)} resizeMode='contain' />
-        <Text color='$amber100' fontFamily='$poppinsBold' fontSize={25}>Dharam cab Drive</Text>
+      <Box flex={1} alignItems="center" justifyContent="center">
+        <Image alt="logo" source={Icons.splashLogo2} w={moderateScale(80)} h={moderateScale(80)} resizeMode="contain" />
+        <Text color="$amber100" fontFamily="$poppinsBold" fontSize={25}>Dharam cab Drive</Text>
       </Box>
     </Container>
-  )
-}
+  );
+};
 
-export default Splash
+export default Splash;

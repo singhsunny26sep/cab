@@ -1,9 +1,9 @@
-import React, { useMemo } from "react";
-import { StyleSheet } from "react-native";
+import React, { useMemo } from 'react';
+import { StyleSheet } from 'react-native';
 import {
   KeyboardAwareScrollView,
   KeyboardAwareScrollViewProps,
-} from "react-native-keyboard-aware-scroll-view";
+} from 'react-native-keyboard-aware-scroll-view';
 
 interface BodyProps extends KeyboardAwareScrollViewProps {
   backgroundColor?: string;
@@ -18,7 +18,7 @@ function Body(props: BodyProps) {
       StyleSheet.create({
         containerStyle: {
           flexGrow: 1,
-          backgroundColor: backgroundColor ?? "transparent",
+          backgroundColor: backgroundColor ?? 'transparent',
         },
       }),
     [backgroundColor]
@@ -27,7 +27,7 @@ function Body(props: BodyProps) {
   return (
     <KeyboardAwareScrollView
       contentContainerStyle={[styles.containerStyle, style]}
-      keyboardShouldPersistTaps={"handled"}
+      keyboardShouldPersistTaps={'handled'}
       enableOnAndroid={false}
       showsVerticalScrollIndicator={false}
       {...props}

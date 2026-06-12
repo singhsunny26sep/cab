@@ -305,7 +305,7 @@ const Wallet = () => {
                       letterSpacing={0.3}>
                       Available Balance
                     </Text>
-                    
+
                   </Box>
                   <Text
                     fontFamily="$poppinsBold"

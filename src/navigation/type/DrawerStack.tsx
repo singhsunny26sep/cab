@@ -31,6 +31,6 @@ const DrawerStack = () => {
       <Drawer.Screen name={NavigationString.BottomTabStacks} component={StackRoute.BottomTabStack} />
     </Drawer.Navigator>
   );
-}
+};
 
 export default DrawerStack;

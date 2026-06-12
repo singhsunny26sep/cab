@@ -20,7 +20,7 @@ import {NavigationString} from '../navigation/navigationStrings';
 import {useTheme} from '../constants/ThemeContext';
 import useRazorpayPayment from '../utils/useRazorpayPayment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Instance} from '../api/Instance.ts'
+import {Instance} from '../api/Instance.ts';
 import {loadUserFromStorage, saveUserToStorage} from '../store/slice/UserSlice';
 import {
   CREATE_PAYMENT_HISTORY,

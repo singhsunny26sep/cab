@@ -8,7 +8,7 @@ interface PhonePeResponse {
   status: 'SUCCESS' | 'FAILURE';
   paymentMethod?: string;
   errorMessage?: string;
-} 
+}
 
 interface PaymentRequestBody {
   merchantId: string;
@@ -28,7 +28,7 @@ const usePhonePePayment = (totalPrice: number) => {
   const [appId, setAppId] = useState<string>('');
   const [enableLogging, setEnableLogging] = useState<boolean>(true);
   const SALT_KEY = '96434309-7796-489d-8924-ab56988a6076';
-  const SALT_INDEX = 1; 
+  const SALT_INDEX = 1;
 
   const generateTransactionId = (): string => {
     const timestamp = Date.now();
@@ -39,7 +39,7 @@ const usePhonePePayment = (totalPrice: number) => {
   const submitHandler = async (): Promise<PhonePeResponse> => {
     try {
       console.log('Initializing PhonePe SDK...');
-      
+
       if (!PhonePe) {
         console.error('PhonePe SDK is not available');
         return { status: 'FAILURE', errorMessage: 'SDK not available' };
@@ -52,7 +52,7 @@ const usePhonePePayment = (totalPrice: number) => {
         merchantId: merchantId,
         merchantTransactionId: generateTransactionId(),
         merchantUserId: '',
-        amount: totalPrice * 100, 
+        amount: totalPrice * 100,
         mobileNumber: '999999999999',
         callbackUrl: '',
         paymentInstrument: {

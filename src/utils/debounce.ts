@@ -9,5 +9,5 @@ const debounce = (func: any, wait: any) => {
       timeout = setTimeout(later, wait);
     };
   };
-  
+
   export default debounce;

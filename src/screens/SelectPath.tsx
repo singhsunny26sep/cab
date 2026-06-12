@@ -130,8 +130,9 @@ const SelectPath = ({route}: any) => {
   // ========== ORIGINAL FUNCTIONS (UNCHANGED) ==========
   const handleLocationSelect = (location: any) => {
     const {latitude, longitude, address} = location;
+    if (!userLocation?.latitude || !userLocation?.longitude) {return;}
     const distance = getDistance(
-      {latitude: userLocation?.latitude, longitude: userLocation.longitude},
+      {latitude: userLocation?.latitude, longitude: userLocation?.longitude},
       {latitude, longitude},
     );
     const fromMetersToKms = (distance / 1000)?.toFixed(2);
@@ -169,7 +170,7 @@ const SelectPath = ({route}: any) => {
   };
 
   const onDone = async () => {
-    if (!checkValid()) return;
+    if (!checkValid()) {return;}
     if (toCords?.distance && Number(toCords.distance) > 10000) {
       showErrorToast('The destination is too far away.');
       return;
@@ -183,7 +184,11 @@ const SelectPath = ({route}: any) => {
     });
     if (saved) {
       fetchCordsValues(toCords);
-      navigation?.popToTop();
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      } else {
+        navigation.navigate(NavigationString.Home);
+      }
     } else {
       showErrorToast('Failed to save destination. Please try again.');
     }
@@ -191,12 +196,19 @@ const SelectPath = ({route}: any) => {
 
   const handleSearchChange = (text: string) => {
     setSearchText(text);
-    if (debounceTimeout) clearTimeout(debounceTimeout);
+    if (debounceTimeout) {clearTimeout(debounceTimeout);}
     setDebounceTimeout(setTimeout(() => searchPlaceByText(text), 400));
   };
 
   const handleSelectPlace = async (place: any) => {
-    if (!userLocation?.latitude || !userLocation?.longitude) return;
+    if (!userLocation?.latitude || !userLocation?.longitude) {
+      showErrorToast('Location not ready. Please try again.');
+      return;
+    }
+    if (!place?.lat || !place?.lng) {
+      showErrorToast('Invalid place selected. Please try another place.');
+      return;
+    }
     const distance = getDistance(
       {latitude: userLocation.latitude, longitude: userLocation.longitude},
       {latitude: place.lat, longitude: place.lng},
@@ -221,7 +233,11 @@ const SelectPath = ({route}: any) => {
     });
     if (saved) {
       fetchCordsValues(newToCords);
-      navigation?.navigate(NavigationString.Home);
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      } else {
+        navigation.navigate(NavigationString.Home);
+      }
     }
   };
 
@@ -301,7 +317,7 @@ const SelectPath = ({route}: any) => {
       statusBarStyle={isDarkMode ? 'light-content' : 'dark-content'}
       statusBarBackgroundColor={isDarkMode ? '#111827' : '#FFFFFF'}
       backgroundColor={isDarkMode ? '#111827' : '#F9FAFB'}>
-      
+
       {/* Static Gradient Header */}
       <LinearGradient
         colors={isDarkMode ? ['#1F2937', '#111827'] : [newTheme.primary, newTheme.primaryDark]}
@@ -327,7 +343,7 @@ const SelectPath = ({route}: any) => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled">
-          
+
           {/* Destination Input Card - static styles, dynamic background */}
           <View
             style={[
@@ -545,7 +561,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: moderateScaleVertical(40),
-    marginTop:34
+    marginTop:34,
   },
   inputCard: {
     flexDirection: 'row',
