@@ -28,7 +28,7 @@ const PrimaryButton = forwardRef((props: ButtonProps, ref) => {
   return (
     <Button
       borderRadius={6}
-      backgroundColor={disabled ? '#6C5CE7' : colors.themeSecondary}
+      backgroundColor={disabled ? '#4330d8' : '#3e2ada'}
       height={56}
       gap={16}
       onPress={onPress}

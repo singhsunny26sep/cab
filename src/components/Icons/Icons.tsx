@@ -193,8 +193,8 @@ export const WalletLineIcon = (props: SvgProps) => (
   <Svg
     width={30}
     height={30}
-    fill="none"
-    stroke="#fff"
+    fill="#a2a2a2"
+    stroke="#3f3e3e"
     viewBox="0 0 24 24"
     {...props}
   >
@@ -212,8 +212,8 @@ export const WalletIcon = (props: SvgProps) => (
   <Svg
     width={25}
     height={25}
-    fill="#fff"
-    stroke="#fff"
+    fill="#333131"
+    stroke="#5b5858"
     viewBox="0 0 20 20"
     {...props}
   >

@@ -49,14 +49,14 @@ const BottomTabStack = () => {
             </Box>
           ),
         }} />
-      <Tab.Screen name={NavigationString.Wallet} component={StackRoute.Wallet}
+    
+         <Tab.Screen name={NavigationString.Wallet} component={StackRoute.Wallet}
         options={{
           tabBarIcon: ({ focused }) => (
             <Box alignItems="center" justifyContent="center" gap={moderateScaleVertical(3)}>
-              <Box mt={moderateScaleVertical(-50)} bg={colors.themePrimary} alignItems="center" justifyContent="center" w={moderateScale(50)} h={moderateScale(50)} borderRadius={moderateScale(30)}>
-                {focused ? <WalletIcon /> : <WalletLineIcon color={isDarkMode ? '#fff' : '#414141'} />}
-              </Box>
-              <Text fontFamily={focused ? '$poppinsSemiBold' : '$poppinsMedium'} fontSize={12} lineHeight={14} color={focused ? colors.themePrimary : (isDarkMode ? '#fff' : '#414141')} bottom={0} position="absolute" mb={moderateScaleVertical(-20)}>
+                             {focused ? < WalletIcon /> : <WalletLineIcon  color={isDarkMode ? '#fff' : '#414141'} />}
+
+              <Text fontFamily={focused ? '$poppinsSemiBold' : '$poppinsMedium'} fontSize={12} lineHeight={14} color={focused ? colors.themePrimary : (isDarkMode ? '#fff' : '#414141')} >
                 Wallet
               </Text>
             </Box>

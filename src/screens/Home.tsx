@@ -143,6 +143,7 @@ const Home = () => {
   const [followUser, setFollowUser] = useState(true);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationRetryCount, setLocationRetryCount] = useState(0);
+  const [isBottomSheetScrolling, setIsBottomSheetScrolling] = useState(false);
 
   // ---------- Enforced Camera Controller API ----------
   const forceCameraZoom = useCallback((lat: number, lng: number) => {
@@ -543,6 +544,7 @@ const Home = () => {
         style={{flex: 1}}
         provider={PROVIDER_GOOGLE}
         followsUserLocation={false}
+        scrollEnabled={!isBottomSheetScrolling}
         initialRegion={DEFAULT_RANCHI_REGION}
         onLayout={() => setIsMapLayoutRendered(true)}
         onMapReady={() => setIsMapReady(true)}>
@@ -611,10 +613,10 @@ const Home = () => {
             bottom: 0,
             left: 0,
             right: 0,
+            height: 520,
             backgroundColor: isDarkMode ? '#1F2937' : '#FFF',
             borderTopLeftRadius: 28,
             borderTopRightRadius: 28,
-            maxHeight: 520,
           }}>
           <View style={{alignItems: 'center', paddingTop: 12}}>
             <View
@@ -626,7 +628,16 @@ const Home = () => {
               }}
             />
           </View>
-          <ScrollView contentContainerStyle={{paddingBottom: 24}}>
+          <ScrollView
+            style={{flex: 1}}
+            nestedScrollEnabled
+            overScrollMode="always"
+            showsVerticalScrollIndicator
+            keyboardShouldPersistTaps="handled"
+            onTouchStart={() => setIsBottomSheetScrolling(true)}
+            onTouchEnd={() => setIsBottomSheetScrolling(false)}
+            onTouchCancel={() => setIsBottomSheetScrolling(false)}
+            contentContainerStyle={{paddingBottom: 24}}>
             <Pressable
               onPress={() =>
                 navigation.navigate(NavigationString.SelectPath, {
@@ -791,8 +802,6 @@ const Home = () => {
           </ScrollView>
         </View>
       )}
-
-      {/* Ride Alert Overlays and Modals */}
       <OngoingRideModal
         visible={showOngoingRideModal && !!ongoingRide}
         onClose={() => setShowOngoingRideModal(false)}

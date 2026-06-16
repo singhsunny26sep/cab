@@ -148,7 +148,7 @@ const RideWaiting = () => {
   const [bookingResponseData, setBookingResponseData] = useState<any>(null);
   const [userToken, setUserToken] = useState<any>(null);
 
-  const [timeLeft, setTimeLeft] = useState(120); //2 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(120);
   const [timerActive, setTimerActive] = useState(true);
   const [timeExpired, setTimeExpired] = useState(false);
 
@@ -181,9 +181,7 @@ const RideWaiting = () => {
   const loadUserLocalDatas = async () => {
     const localData = await loadUserFromStorage();
     const userToken: any = await AsyncStorage.getItem('userToken');
-    // console.log('localData========>>>>>>>>', localData);
     setUserToken(userToken);
-    // console.log('localData========>>>>>>>>', localData);
     setUserLocalData(localData);
   };
 
@@ -196,7 +194,6 @@ const RideWaiting = () => {
             clearInterval(timerRef.current as NodeJS.Timeout);
             setTimerActive(false);
             setTimeExpired(true);
-            // Stop Lottie animation when timer expires
             lottieRef.current?.pause();
             return 0;
           }
@@ -214,7 +211,6 @@ const RideWaiting = () => {
       try {
         await loadUserLocalDatas();
         await getLocationOnce();
-        // console.log('checking---------------===========>>>>>>1', userLocalData);
       } catch (error) {
         console.error('Initialization error:', error);
       }
@@ -231,8 +227,6 @@ const RideWaiting = () => {
       'checking---------------===========>>>>>>2',
       userLocalData?.token,
     );
-    // if (!userToken) return;
-    console.log('checking---------------===========>>>>>>3');
     const initializeSocket = async () => {
       try {
         console.log('checking---------------===========>>>>>>4');
@@ -250,9 +244,6 @@ const RideWaiting = () => {
     };
   }, [userLocalData]);
   useEffect(() => {
-    // if (!socketInitialized) return;
-
-    // if (socketInitialized) {
     console.log(
       'bookingData passed in socketttttttttttttt at ride waiting',
       bookingData,
@@ -269,25 +260,21 @@ const RideWaiting = () => {
     socketServices.emit('onGoing_booking', {});
     socketServices.on('driver_booking_response', (response: any) => {
       const firstRide = response?.data;
-      // console.log('Booking response received at ride waiting--------------------->>>>>:', response);
       console.log(
         'Booking response received at ride waiting--------------------->>>>>:',
         firstRide,
       );
 
-      // Driver accepted the ride
       if (firstRide?.bookingStatus === 'ongoing') {
         setBookingResponseData(firstRide);
         setTimerActive(false);
         lottieRef.current?.pause();
         handleCloseModal();
 
-        // Navigate to Home screen with the ongoing ride data
         navigation.navigate(NavigationString.Home, {
           ongoingRide: firstRide,
         });
       }
-      // Driver rejected the ride
       else if (firstRide?.bookingStatus === 'cancelled') {
         setBookingResponseData(firstRide);
         setTimerActive(false);
@@ -296,7 +283,6 @@ const RideWaiting = () => {
         navigation.navigate(NavigationString.Home, {
           ongoingRide: firstRide,
         });
-        // Show rejection message
         toast.show({
           placement: 'top',
           render: ({id}) => (
@@ -356,7 +342,7 @@ const RideWaiting = () => {
     setModalVisible(!modalVisible);
   };
 
-  const handleCancelRide = async () => {
+  const handleCancelRide = () => {
     setShowCancleAlert(true);
   };
   const handleRejectRide = async () => {
@@ -367,11 +353,11 @@ const RideWaiting = () => {
         rejectMessage: selectedCancelReason,
         cancelledBy: 'customer',
       });
-setSelectedCancelReason(null);
-       navigation?.reset({
-         index: 0,
-         routes: [{ name: NavigationString.Home }],
-       });
+      setSelectedCancelReason(null);
+      navigation?.reset({
+        index: 0,
+        routes: [{ name: NavigationString.Home }],
+      });
     } catch (error: any) {
       const errorMessage =
         error?.response?.data?.message ||
@@ -395,11 +381,6 @@ setSelectedCancelReason(null);
   };
 
   const cancelRide = async () => {
-    // console.log(
-    //   'URL going ->',
-    //   `${BASE_URL}${UPDATE_RIDE_STATUS.url}${bookingResponseData?._id}`,
-    // );
-    // console.log('Booking response', bookingResponseData?.data?._id);
     try {
       const response = await axios({
         url: `${BASE_URL}${UPDATE_RIDE_STATUS.url}${bookingResponseData?.data?._id}`,
@@ -414,10 +395,7 @@ setSelectedCancelReason(null);
         },
       });
 
-      // console.log('response for cancelled api -----', response);
-
       if (response.status === 200 && response.data) {
-        console.log('response for cancelled api -----', response.data);
         toast.show({
           placement: 'top',
           render: ({id}: any) => {
@@ -430,9 +408,9 @@ setSelectedCancelReason(null);
           },
         });
         navigation?.reset({
-           index: 0,
-           routes: [{ name: NavigationString.Home }],
-         });
+          index: 0,
+          routes: [{ name: NavigationString.Home }],
+        });
       } else {
         toast.show({
           placement: 'top',
@@ -479,11 +457,16 @@ setSelectedCancelReason(null);
     });
   };
 
+  // ============================================================
+  //  ✨ 新的渲染（UI 升级）
+  // ============================================================
   return (
     <Container
       statusBarStyle={isDarkMode ? 'light-content' : 'dark-content'}
       statusBarBackgroundColor={isDarkMode ? '#000000' : '#ffffff'}
       backgroundColor={isDarkMode ? '#000000' : '#ffffff'}>
+
+      {/* 地图 */}
       <MapView
         style={{flex: 1}}
         ref={mapRef}
@@ -521,8 +504,6 @@ setSelectedCancelReason(null);
               {
                 latitude: bookingResponseData?.driverInfo?.lat,
                 longitude: bookingResponseData?.driverInfo?.long,
-                // latitude: 22.9621805,
-                // longitude: 74.588718,
               } as any
             }
             anchor={{x: 0.5, y: 0.5}}
@@ -580,279 +561,263 @@ setSelectedCancelReason(null);
         ) : null}
       </MapView>
 
+      {/* 地图控制按钮（中心定位） */}
+      <Pressable
+        onPress={onCenter}
+        position="absolute"
+        bottom={50}
+        left={10}
+        height={scale(60)}
+        width={scale(60)}
+        justifyContent="center"
+        alignItems="center"
+        borderRadius={scale(10)}
+        bgColor={isDarkMode ? '#1E293B' : '#FFFFFF'}
+        style={{
+          shadowColor: '#000',
+          shadowOffset: {width: 0, height: 2},
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+          elevation: 4,
+        }}>
+        <MaterialIcons
+          name="my-location"
+          size={25}
+          color={isDarkMode ? '#94A3B8' : colors.borderColor}
+        />
+        <Text fontSize={10} color={isDarkMode ? '#94A3B8' : '#666'}>Center</Text>
+      </Pressable>
+
+      {/* 右侧 Ride info 按钮（显示/隐藏模态框） */}
+      <Pressable
+        onPress={toggleRideModal}
+        position="absolute"
+        bottom={50}
+        right={10}
+        height={scale(60)}
+        width={scale(60)}
+        justifyContent="center"
+        alignItems="center"
+        borderRadius={scale(10)}
+        bgColor={isDarkMode ? '#1E293B' : '#FFFFFF'}
+        style={{
+          shadowColor: '#000',
+          shadowOffset: {width: 0, height: 2},
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+          elevation: 4,
+        }}>
+        <MaterialIcons name="info" size={25} color={isDarkMode ? '#94A3B8' : colors.borderColor} />
+        <Text fontSize={10} color={isDarkMode ? '#94A3B8' : '#666'}>Ride</Text>
+      </Pressable>
+
+      {/* ========== 模态框 ========== */}
       <Modal
         isVisible={modalVisible}
         onBackdropPress={handleCloseModal}
         onBackButtonPress={handleCloseModal}
         style={styles.modal}
-        backdropOpacity={0.1}
+        backdropOpacity={0.3}
         swipeDirection={['down']}
         onSwipeComplete={handleCloseModal}
         animationIn="slideInUp"
         animationOut="slideOutDown"
         backdropTransitionInTiming={500}
         backdropTransitionOutTiming={500}
-        // statusBarTranslucent
         hideModalContentWhileAnimating={true}>
         <Box
           style={[
             styles.modalContent,
-            {backgroundColor: isDarkMode ? colors.black : colors.white},
+            {
+              backgroundColor: isDarkMode ? '#1E293B' : '#FFFFFF',
+              borderTopLeftRadius: moderateScale(24),
+              borderTopRightRadius: moderateScale(24),
+            },
           ]}>
-          <Box borderBottomWidth={0.5}>
-            <Box
-              flexDirection="row"
-              alignItems="center"
-              justifyContent="space-between"
-              padding={scale(16)}>
-              <Box>
-                {timeExpired ? (
-                  <Box alignItems="center" mb={moderateScale(10)}>
-                    <Text
-                      fontFamily={'$poppinsMedium'}
-                      fontSize={16}
-                      color="#FF3B30"
-                      textAlign="center">
-                      Oops, Driver not responding. Please retry.
-                    </Text>
-                  </Box>
-                ) : (
-                  <Text
-                    fontFamily={'$poppinsMedium'}
-                    fontSize={15}
-                    lineHeight={20}
-                    color={isDarkMode ? colors.white : colors.charcoalGray}
-                    numberOfLines={1}>
-                    Request sent to driver, Waiting for accept.
-                  </Text>
-                )}
-              </Box>
-              <Pressable onPress={handleCloseModal}>
-                <CloseIcon />
-              </Pressable>
-            </Box>
-          </Box>
-          <Box borderBottomWidth={1} paddingBottom={verticalScale(15)}>
-            <Box
-              flexDirection="row"
-              alignItems="center"
-              justifyContent="space-between"
-              marginHorizontal={scale(15)}
-              mt={moderateScale(10)}>
-              <Image
-                source={{
-                  uri: bookingResponseData?.driverInfo?.profileImgUrl,
-                }}
-                style={{
-                  height: scale(80),
-                  width: scale(80),
-                  borderRadius: moderateScale(8),
-                  marginRight: moderateScale(10),
-                }}
-              />
-              <Box flex={1}>
-                <Text
-                  fontFamily={'$poppinsSemiBold'}
-                  fontSize={15}
-                  lineHeight={20}
-                  color={isDarkMode ? colors.white : colors.charcoalGray}>
-                  {bookingResponseData?.driverInfo?.name}
-                </Text>
-                <Box
-                  flexDirection="row"
-                  alignItems="center"
-                  marginTop={moderateScale(5)}>
-                  <LocationMakerRedIcon />
-                  <Text
-                    marginLeft={moderateScale(5)}
-                    color={isDarkMode ? colors.white : colors.charcoalGray}>
-                    {bookingResponseData?.data?.distance?.toFixed(2)} km
-                  </Text>
-                </Box>
-                <Box
-                  flexDirection="row"
-                  alignItems="center"
-                  marginTop={moderateScale(5)}>
-                  <Box marginLeft={moderateScale(3)}>
-                    <ReviewStarIcon />
-                  </Box>
-                  <Text
-                    marginLeft={moderateScale(8)}
-                    color={isDarkMode ? colors.white : colors.charcoalGray}>
-                    4.9 (Review)
-                  </Text>
-                </Box>
-              </Box>
-              <Box alignItems="center">
-                <LottieView
-                  ref={lottieRef}
-                  source={require('../assets/lotties/loading2.json')}
-                  // autoPlay
-                  // loop
-                  style={{
-                    width: scale(80),
-                    height: scale(80),
-                  }}
-                  resizeMode="contain"
-                />
-                <Text
-                  fontFamily={'$poppinsMedium'}
-                  fontSize={18}
-                  color={isDarkMode ? colors.white : colors.charcoalGray}>
-                  {formatTime(timeLeft)}
-                </Text>
-              </Box>
-            </Box>
-            <Box
-              alignItems="flex-end"
-              mb={moderateScale(10)}
-              marginRight={moderateScale(10)} />
-          </Box>
+          
+          {/* 顶栏 – 状态 + 关闭 */}
           <Box
-            mt={scale(10)}
             flexDirection="row"
             justifyContent="space-between"
-            marginHorizontal={scale(15)}>
+            alignItems="center"
+            px={scale(16)}
+            pt={scale(16)}
+            pb={scale(8)}>
             <Text
-              fontFamily={'$poppinsRegular'}
-              fontSize={18}
-              lineHeight={30}
-              color={isDarkMode ? colors.white : colors.charcoalGray}>
-              Payment Method
+              fontFamily="$poppinsMedium"
+              fontSize={16}
+              color={timeExpired ? '#FF3B30' : (isDarkMode ? '#E2E8F0' : '#1E293B')}>
+              {timeExpired ? 'Driver not responding' : 'Waiting for driver...'}
             </Text>
-            <Text
-              fontFamily={'$poppinsMedium'}
-              fontSize={25}
-              lineHeight={30}
-              color={isDarkMode ? colors.white : colors.charcoalGray}>
-              {'\u20B9'}2000
-            </Text>
+            <Pressable onPress={handleCloseModal}>
+              <CloseIcon color={isDarkMode ? '#94A3B8' : '#1E293B'} />
+            </Pressable>
           </Box>
+
+          {/* 司机信息 + 计时器 */}
           <Box
             flexDirection="row"
-            marginHorizontal={scale(15)}
-            mt={moderateScale(20)}>
-            <TouchableOpacity
-              // onPress={() => navigation.navigate(NavigationString.CallScreen)}
-              onPress={handleCallDriver}>
-              <Box
-                borderRadius={moderateScale(100)}
-                padding={scale(10)}
-                justifyContent="center"
-                alignItems="center"
-                borderWidth={scale(1)}
-                borderColor={colors.yellow}>
-                <Image
-                  source={Icons.Call}
-                  style={{
-                    tintColor: colors.yellow,
-                    height: scale(25),
-                    width: scale(25),
-                  }}
-                />
-              </Box>
-            </TouchableOpacity>
+            alignItems="center"
+            px={scale(16)}
+            py={scale(12)}
+            borderBottomWidth={1}
+            borderBottomColor={isDarkMode ? '#334155' : '#E2E8F0'}>
+              <View style={{
+                width: scale(64),
+                height: scale(64),
+                borderRadius: moderateScale(32),
+                overflow: 'hidden',
+                marginRight: moderateScale(12),
+                borderWidth: 1,
+                borderColor: "blue",
+              }}>
 
-            <TouchableOpacity onPress={handleChatDriver}>
-              <Box
-                borderRadius={moderateScale(100)}
-                padding={scale(10)}
-                justifyContent="center"
-                alignItems="center"
-                marginLeft={moderateScale(10)}
-                borderWidth={scale(1)}
-                borderColor={colors.yellow}>
-                <Image
-                  source={Icons.Message}
-                  style={{
-                    tintColor: colors.yellow,
-                    height: scale(25),
-                    width: scale(25),
-                  }}
-                />
-              </Box>
-            </TouchableOpacity>
-            <Box
-              flex={1}
-              paddingLeft={scale(20)}
-              alignItems="center"
-              justifyContent="flex-end"
-              flexDirection="row">
-              {timeExpired && (
-                <TouchableOpacity onPress={handleRetryBooking}>
-                  <Box
-                    borderRadius={moderateScale(5)}
-                    padding={scale(10)}
-                    justifyContent="flex-end"
-                    alignItems="center"
-                    backgroundColor={colors.yellow}
-                    mr={moderateScale(10)}>
-                    <Text style={{color: colors.white, fontSize: scale(15)}}>
-                      Retry Booking
-                    </Text>
-                  </Box>
-                </TouchableOpacity>
-              )}
-              <TouchableOpacity onPress={handleCancelRide}>
-                <Box
-                  borderRadius={moderateScale(5)}
-                  padding={scale(10)}
-                  justifyContent="flex-end"
-                  alignItems="center"
-                  // marginLeft={moderateScale(10)}
-                  backgroundColor={colors.yellow}
-                  // ml={moderateScale(10)}
-                >
-                  <Text style={{color: colors.white, fontSize: scale(15)}}>
-                    Cancel Ride
+            <Image  
+              source={{ uri: bookingResponseData?.driverInfo?.profileImgUrl || 'https://ui-avatars.com/api/?name=U&background=94A3B8&color=fff&size=80' }}
+              style={{
+                width: scale(64),
+                height: scale(64),
+                borderRadius: moderateScale(32),
+                marginRight: moderateScale(12),
+            
+              }}
+            />
+              </View>
+            <Box flex={1}>
+              <Text
+                fontFamily="$poppinsSemiBold"
+                fontSize={18}
+                color={isDarkMode ? '#F1F5F9' : '#1E293B'}>
+                {bookingResponseData?.driverInfo?.name || 'Driver'}
+              </Text>
+              <Box flexDirection="row" alignItems="center" mt={4}>
+                <LocationMakerRedIcon />
+                <Text
+                  ml={4}
+                  fontFamily="$poppinsRegular"
+                  fontSize={14}
+                  color={isDarkMode ? '#94A3B8' : '#475569'}>
+                  {bookingResponseData?.data?.distance?.toFixed(2) || '0'} km
+                </Text>
+                <Box ml={12} flexDirection="row" alignItems="center">
+                  <ReviewStarIcon />
+                  <Text
+                    ml={4}
+                    fontFamily="$poppinsRegular"
+                    fontSize={14}
+                    color={isDarkMode ? '#94A3B8' : '#475569'}>
+                    4.9
                   </Text>
                 </Box>
-              </TouchableOpacity>
+              </Box>
+            </Box>
+            <Box alignItems="center">
+              <LottieView
+                ref={lottieRef}
+                source={require('../assets/lotties/loading2.json')}
+                style={{ width: scale(50), height: scale(50) }}
+                resizeMode="contain"
+              />
+              <Text
+                fontFamily="$poppinsBold"
+                fontSize={18}
+                color={isDarkMode ? '#F1F5F9' : '#1E293B'}>
+                {formatTime(timeLeft)}
+              </Text>
             </Box>
           </Box>
 
+          {/* 支付方式（精简） */}
+          <Box
+            flexDirection="row"
+            justifyContent="space-between"
+            px={scale(16)}
+            py={scale(8)}
+            borderBottomWidth={1}
+            borderBottomColor={isDarkMode ? '#334155' : '#E2E8F0'}>
+            <Text
+              fontFamily="$poppinsRegular"
+              fontSize={14}
+              color={isDarkMode ? '#94A3B8' : '#475569'}>
+              Payment
+            </Text>
+            <Text
+              fontFamily="$poppinsMedium"
+              fontSize={16}
+              color={isDarkMode ? '#F1F5F9' : '#1E293B'}>
+              ₹2000
+            </Text>
+          </Box>
+
+          {/* 操作按钮 */}
+          <Box
+            flexDirection="row"
+            justifyContent="space-around"
+            alignItems="center"
+            px={scale(16)}
+            py={scale(12)}>
+            <TouchableOpacity onPress={handleCallDriver} style={styles.actionButton}>
+              <Image
+                source={Icons.Call}
+                style={{ tintColor: colors.yellow, height: scale(24), width: scale(24) }}
+              />
+              <Text fontSize={12} color={isDarkMode ? '#94A3B8' : '#475569'} ml={4}>Call</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={handleChatDriver} style={styles.actionButton}>
+              <Image
+                source={Icons.Message}
+                style={{ tintColor: colors.yellow, height: scale(24), width: scale(24) }}
+              />
+              <Text fontSize={12} color={isDarkMode ? '#94A3B8' : '#475569'} ml={4}>Chat</Text>
+            </TouchableOpacity>
+
+            {timeExpired ? (
+              <TouchableOpacity onPress={handleRetryBooking} style={[styles.actionButton, { backgroundColor: colors.yellow, paddingHorizontal: 16, borderRadius: 20 }]}>
+                <Text fontFamily="$poppinsSemiBold" fontSize={14} color="#FFFFFF">Retry</Text>
+              </TouchableOpacity>
+            ) : null}
+
+            <TouchableOpacity onPress={handleCancelRide} style={[styles.actionButton, { backgroundColor: '#FF3B30', paddingHorizontal: 16, borderRadius: 20 }]}>
+              <Text fontFamily="$poppinsSemiBold" fontSize={14} color="#FFFFFF">Cancel</Text>
+            </TouchableOpacity>
+          </Box>
+
+          {/* 取消原因下拉（条件显示） */}
           {showCancleAlert && (
-            <Box padding={scale(16)}>
+            <Box px={scale(16)} pb={scale(12)}>
               <Dropdown
-                style={[
-                  styles.dropdown,
-                  // genderError ? { borderColor: colors.error } : null
-                ]}
+                style={[styles.dropdown, { borderColor: isDarkMode ? '#334155' : '#E2E8F0' }]}
                 placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
+                selectedTextStyle={[
+                  styles.selectedTextStyle,
+                  { color: isDarkMode ? '#F1F5F9' : '#1E293B' },
+                ]}
                 data={customerCancelRideReasons}
                 labelField="label"
                 valueField="value"
-                placeholder={'Select Reason for Cancel Ride'}
+                placeholder="Select reason for cancellation"
                 onChange={item => {
                   setSelectedCancelReason(item?.value);
                   Alert.alert(
                     'Confirm Cancellation',
                     `Are you sure you want to cancel the ride? Reason: ${item?.value}`,
                     [
-                      {
-                        text: 'Cancel',
-                        onPress: () => setShowCancleAlert(false),
-                        style: 'cancel',
-                      },
-                      {
-                        text: 'OK',
-                        onPress: () => handleRejectRide(),
-                      },
+                      { text: 'Cancel', onPress: () => setShowCancleAlert(false), style: 'cancel' },
+                      { text: 'OK', onPress: () => handleRejectRide() },
                     ],
                   );
                 }}
                 renderRightIcon={() => (
                   <Icon as={ChevronDownIcon} size="lg" mr="$2" />
                 )}
-                selectedTextProps={{numberOfLines: 1}}
+                selectedTextProps={{ numberOfLines: 1 }}
                 renderItem={item => (
                   <Text
                     fontFamily="$poppinsMedium"
                     fontSize={14}
                     lineHeight={16}
-                    color={colors.black}
-                    numberOfLines={1}
+                    color={isDarkMode ? '#F1F5F9' : '#1E293B'}
                     style={{
                       paddingHorizontal: responsiveWidth(2.5),
                       paddingVertical: responsiveHeight(1.5),
@@ -860,57 +825,20 @@ setSelectedCancelReason(null);
                     {item?.label}
                   </Text>
                 )}
-                itemTextStyle={styles.selectedTextStyle}
+                itemTextStyle={[styles.selectedTextStyle, { color: isDarkMode ? '#F1F5F9' : '#1E293B' }]}
                 itemContainerStyle={styles.itemContainerStyle}
               />
             </Box>
           )}
         </Box>
       </Modal>
-      <Pressable
-        onPress={() => {
-          toggleRideModal();
-        }}
-        position="absolute"
-        bottom={50}
-        // mb={moderateScaleVertical(175)}
-        right={10}
-        height={scale(60)}
-        width={scale(60)}
-        bgColor={colors.white}
-        justifyContent="center"
-        alignItems="center"
-        borderRadius={scale(10)}>
-        <MaterialIcons name="info" size={25} color={colors.borderColor} />
-        <Text>Ride</Text>
-      </Pressable>
-      <Pressable
-        onPress={() => {
-          onCenter();
-        }}
-        position="absolute"
-        height={scale(60)}
-        width={scale(60)}
-        bottom={50}
-        // mb={moderateScaleVertical(175)}
-        left={10}
-        justifyContent="center"
-        alignItems="center"
-        borderRadius={scale(10)}
-        bgColor={colors.white}
-        mr={moderateScale(15)}>
-        {/* <LocationTargetIcon /> */}
-        <MaterialIcons
-          name="my-location"
-          size={25}
-          color={colors.borderColor}
-        />
-        <Text>Center</Text>
-      </Pressable>
     </Container>
   );
 };
 
+// ============================================================
+// 📐 样式
+// ============================================================
 const styles = StyleSheet.create({
   modal: {
     justifyContent: 'flex-end',
@@ -919,34 +847,40 @@ const styles = StyleSheet.create({
   modalContent: {
     width: '100%',
     paddingBottom: scale(20),
-    borderTopLeftRadius: moderateScale(20),
-    borderTopRightRadius: moderateScale(20),
+    borderTopLeftRadius: moderateScale(24),
+    borderTopRightRadius: moderateScale(24),
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: -4},
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 20,
   },
-  lottie: {
-    height: scale(80),
-    width: scale(80),
-    alignSelf: 'center',
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: moderateScale(8),
+    paddingHorizontal: moderateScale(12),
+    borderRadius: moderateScale(20),
+    backgroundColor: 'transparent',
   },
   dropdown: {
-    borderRadius: moderateScale(6),
-    height: moderateScale(50),
-    paddingLeft: moderateScale(10),
+    borderRadius: moderateScale(8),
+    height: moderateScale(48),
+    paddingLeft: moderateScale(12),
     borderWidth: 1,
-    borderColor: colors.silverGray,
   },
   placeholderStyle: {
     fontSize: textScale(14),
     fontFamily: 'Poppins-Medium',
-    color: '#D0D0D0',
+    color: '#94A3B8',
   },
   selectedTextStyle: {
     fontSize: textScale(14),
     lineHeight: textScale(16),
     fontFamily: 'Poppins-Medium',
-    color: colors.black,
   },
   itemContainerStyle: {
-    // borderBottomWidth: 1,
+    borderBottomWidth: 0,
   },
 });
 
