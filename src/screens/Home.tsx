@@ -421,7 +421,7 @@ const Home = () => {
         flex: 1,
         alignItems: 'center',
         paddingVertical: 14,
-        borderRadius: 20,
+        borderRadius: 10,
         backgroundColor:
           selectedRideType === type
             ? colors.themePrimary
@@ -436,27 +436,24 @@ const Home = () => {
           width: 56,
           height: 56,
           borderRadius: 28,
-          backgroundColor:
-            selectedRideType === type
-              ? 'rgba(255,255,255,0.2)'
-              : isDarkMode
-              ? '#374151'
-              : '#F3F4F6',
+       
+            
           alignItems: 'center',
           justifyContent: 'center',
           marginBottom: 8,
         }}>
-        <Image resizeMode="contain"
-          source={require(`../assets/images/car.png`)}
+        <Image
+          resizeMode="contain"
+          source={
+            type === 'bike'
+              ? require('../assets/images/bike.png')
+              : type === 'auto'
+              ? require('../assets/images/auto.png')
+              : require('../assets/images/car.png')
+          }
           style={{
-            width: 32,
-            height: 32,
-            tintColor:
-              selectedRideType === type
-                ? '#FFF'
-                : isDarkMode
-                ? '#FFF'
-                : '#4B5563',
+            width: 90,
+            height: 90,
           }}
         />
       </View>
