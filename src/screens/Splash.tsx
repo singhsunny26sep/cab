@@ -38,9 +38,9 @@ const Splash = () => {
   }, [navigation]);
 
   return (
-    <Container statusBarBackgroundColor={colors.themePrimary} backgroundColor={colors.themePrimary}>
+    <Container statusBarBackgroundColor={colors.themePrimary} backgroundColor="black">
       <Box flex={1} alignItems="center" justifyContent="center">
-        <Image alt="logo" source={Icons.splashLogo2} w={moderateScale(80)} h={moderateScale(80)} resizeMode="contain" />
+        <Image alt="logo" source={require('../assets/images/logo.png')} w={moderateScale(120)} h={moderateScale(120)} resizeMode="contain" />
         <Text color="$amber100" fontFamily="$poppinsBold" fontSize={25}>Dharam cab Drive</Text>
       </Box>
     </Container>

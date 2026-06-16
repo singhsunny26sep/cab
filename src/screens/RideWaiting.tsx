@@ -95,10 +95,7 @@ const RideWaiting = () => {
   const toast = useToast();
   const route = useRoute();
   const {bookingData}: any = route.params;
-  console.log(
-    'booking Data at ride waitin -----------------------> ',
-    bookingData,
-  );
+  console.log('booking Data at ride waitin -----------------------> ', bookingData);
 
   const mapRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
@@ -206,6 +203,7 @@ const RideWaiting = () => {
       if (timerRef.current) {clearInterval(timerRef.current);}
     };
   }, [timerActive]);
+
   useEffect(() => {
     const initializeApp = async () => {
       try {
@@ -222,18 +220,17 @@ const RideWaiting = () => {
       // socketServices.disconnectSocket();
     };
   }, []);
+
   useEffect(() => {
-    console.log(
-      'checking---------------===========>>>>>>2',
-      userLocalData?.token,
-    );
+    console.log('checking---------------===========>>>>>>2', userLocalData?.token);
     const initializeSocket = async () => {
       try {
         console.log('checking---------------===========>>>>>>4');
         if (socketServices.isConnected()) {
           setSocketInitialized(true);
         }
-        // await socketServices.initializeSocket(userLocalData.token);
+        await socketServices.initializeSocket(userLocalData.token);
+        setSocketInitialized(true);
       } catch (error) {
         console.error('Socket initialization failed:', error);
       }
@@ -243,27 +240,19 @@ const RideWaiting = () => {
       setSocketInitialized(false);
     };
   }, [userLocalData]);
+
   useEffect(() => {
-    console.log(
-      'bookingData passed in socketttttttttttttt at ride waiting',
-      bookingData,
-    );
+    console.log('bookingData passed in socketttttttttttttt at ride waiting', bookingData);
     socketServices.emit('booking', bookingData);
     socketServices.on('booking-response', (bookingResponse: any) => {
-      console.log(
-        'bookingResponse =================>>>>',
-        JSON.stringify(bookingResponse),
-      );
+      console.log('bookingResponse =================>>>>', JSON.stringify(bookingResponse));
       setBookingResponseData(bookingResponse);
     });
 
     socketServices.emit('onGoing_booking', {});
     socketServices.on('driver_booking_response', (response: any) => {
       const firstRide = response?.data;
-      console.log(
-        'Booking response received at ride waiting--------------------->>>>>:',
-        firstRide,
-      );
+      console.log('Booking response received at ride waiting--------------------->>>>>:', firstRide);
 
       if (firstRide?.bookingStatus === 'ongoing') {
         setBookingResponseData(firstRide);
@@ -297,9 +286,11 @@ const RideWaiting = () => {
       socketServices?.removeListener('driver_booking_response', () => {});
     };
   }, [socketInitialized, navigation, toast]);
+
   useEffect(() => {
     onCenter();
   }, [state.curLoc]);
+
   const getLocationOnce = async () => {
     const locationData: any = await getCurrentLocationOnce();
     if (locationData) {
@@ -329,6 +320,7 @@ const RideWaiting = () => {
       return pickupDetails;
     }
   };
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -345,6 +337,7 @@ const RideWaiting = () => {
   const handleCancelRide = () => {
     setShowCancleAlert(true);
   };
+
   const handleRejectRide = async () => {
     try {
       socketServices.emit('update_booking_status', {
@@ -362,10 +355,7 @@ const RideWaiting = () => {
       const errorMessage =
         error?.response?.data?.message ||
         'Network error. Please check your connection.';
-      console.error(
-        'Error updating status for cancel in Waiting:',
-        JSON.stringify(error),
-      );
+      console.error('Error updating status for cancel in Waiting:', JSON.stringify(error));
       toast.show({
         placement: 'top',
         render: ({id}: any) => {
@@ -458,7 +448,7 @@ const RideWaiting = () => {
   };
 
   // ============================================================
-  //  ✨ 新的渲染（UI 升级）
+  //  ✨ 渲染 UI（已升级 + 距离修复 + 头像安全）
   // ============================================================
   return (
     <Container
@@ -588,7 +578,7 @@ const RideWaiting = () => {
         <Text fontSize={10} color={isDarkMode ? '#94A3B8' : '#666'}>Center</Text>
       </Pressable>
 
-      {/* 右侧 Ride info 按钮（显示/隐藏模态框） */}
+      {/* 右侧 Ride info 按钮 */}
       <Pressable
         onPress={toggleRideModal}
         position="absolute"
@@ -662,27 +652,31 @@ const RideWaiting = () => {
             py={scale(12)}
             borderBottomWidth={1}
             borderBottomColor={isDarkMode ? '#334155' : '#E2E8F0'}>
-              <View style={{
-                width: scale(64),
-                height: scale(64),
-                borderRadius: moderateScale(32),
-                overflow: 'hidden',
-                marginRight: moderateScale(12),
-                borderWidth: 1,
-                borderColor: "blue",
-              }}>
-
-            <Image  
-              source={{ uri: bookingResponseData?.driverInfo?.profileImgUrl || 'https://ui-avatars.com/api/?name=U&background=94A3B8&color=fff&size=80' }}
-              style={{
-                width: scale(64),
-                height: scale(64),
-                borderRadius: moderateScale(32),
-                marginRight: moderateScale(12),
-            
-              }}
-            />
-              </View>
+            <View style={{
+              width: scale(48),
+              height: scale(48),
+              borderRadius: moderateScale(24),
+              overflow: 'hidden',
+              marginRight: moderateScale(12),
+              borderWidth: 1,
+              borderColor: isDarkMode ? '#334155' : '#E2E8F0',
+            }}>
+              <Image  
+                source={{
+                  uri: (bookingResponseData?.driverInfo?.profileImgUrl || '')
+                    .replace(/^http:/, 'https:') ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(bookingResponseData?.driverInfo?.name?.[0] || 'U')}&background=5B6BF0&color=fff&size=80&bold=true`
+                }}
+                style={{
+                  width: scale(48),
+                  height: scale(48),
+                  borderRadius: moderateScale(24),
+                }}
+                onError={(e) => {
+                  e.target.source = { uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(bookingResponseData?.driverInfo?.name?.[0] || 'U')}&background=94A3B8&color=fff&size=80` };
+                }}
+              />
+            </View>
             <Box flex={1}>
               <Text
                 fontFamily="$poppinsSemiBold"
@@ -690,14 +684,17 @@ const RideWaiting = () => {
                 color={isDarkMode ? '#F1F5F9' : '#1E293B'}>
                 {bookingResponseData?.driverInfo?.name || 'Driver'}
               </Text>
-              <Box flexDirection="row" alignItems="center" mt={4}>
+              <Box flexDirection="row" alignItems="center" mt={2}>
                 <LocationMakerRedIcon />
                 <Text
                   ml={4}
                   fontFamily="$poppinsRegular"
                   fontSize={14}
                   color={isDarkMode ? '#94A3B8' : '#475569'}>
-                  {bookingResponseData?.data?.distance?.toFixed(2) || '0'} km
+                  {/* ✅ 修复：优先使用 bookingData 中的距离 */}
+                  {bookingData?.destination?.distance
+                    ? `${parseFloat(bookingData.destination.distance).toFixed(2)} km`
+                    : bookingResponseData?.data?.distance?.toFixed(2) || '0 km'}
                 </Text>
                 <Box ml={12} flexDirection="row" alignItems="center">
                   <ReviewStarIcon />
@@ -715,7 +712,7 @@ const RideWaiting = () => {
               <LottieView
                 ref={lottieRef}
                 source={require('../assets/lotties/loading2.json')}
-                style={{ width: scale(50), height: scale(50) }}
+                style={{ width: scale(44), height: scale(44) }}
                 resizeMode="contain"
               />
               <Text
@@ -727,7 +724,7 @@ const RideWaiting = () => {
             </Box>
           </Box>
 
-          {/* 支付方式（精简） */}
+          {/* 支付方式 */}
           <Box
             flexDirection="row"
             justifyContent="space-between"
@@ -745,7 +742,7 @@ const RideWaiting = () => {
               fontFamily="$poppinsMedium"
               fontSize={16}
               color={isDarkMode ? '#F1F5F9' : '#1E293B'}>
-              ₹2000
+              ₹{bookingData?.priceDetails?.payableAmount || 0}
             </Text>
           </Box>
 

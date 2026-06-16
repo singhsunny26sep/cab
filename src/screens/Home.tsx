@@ -429,7 +429,7 @@ const Home = () => {
             ? '#1F2937'
             : '#FFF',
         borderWidth: selectedRideType === type ? 0 : 1,
-        borderColor: isDarkMode ? '#374151' : '#E5E7EB',
+        borderColor: isDarkMode ? '#374151' : '#1257e2',
       }}>
       <View
         style={{
@@ -446,8 +446,8 @@ const Home = () => {
           justifyContent: 'center',
           marginBottom: 8,
         }}>
-        <Image
-          source={icon}
+        <Image resizeMode="contain"
+          source={require(`../assets/images/car.png`)}
           style={{
             width: 32,
             height: 32,
@@ -509,18 +509,8 @@ const Home = () => {
           <HamburgerIcon />
         </Pressable>
         <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
-          <LinearGradient
-            colors={[newTheme.primary, newTheme.secondary]}
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 14,
-              alignItems: 'center',
-              justifyContent: 'center',
-                }}>
-            <Text style={{fontFamily: fontFamily.bold, fontSize: 22, color: '#FFF'}}>D</Text>
-          </LinearGradient>
-          <Text style={{fontFamily: fontFamily.bold, fontSize: 20, color: isDarkMode ? '#F9FAFB' : '#111827'}}>
+          
+          <Text style={{fontFamily: fontFamily.bold, fontSize: 20, color: isDarkMode ? '#F9FAFB' : '#111827' ,textTransform: 'uppercase',fontweight: '800'}}>
             Dharam Cab
           </Text>
         </View>
@@ -533,6 +523,7 @@ const Home = () => {
             backgroundColor: isDarkMode ? '#374151' : '#FFF',
             alignItems: 'center',
             justifyContent: 'center',
+            fontWeight: '800',
           }}>
           <Notification />
         </Pressable>
@@ -741,51 +732,159 @@ const Home = () => {
               </View>
             </View>
 
-            {!state.destinationCords?.address && (
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-around',
-                  paddingHorizontal: 16,
-                  paddingVertical: 20,
-                  marginTop: 12,
-                  borderTopWidth: 1,
-                  borderTopColor: isDarkMode ? '#374151' : '#E5E7EB',
-                }}>
-                <TouchableOpacity>
-                  <LinearGradient
-                    colors={[newTheme.warning, '#FBBF24']}
-                    style={{width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center'}}>
-                    <MaterialIcons name="schedule" size={24} color="#FFF" />
-                  </LinearGradient>
-                  <Text style={{fontSize: 11, marginTop: 8}}>Schedule</Text>
-                </TouchableOpacity>
-                <TouchableOpacity>
-                  <LinearGradient
-                    colors={[newTheme.secondary, newTheme.secondaryLight]}
-                    style={{width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center'}}>
-                    <MaterialIcons name="local-offer" size={24} color="#FFF" />
-                  </LinearGradient>
-                  <Text style={{fontSize: 11, marginTop: 8}}>Offers</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate(NavigationString.Favourite)}>
-                  <LinearGradient
-                    colors={[newTheme.accent, newTheme.accentLight]}
-                    style={{width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center'}}>
-                    <MaterialIcons name="favorite-border" size={24} color="#FFF" />
-                  </LinearGradient>
-                  <Text style={{fontSize: 11, marginTop: 8}}>Favorites</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate(NavigationString.History)}>
-                  <LinearGradient
-                    colors={['#A78BFA', '#C4B5FD']}
-                    style={{width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center'}}>
-                    <MaterialIcons name="history" size={24} color="#FFF" />
-                  </LinearGradient>
-                  <Text style={{fontSize: 11, marginTop: 8}}>History</Text>
-                </TouchableOpacity>
-              </View>
-            )}
+        {!state.destinationCords?.address && (
+  <View
+    style={{
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      alignItems: 'flex-start',
+      paddingHorizontal: 16,
+      paddingVertical: 16,
+      marginTop: 8,
+      backgroundColor: "white",
+      borderRadius: 20,
+      marginHorizontal: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
+      elevation: 3,
+      backdropFilter: 'blur(10px)',
+      
+    }}>
+    {/* Schedule */}
+    <TouchableOpacity
+      activeOpacity={0.7}
+      style={{ alignItems: 'center', flex: 1 }}
+      onPress={() => { /* your schedule action */ }}>
+      <LinearGradient
+        colors={[newTheme.warning, '#FBBF24']}
+        style={{
+          width: 52,
+          height: 52,
+          borderRadius: 26,
+          alignItems: 'center',
+          justifyContent: 'center',
+          shadowColor: '#FBBF24',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 6,
+          elevation: 4,
+        }}>
+        <MaterialIcons name="schedule" size={26} color="#FFF" />
+      </LinearGradient>
+      <Text
+        style={{
+          fontSize: 12,
+          fontWeight: '500',
+          marginTop: 8,
+          color: isDarkMode ? '#E2E8F0' : '#1E293B',
+          letterSpacing: 0.3,
+        }}>
+        Schedule
+      </Text>
+    </TouchableOpacity>
+
+    {/* Offers */}
+    <TouchableOpacity
+      activeOpacity={0.7}
+      style={{ alignItems: 'center', flex: 1 }}
+      onPress={() => { /* your offers action */ }}>
+      <LinearGradient
+        colors={[newTheme.secondary, newTheme.secondaryLight]}
+        style={{
+          width: 52,
+          height: 52,
+          borderRadius: 26,
+          alignItems: 'center',
+          justifyContent: 'center',
+          shadowColor: newTheme.secondary,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 6,
+          elevation: 4,
+        }}>
+        <MaterialIcons name="local-offer" size={26} color="#FFF" />
+      </LinearGradient>
+      <Text
+        style={{
+          fontSize: 12,
+          fontWeight: '500',
+          marginTop: 8,
+          color: isDarkMode ? '#E2E8F0' : '#1E293B',
+          letterSpacing: 0.3,
+        }}>
+        Offers
+      </Text>
+    </TouchableOpacity>
+
+    {/* Favorites */}
+    <TouchableOpacity
+      activeOpacity={0.7}
+      style={{ alignItems: 'center', flex: 1 }}
+      onPress={() => navigation.navigate(NavigationString.Favourite)}>
+      <LinearGradient
+        colors={[newTheme.accent, newTheme.accentLight]}
+        style={{
+          width: 52,
+          height: 52,
+          borderRadius: 26,
+          alignItems: 'center',
+          justifyContent: 'center',
+          shadowColor: newTheme.accent,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 6,
+          elevation: 4,
+        }}>
+        <MaterialIcons name="favorite-border" size={26} color="#FFF" />
+      </LinearGradient>
+      <Text
+        style={{
+          fontSize: 12,
+          fontWeight: '500',
+          marginTop: 8,
+          color: isDarkMode ? '#E2E8F0' : '#1E293B',
+          letterSpacing: 0.3,
+        }}>
+        Favorites
+      </Text>
+    </TouchableOpacity>
+
+    {/* History */}
+    <TouchableOpacity
+      activeOpacity={0.7}
+      style={{ alignItems: 'center', flex: 1 }}
+      onPress={() => navigation.navigate(NavigationString.History)}>
+      <LinearGradient
+        colors={['#A78BFA', '#C4B5FD']}
+        style={{
+          width: 52,
+          height: 52,
+          borderRadius: 26,
+          alignItems: 'center',
+          justifyContent: 'center',
+          shadowColor: '#A78BFA',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 6,
+          elevation: 4,
+        }}>
+        <MaterialIcons name="history" size={26} color="#FFF" />
+      </LinearGradient>
+      <Text
+        style={{
+          fontSize: 12,
+          fontWeight: '500',
+          marginTop: 8,
+          color: isDarkMode ? '#E2E8F0' : '#1E293B',
+          letterSpacing: 0.3,
+        }}>
+        History
+      </Text>
+    </TouchableOpacity>
+  </View>
+)}
             {state.destinationCords?.address && (
               <View style={{paddingHorizontal: 20, marginTop: 12}}>
                 <PrimaryButton
