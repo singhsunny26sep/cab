@@ -66,6 +66,7 @@ const CustomBottomsheetRideALerts: React.FC<RideAlertProps> = ({
       }
     } else {
       setInternalVisible(false);
+      setHasShownConfirmation(false);
     }
 
     return () => {

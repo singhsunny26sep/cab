@@ -222,12 +222,14 @@ const RideWaiting = () => {
   }, []);
 
   useEffect(() => {
-    console.log('checking---------------===========>>>>>>2', userLocalData?.token);
+    if (!userLocalData?.token) {
+      return;
+    }
     const initializeSocket = async () => {
       try {
-        console.log('checking---------------===========>>>>>>4');
         if (socketServices.isConnected()) {
           setSocketInitialized(true);
+          return;
         }
         await socketServices.initializeSocket(userLocalData.token);
         setSocketInitialized(true);
@@ -239,18 +241,20 @@ const RideWaiting = () => {
     return () => {
       setSocketInitialized(false);
     };
-  }, [userLocalData]);
+  }, [userLocalData?.token]);
 
   useEffect(() => {
+    if (!socketInitialized) {return;}
+
     console.log('bookingData passed in socketttttttttttttt at ride waiting', bookingData);
     socketServices.emit('booking', bookingData);
-    socketServices.on('booking-response', (bookingResponse: any) => {
+
+    const bookingResponseHandler = (bookingResponse: any) => {
       console.log('bookingResponse =================>>>>', JSON.stringify(bookingResponse));
       setBookingResponseData(bookingResponse);
-    });
+    };
 
-    socketServices.emit('onGoing_booking', {});
-    socketServices.on('driver_booking_response', (response: any) => {
+    const driverBookingResponseHandler = (response: any) => {
       const firstRide = response?.data;
       console.log('Booking response received at ride waiting--------------------->>>>>:', firstRide);
 
@@ -281,11 +285,17 @@ const RideWaiting = () => {
           ),
         });
       }
-    });
-    return () => {
-      socketServices?.removeListener('driver_booking_response', () => {});
     };
-  }, [socketInitialized, navigation, toast]);
+
+    socketServices.on('booking-response', bookingResponseHandler);
+    socketServices.emit('onGoing_booking', {});
+    socketServices.on('driver_booking_response', driverBookingResponseHandler);
+
+    return () => {
+      socketServices?.removeListener('booking-response', bookingResponseHandler);
+      socketServices?.removeListener('driver_booking_response', driverBookingResponseHandler);
+    };
+  }, [socketInitialized, navigation, toast, bookingData]);
 
   useEffect(() => {
     onCenter();
@@ -624,7 +634,7 @@ const RideWaiting = () => {
               borderTopRightRadius: moderateScale(24),
             },
           ]}>
-          
+
           {/* 顶栏 – 状态 + 关闭 */}
           <Box
             flexDirection="row"
@@ -661,11 +671,11 @@ const RideWaiting = () => {
               borderWidth: 1,
               borderColor: isDarkMode ? '#334155' : '#E2E8F0',
             }}>
-              <Image  
+              <Image
                 source={{
                   uri: (bookingResponseData?.driverInfo?.profileImgUrl || '')
                     .replace(/^http:/, 'https:') ||
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(bookingResponseData?.driverInfo?.name?.[0] || 'U')}&background=5B6BF0&color=fff&size=80&bold=true`
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(bookingResponseData?.driverInfo?.name?.[0] || 'U')}&background=5B6BF0&color=fff&size=80&bold=true`,
                 }}
                 style={{
                   width: scale(48),

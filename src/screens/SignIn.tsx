@@ -106,7 +106,8 @@ const SignIn = () => {
         setLoading(true);
 
         // Send the full contact number including country code (e.g., +91xxxxxxxxxx)
-        const fullContactNumber = callingCode + mobileNumber;
+        const fullContactNumber =  mobileNumber;
+        console.log('Full contact number to send OTP:', fullContactNumber);
          const response = await Instance2.post(SEND_OTP_CONTACT.url, {
             contact: fullContactNumber,
             fcmToken,
@@ -236,11 +237,7 @@ const SignIn = () => {
         <Text fontFamily={'$poppinsMedium'} fontSize={16} lineHeight={18} color={colors.charcoalGray} numberOfLines={2} alignSelf="center">
           Already have an account ?
         </Text>
-        <Pressable onPress={() => navigation.navigate(NavigationString.SignUp)}>
-          <Text fontFamily={'$poppinsMedium'} fontSize={16} lineHeight={18} color={colors.themePrimary} numberOfLines={1}>
-            Sign Up
-          </Text>
-        </Pressable>
+
       </Box>
     </Container>
   );

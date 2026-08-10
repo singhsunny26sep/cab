@@ -36,13 +36,8 @@
 	<string>DharamCab would like to use your Location</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>DharamCab would like to use your Location</string>
-	<key>NSLocationUsageDescription</key>
-	<string>DharamCab would like to use your Location</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>DharamCab would like to use your Location</string>
-
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string/>
+	<string>DharamCab needs location access to show your current position and provide ride services</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>

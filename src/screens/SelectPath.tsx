@@ -136,9 +136,10 @@ const SelectPath = ({route}: any) => {
       {latitude, longitude},
     );
     const fromMetersToKms = (distance / 1000)?.toFixed(2);
+    const routeDurationinMinutes = distance > 0 ? Math.ceil((distance / 1000 / 30) * 60) : undefined;
     setState({
       ...state,
-      toCords: {latitude, longitude, address, distance: fromMetersToKms},
+      toCords: {latitude, longitude, address, distance: fromMetersToKms, routeDurationinMinutes},
     });
     setSearchText(location.name);
     setShowLocations(false);
@@ -181,6 +182,7 @@ const SelectPath = ({route}: any) => {
       address: toCords.address,
       city: selectedPlace?.name || searchText,
       distance: toCords.distance,
+      routeDurationinMinutes: toCords.routeDurationinMinutes,
     });
     if (saved) {
       fetchCordsValues(toCords);
@@ -214,11 +216,13 @@ const SelectPath = ({route}: any) => {
       {latitude: place.lat, longitude: place.lng},
     );
     const fromMetersToKms = (distance / 1000)?.toFixed(2);
+    const routeDurationinMinutes = distance > 0 ? Math.ceil((distance / 1000 / 30) * 60) : undefined;
     const newToCords = {
       latitude: place.lat,
       longitude: place.lng,
       address: place.address,
       distance: fromMetersToKms,
+      routeDurationinMinutes,
     };
     setState((prev: any) => ({...prev, toCords: newToCords}));
     setSearchText(place.name);
@@ -230,6 +234,7 @@ const SelectPath = ({route}: any) => {
       address: place.address,
       city: place.name,
       distance: fromMetersToKms,
+      routeDurationinMinutes: newToCords.routeDurationinMinutes,
     });
     if (saved) {
       fetchCordsValues(newToCords);

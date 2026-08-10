@@ -101,7 +101,7 @@ const HistoryCard = ({
           lineHeight={14}
           color={isDarkMode ? colors.white : colors.black}
           numberOfLines={2}>
-          {item.pickupLocation.address}
+          {item.pickupLocation?.address || 'N/A'}
         </Text>
       </Box>
 
@@ -119,7 +119,7 @@ const HistoryCard = ({
           lineHeight={14}
           color={isDarkMode ? colors.white : colors.black}
           numberOfLines={2}>
-          {item.destinationLocation.address}
+          {item.destinationLocation?.address || 'N/A'}
         </Text>
       </Box>
 
@@ -275,8 +275,8 @@ const History = () => {
 
     // Clean up socket listeners when component unmounts
     return () => {
-      // socketServices.off('client_booking_error');
-      // socketServices.off('client_booking_list');
+      socketServices.off('client_booking_error');
+      socketServices.off('client_booking_list');
     };
   }, [selectedOption]);
 
@@ -286,7 +286,6 @@ const History = () => {
       statusBarBackgroundColor={isDarkMode ? '#000000' : '#ffffff'}
       backgroundColor={isDarkMode ? colors.black : colors.white}>
       <AppBar back title="History" isDarkMode={isDarkMode} />
-
       <Box
         flexDirection="row"
         alignItems="center"

@@ -49,7 +49,7 @@ const BottomTabStack = () => {
             </Box>
           ),
         }} />
-    
+
          <Tab.Screen name={NavigationString.Wallet} component={StackRoute.Wallet}
         options={{
           tabBarIcon: ({ focused }) => (

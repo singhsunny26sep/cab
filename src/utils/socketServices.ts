@@ -1,6 +1,6 @@
 import {io, Socket} from 'socket.io-client';
 
-const SOCKET_URL = 'https://api.mrmanfredhotel.com/';
+const SOCKET_URL = 'https://api.fixetservices.com/';
 // Make sure your socket server is running on this IP/port
 
 type EventCallback = (...args: any[]) => void;
@@ -14,7 +14,6 @@ class WSService {
       if (this.socket?.connected) {
         return this.socket;
       }
-
       // Initialize new socket connection
       this.socket = io(SOCKET_URL, {
         transports: ['websocket', 'polling'],
@@ -90,6 +89,18 @@ class WSService {
       return;
     }
     this.socket.off(event, listener);
+  }
+
+  off(event: string, listener?: EventCallback): void {
+    if (!this.socket) {
+      console.warn('Socket not initialized. Call initializeSocket first.');
+      return;
+    }
+    if (listener) {
+      this.socket.off(event, listener);
+    } else {
+      this.socket.off(event);
+    }
   }
 
   disconnectSocket = (): void => {

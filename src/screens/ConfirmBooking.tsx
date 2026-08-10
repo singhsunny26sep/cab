@@ -1,17 +1,8 @@
 import {useEffect, useState} from 'react';
-import {Alert, Modal, StyleSheet, Switch, View, TouchableOpacity} from 'react-native';
-import {
-  Box,
-  Image,
-  Pressable,
-  Text,
-  Toast,
-  ToastTitle,
-  useToast,
-} from '@gluestack-ui/themed';
+import {Alert, StyleSheet, Switch, TouchableOpacity} from 'react-native';
+import {Box, Text, Toast, ToastTitle, useToast} from '@gluestack-ui/themed';
 import {ParamListBase, useNavigation, useRoute} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-
 import {Container} from '../components/Container';
 import {AppBar} from '../components/AppBar';
 import {colors} from '../constants/colors';
@@ -21,30 +12,35 @@ import {
   LocationMakerRedIcon,
   LocationMakerYellowIcon,
 } from '../components/Icons';
-import {moderateScale, moderateScaleVertical, scale} from '../utils/responsiveSize';
+import {
+  moderateScale,
+  moderateScaleVertical,
+  scale,
+} from '../utils/responsiveSize';
 import InputText from '../components/TextInput/InputText';
 import PrimaryButton from '../components/Button/PrimaryButton';
 import {NavigationString} from '../navigation/navigationStrings';
 import {BASE_URL, Instance} from '../api/Instance.ts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Icons from '../assets/Icons';
 import {useTheme} from '../constants/ThemeContext';
-import {useDispatch, useSelector} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {RootState} from '../store/reduxStore/store';
 import {loadUserFromStorage} from '../store/slice/UserSlice';
-import {CONFIRM_BOOKING, CREATE_FAVORITE_ADDRESS, BOOKING_CHARGES} from '../api/ApiEndpoints';
-import moment, { localeData } from 'moment';
+import {
+  CONFIRM_BOOKING,
+  CREATE_FAVORITE_ADDRESS,
+  BOOKING_CHARGES,
+} from '../api/ApiEndpoints';
+import moment from 'moment';
 import {getCurrentLocationOnce} from '../utils/locationHelper';
 
 const ConfirmBooking = () => {
   const {isDarkMode} = useTheme();
-  const dispatch = useDispatch();
   const toast = useToast();
   const userData = useSelector((state: RootState) => state.user);
   const currentTime = moment().format('hh:mm A');
   const route = useRoute();
   const {vehicle}: any = route.params;
-
   const [priceDetails, setPriceDetails] = useState({
     baseAmount: 0,
     payablePrice: 0,
@@ -54,7 +50,6 @@ const ConfirmBooking = () => {
     message: '',
     promoCode: '',
   });
-console.log(priceDetails,'$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
   const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
   const [userLocalData, setUserLocalData] = useState<any>(null);
   const [promoCode, setPromoCode] = useState<string>('');
@@ -66,14 +61,15 @@ console.log(priceDetails,'$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
   const [favoriteAdded, setFavoriteAdded] = useState(false);
   const [calculatingPrice, setCalculatingPrice] = useState(false);
-
   // Calculate price whenever distance changes
   useEffect(() => {
-    if (userLocalData?.dropDetails?.distance) {
+    if (
+      userData?.dropDetails?.distance ||
+      userLocalData?.dropDetails?.distance
+    ) {
       calculateBookingPrice();
     }
-  }, [userLocalData]);
-console.log(localeData,'this is localData____________________________________________');
+  }, [userData, userLocalData]);
   const calculateBookingPrice = async (promo: string = '') => {
     try {
       setCalculatingPrice(true);
@@ -82,13 +78,14 @@ console.log(localeData,'this is localData_______________________________________
         showErrorToast('User not authenticated');
         return;
       }
-
       const payload = {
         rideType: vehicle?.type.toLowerCase(),
         promoCode: promo || '',
-        distance: userLocalData?.dropDetails?.distance,
+        distance:
+          userData?.dropDistance ||
+          userData?.dropDetails?.distance ||
+          userLocalData?.dropDetails?.distance,
       };
-
       const response = await Instance.post(
         `${BASE_URL}${BOOKING_CHARGES.url}`,
         payload,
@@ -96,9 +93,8 @@ console.log(localeData,'this is localData_______________________________________
           headers: {
             Authorization: token,
           },
-        }
+        },
       );
-      console.log('response for calculateBookingPrice ===>', response?.data);
       if (response.data.success) {
         setPriceDetails({
           baseAmount: response.data.baseAmount,
@@ -131,8 +127,15 @@ console.log(localeData,'this is localData_______________________________________
         }
       }
     } catch (error: any) {
-      console.error('Error calculating booking price:', error);
-      showErrorToast('Failed to calculate booking price');
+      console.error(
+        'Error calculating booking price:',
+        error?.response?.data?.message || error.message,
+      );
+      showErrorToast(
+        error?.response?.data?.message ||
+          error.message ||
+          'Failed to calculate booking price',
+      );
       setPriceDetails({
         baseAmount: 0,
         payablePrice: 0,
@@ -159,16 +162,41 @@ console.log(localeData,'this is localData_______________________________________
     setPromoCode('');
     await calculateBookingPrice('');
   };
-
   const handleConfirmRide = async () => {
     try {
-      if (!userLocalData?.pickupDetails && !userLocalData?.dropDetails) {
-        loadUserLocalDatas();
-      }
-
+      const localData = await loadUserFromStorage();
+      setUserLocalData(localData);
       setLoading(true);
       const locationData: any = await getCurrentLocationOnce();
-      const {latitude, longitude} = locationData.coordinates;
+
+      let latitude: number, longitude: number;
+
+      // Debug: log what we received
+      console.log('Location data:', locationData);
+      console.log('userData pickupDetails:', userData?.pickupDetails);
+      console.log('localData pickupDetails:', localData?.pickupDetails);
+
+      if (locationData?.coordinates) {
+        latitude = locationData.coordinates.latitude;
+        longitude = locationData.coordinates.longitude;
+      } else if (
+        userData?.pickupDetails?.latitude &&
+        userData?.pickupDetails?.longitude
+      ) {
+        latitude = userData.pickupDetails.latitude;
+        longitude = userData.pickupDetails.longitude;
+      } else if (
+        localData?.pickupDetails?.latitude &&
+        localData?.pickupDetails?.longitude
+      ) {
+        latitude = localData.pickupDetails.latitude;
+        longitude = localData.pickupDetails.longitude;
+      } else {
+        showErrorToast(
+          'Unable to get location. Please enable GPS and try again.',
+        );
+        return;
+      }
 
       const bookingDatas = {
         currentLocation: {
@@ -179,14 +207,29 @@ console.log(localeData,'this is localData_______________________________________
         },
         lat: latitude,
         lng: longitude,
-        destination: userData?.dropDetails,
+        destination: userData?.dropDetails?.address,
         rideType: vehicle?.type.toLowerCase(),
         vehicleId: vehicle._id,
         bookingDate: new Date().toISOString(),
         bookingTime: currentTime,
         promoCode: priceDetails.promoCode,
-        distance: userLocalData?.dropDetails?.distance,
-        duration: userLocalData?.dropDetails?.routeDurationinMinutes,
+        distance:
+          userData?.dropDistance ||
+          userData?.dropDetails?.distance ||
+          localData?.dropDetails?.distance,
+        duration:
+          localData?.dropDetails?.routeDurationinMinutes ||
+          (() => {
+            const dist = parseFloat(
+              String(
+                userData?.dropDistance ||
+                  userData?.dropDetails?.distance ||
+                  localData?.dropDetails?.distance ||
+                  '0',
+              ),
+            );
+            return dist > 0 ? Math.ceil((dist / 30) * 60) : undefined;
+          })(),
         type: 'general',
         priceDetails: {
           baseAmount: priceDetails.baseAmount,
@@ -195,19 +238,16 @@ console.log(localeData,'this is localData_______________________________________
         },
       };
       setBookingData(bookingDatas);
-
       // Check if price is valid before proceeding
       if (priceDetails.baseAmount === 0 || priceDetails.payablePrice === 0) {
         showErrorToast('Invalid booking price. Please check your details.');
         return;
       }
-
       const token = await AsyncStorage.getItem('userToken');
       if (!token) {
         showErrorToast('User not authenticated');
         return;
       }
-
       const response = await Instance.post(
         `${BASE_URL}${CONFIRM_BOOKING.url}`,
         bookingDatas,
@@ -215,19 +255,24 @@ console.log(localeData,'this is localData_______________________________________
           headers: {
             Authorization: token,
           },
-        }
+        },
       );
-
       if (response.data.success) {
-        navigation.navigate(NavigationString.RideWaiting, {bookingData: response.data.data});
+        navigation.navigate(NavigationString.RideWaiting, {
+          bookingData: response.data.data,
+        });
       } else {
         showErrorToast(response.data.message || 'Booking failed');
       }
     } catch (error: any) {
-      console.error('Booking failed:', error.response.data);
+      console.error(
+        'Booking failed:',
+        error?.response?.data?.message || error.message,
+      );
       Alert.alert(
         'Error',
-        'Something went wrong during booking. Please try again.',
+        error?.response?.data?.message ||
+          'Something went wrong during booking. Please try again.',
       );
     } finally {
       setLoading(false);
@@ -345,7 +390,6 @@ console.log(localeData,'this is localData_______________________________________
       statusBarBackgroundColor={isDarkMode ? '#000000' : '#ffffff'}
       backgroundColor={isDarkMode ? '#000000' : '#ffffff'}>
       <AppBar back title="Request for ride" isDarkMode={isDarkMode} />
-{}
       <Body>
         <Box
           mx={moderateScale(10)}
@@ -366,22 +410,14 @@ console.log(localeData,'this is localData_______________________________________
                   numberOfLines={1}>
                   Current Location
                 </Text>
-                <Text
-                  fontFamily={'$poppinsMedium'}
-                  fontSize={16}
-                  lineHeight={18}
-                  color={isDarkMode ? colors.white : colors.charcoalGray}
-                  numberOfLines={1}>
-                  {userLocalData?.dropDetails?.routeDuration}
-                </Text>
               </Box>
               <Text
-                fontFamily={'$poppinsRegular'}
-                fontSize={12}
-                lineHeight={14}
-                color={isDarkMode ? colors.white : colors.silverGray}
+                fontFamily={'$poppinsMedium'}
+                fontSize={16}
+                lineHeight={18}
+                color={isDarkMode ? colors.white : colors.black}
                 numberOfLines={1}>
-                {userData?.pickupDetails?.address}
+                {userLocalData?.pickupDetails?.address}
               </Text>
             </Box>
           </Box>
@@ -405,16 +441,16 @@ console.log(localeData,'this is localData_______________________________________
                   fontFamily={'$poppinsMedium'}
                   fontSize={14}
                   lineHeight={16}
-                  color={isDarkMode ? colors.white : colors.charcoalGray}
+                  color={isDarkMode ? colors.white : colors.black}
                   numberOfLines={1}>
-                  {userLocalData?.dropDetails?.distance} Kms
+                  {userLocalData?.dropDetails?.distance}
                 </Text>
               </Box>
               <Text
                 fontFamily={'$poppinsRegular'}
                 fontSize={12}
                 lineHeight={14}
-                color={isDarkMode ? colors.white : colors.silverGray}
+                color={isDarkMode ? colors.white : colors.black}
                 numberOfLines={1}>
                 {userData?.dropDetails?.address}
               </Text>
@@ -464,24 +500,21 @@ console.log(localeData,'this is localData_______________________________________
               borderRadius={moderateScale(5)}
               borderWidth={scale(1)}
               borderColor={colors.success}
-              borderStyle="dashed"
-            >
-              <Text
-                fontSize={14}
-                color={colors.success}>
+              borderStyle="dashed">
+              <Text fontSize={14} color={colors.success}>
                 Promo code {priceDetails.promoCode} applied successfully!
               </Text>
               <TouchableOpacity onPress={handleRemovePromoCode}>
-                <Text color={colors.error} fontWeight="bold">X</Text>
+                <Text color={colors.error} fontWeight="bold">
+                  X
+                </Text>
               </TouchableOpacity>
             </Box>
           )}
 
           {/* Price calculation message */}
           {priceDetails.message && !priceDetails.promoApplied && promoCode && (
-            <Text
-              fontSize={14}
-              color={colors.error}>
+            <Text fontSize={14} color={colors.error}>
               {priceDetails.message}
             </Text>
           )}
@@ -624,14 +657,16 @@ console.log(localeData,'this is localData_______________________________________
         )}
       </Body>
 
-      {!userData?.destinationByFavorite && !favoriteAdded && !showFavoriteForm && (
-        <PrimaryButton
-          buttonText="Add to favorite address"
-          onPress={() => setShowFavoriteForm(true)}
-          marginHorizontal={moderateScale(15)}
-          marginBottom={moderateScaleVertical(10)}
-        />
-      )}
+      {!userData?.destinationByFavorite &&
+        !favoriteAdded &&
+        !showFavoriteForm && (
+          <PrimaryButton
+            buttonText="Add to favorite address"
+            onPress={() => setShowFavoriteForm(true)}
+            marginHorizontal={moderateScale(15)}
+            marginBottom={moderateScaleVertical(10)}
+          />
+        )}
       <PrimaryButton
         buttonText={loading ? 'Processing...' : 'Confirm Ride'}
         onPress={handleConfirmRide}

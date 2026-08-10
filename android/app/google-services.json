@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "969994681595",
-    "project_id": "dharamcabcustomer",
-    "storage_bucket": "dharamcabcustomer.firebasestorage.app"
+    "project_number": "4614626687",
+    "project_id": "dharmacab-5651d",
+    "storage_bucket": "dharmacab-5651d.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:969994681595:android:9a259b34e3c7548cb5845e",
+        "mobilesdk_app_id": "1:4614626687:android:5c23a42195f34ba774ce4a",
         "android_client_info": {
           "package_name": "com.dharamcab"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBTs9bdf92h4DuAYZ5zTQJb3dP8j7og0ZQ"
+          "current_key": "AIzaSyANjN_dUxDuJCJUnSsRTakSB0ZUCvKPsLU"
         }
       ],
       "services": {

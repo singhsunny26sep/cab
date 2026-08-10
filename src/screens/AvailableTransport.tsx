@@ -60,13 +60,20 @@ const transportTypes = [
 // ==============================================
 // 🚗 车辆卡片（含图片）
 // ==============================================
-const VehicleCard = ({item, type, index}: {item: any; type: string; index: number}) => {
+const VehicleCard = ({
+  item,
+  type,
+  index,
+}: {
+  item: any;
+  type: string;
+  index: number;
+}) => {
   const {isDarkMode} = useTheme();
   const colors = isDarkMode ? darkPalette : lightPalette;
   const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
-
   useEffect(() => {
     Animated.timing(fadeAnim, {
       toValue: 1,
@@ -76,20 +83,80 @@ const VehicleCard = ({item, type, index}: {item: any; type: string; index: numbe
     }).start();
   }, []);
 
-  const getManufacturer = () => (type === 'parcel' ? item.brand || item.manufacturer : item.manufacturer);
+  const getManufacturer = () =>
+    type === 'parcel' ? item.brand || item.manufacturer : item.manufacturer;
   const getFuelOrType = () => (type === 'parcel' ? item.type : item.fuelType);
   const getSpecs = () => {
     const parts = [];
-    if (item.transmissionType) parts.push(item.transmissionType);
+    if (item.transmissionType) {
+      parts.push(item.transmissionType);
+    }
     const fuelOrType = getFuelOrType();
-    if (fuelOrType) parts.push(fuelOrType);
-    if (item.vehicleNo) parts.push(item.vehicleNo.slice(-4));
+    if (fuelOrType) {
+      parts.push(fuelOrType);
+    }
+    if (item.vehicleNo) {
+      parts.push(item.vehicleNo.slice(-4));
+    }
     return parts.join(' • ');
   };
 
-  const pricePerKm = item.pricePerKm || (type === 'car' ? 18 : type === 'bike' ? 8 : 12);
+  const getDescription = () => {
+    if (item.description) {
+      return item.description;
+    }
+    return '';
+  };
+
+  const getAdditionalSpecs = () => {
+    const specs = [];
+    if (item.seatingCapacity) {
+      specs.push(`${item.seatingCapacity} seats`);
+    }
+    if (item.luggageCapacity) {
+      specs.push(`${item.luggageCapacity} luggage`);
+    }
+    if (item.maxSpeed) {
+      specs.push(`${item.maxSpeed} km/h`);
+    }
+    if (item.maxpower) {
+      specs.push(`${item.maxpower} HP`);
+    }
+    if (item.zeroToSixtySpeedTime) {
+      specs.push(`${item.zeroToSixtySpeedTime}s 0-60`);
+    }
+    return specs.join(' • ');
+  };
+
+  const getFuelCost = () => {
+    if (item.fuelCostAverage) {
+      return `₹${item.fuelCostAverage}/avg`;
+    }
+    return '';
+  };
+
+  const getRegistrationInfo = () => {
+    const info = [];
+    if (item.vehicleRegistrationNo) {
+      info.push(`Reg: ${item.vehicleRegistrationNo}`);
+    }
+    if (item.puc) {
+      info.push(`PUC: ${item.puc}`);
+    }
+    if (item.vehicleInsurance) {
+      info.push('Insured');
+    }
+    if (item.vehiclePermit) {
+      info.push(`Permit: ${item.vehiclePermit}`);
+    }
+    return info.join(' • ');
+  };
+
+  const pricePerKm =
+    item.pricePerKm || (type === 'car' ? 18 : type === 'bike' ? 8 : 12);
   const rating = item.rating || (4 + Math.random() * 0.8).toFixed(1);
-  const distance = item?.calculatedDistance || (2 + Math.random() * 8).toFixed(1);
+  const distance =
+    item?.calculatedDistance || (2 + Math.random() * 8).toFixed(1);
 
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {toValue: 0.96, useNativeDriver: true}).start();
@@ -98,10 +165,23 @@ const VehicleCard = ({item, type, index}: {item: any; type: string; index: numbe
     Animated.spring(scaleAnim, {toValue: 1, useNativeDriver: true}).start();
   };
 
-  const imageUrl = item.imgUrl || 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=400&h=300&fit=crop&auto=format';
+  const imageUrl =
+    item.imgUrl ||
+    'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=400&h=300&fit=crop&auto=format';
 
   return (
-    <Animated.View style={{opacity: fadeAnim, transform: [{translateY: fadeAnim.interpolate({inputRange: [0,1], outputRange: [20,0]})}]}}>
+    <Animated.View
+      style={{
+        opacity: fadeAnim,
+        transform: [
+          {
+            translateY: fadeAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [20, 0],
+            }),
+          },
+        ],
+      }}>
       <Box
         bgColor={colors.card}
         borderRadius={moderateScale(16)}
@@ -116,15 +196,25 @@ const VehicleCard = ({item, type, index}: {item: any; type: string; index: numbe
           borderWidth: 1,
           borderColor: colors.border,
         }}>
-        
         {/* 第一行：名称 + 星级 */}
-        <Box flexDirection="row" justifyContent="space-between" alignItems="center">
-          <Text fontFamily="$poppinsSemiBold" fontSize={17} color={colors.text} numberOfLines={1}>
+        <Box
+          flexDirection="row"
+          justifyContent="space-between"
+          alignItems="center">
+          <Text
+            fontFamily="$poppinsSemiBold"
+            fontSize={17}
+            color={colors.text}
+            numberOfLines={1}>
             {getManufacturer()} {item.model}
           </Text>
           <Box flexDirection="row" alignItems="center">
             <MaterialIcon name="star" size={16} color="#FBBF24" />
-            <Text fontFamily="$poppinsMedium" fontSize={14} color={colors.text} ml={4}>
+            <Text
+              fontFamily="$poppinsMedium"
+              fontSize={14}
+              color={colors.text}
+              ml={4}>
               {rating}
             </Text>
           </Box>
@@ -144,40 +234,81 @@ const VehicleCard = ({item, type, index}: {item: any; type: string; index: numbe
             resizeMode="cover"
           />
         </Box>
-
-        {/* 规格 */}
-        <Text fontFamily="$poppinsRegular" fontSize={12} color={colors.textSecondary} mt={moderateScaleVertical(8)} numberOfLines={1}>
+        <Text
+          fontFamily="$poppinsRegular"
+          fontSize={12}
+          color={colors.textSecondary}
+          mt={moderateScaleVertical(8)}
+          numberOfLines={1}>
           {getSpecs()}
         </Text>
 
-        {/* 距离 + 时间 */}
-        <Box flexDirection="row" alignItems="center" mt={moderateScaleVertical(8)}>
-          <Box flexDirection="row" alignItems="center" mr={moderateScale(16)}>
-            <MaterialIcon name="map-marker" size={16} color={colors.textMuted} />
-            <Text fontFamily="$poppinsMedium" fontSize={13} color={colors.textSecondary} ml={4}>
-              {distance} km away
-            </Text>
-          </Box>
-          <Box flexDirection="row" alignItems="center">
-            <MaterialIcon name="clock-outline" size={16} color={colors.textMuted} />
-            <Text fontFamily="$poppinsRegular" fontSize={13} color={colors.textSecondary} ml={4}>
-              5 min
-            </Text>
-          </Box>
-        </Box>
-
-        {/* 价格 + Ride now 按钮 */}
-        <Box flexDirection="row" alignItems="center" justifyContent="space-between" mt={moderateScaleVertical(12)}>
-          <Text fontFamily="$poppinsBold" fontSize={20} color={colors.primary}>
-            ₹{pricePerKm}
-            <Text fontFamily="$poppinsRegular" fontSize={13} color={colors.textMuted}>/km</Text>
+        {getRegistrationInfo() ? (
+          <Text
+            fontFamily="$poppinsRegular"
+            fontSize={10}
+            color={colors.textMuted}
+            mt={moderateScaleVertical(4)}>
+            {getRegistrationInfo()}
           </Text>
+        ) : null}
+
+        {getAdditionalSpecs() ? (
+          <Box
+            flexDirection="row"
+            alignItems="center"
+            mt={moderateScaleVertical(8)}>
+            <MaterialIcon
+              name="speedometer"
+              size={14}
+              color={colors.textMuted}
+            />
+            <Text
+              fontFamily="$poppinsRegular"
+              fontSize={11}
+              color={colors.textMuted}
+              ml={4}>
+              {getAdditionalSpecs()}
+            </Text>
+          </Box>
+        ) : null}
+        <Box
+          flexDirection="row"
+          alignItems="center"
+          justifyContent="space-between"
+          mt={moderateScaleVertical(12)}>
+          <Box>
+            <Text
+              fontFamily="$poppinsBold"
+              fontSize={20}
+              color={colors.primary}>
+              ₹{pricePerKm}
+              <Text
+                fontFamily="$poppinsRegular"
+                fontSize={13}
+                color={colors.textMuted}>
+                /km
+              </Text>
+            </Text>
+            {getFuelCost() ? (
+              <Text
+                fontFamily="$poppinsRegular"
+                fontSize={11}
+                color={colors.textMuted}
+                mt={2}>
+                {getFuelCost()}
+              </Text>
+            ) : null}
+          </Box>
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => navigation.navigate(NavigationString.VehicleDetail, {vehicle: item})}
+            onPress={() =>
+              navigation.navigate(NavigationString.VehicleDetail, {
+                vehicle: item,
+              })
+            }
             onPressIn={handlePressIn}
-            onPressOut={handlePressOut}
-          >
+            onPressOut={handlePressOut}>
             <Animated.View style={{transform: [{scale: scaleAnim}]}}>
               <Box
                 bgColor={colors.primary}
@@ -185,9 +316,11 @@ const VehicleCard = ({item, type, index}: {item: any; type: string; index: numbe
                 px={moderateScale(20)}
                 py={moderateScaleVertical(8)}
                 alignItems="center"
-                justifyContent="center"
-              >
-                <Text fontFamily="$poppinsSemiBold" fontSize={14} color="#FFFFFF">
+                justifyContent="center">
+                <Text
+                  fontFamily="$poppinsSemiBold"
+                  fontSize={14}
+                  color="#FFFFFF">
                   Ride now
                 </Text>
               </Box>
@@ -226,22 +359,30 @@ const AvailableTransport = () => {
 
       let url = '';
       switch (transportType) {
-        case 'car': url = `${BASE_URL}${GET_CARS.url}`; break;
-        case 'bike': url = `${BASE_URL}${GET_BIKES.url}`; break;
-        case 'parcel': url = `${BASE_URL}${GET_CYCLES.url}`; break;
-        case 'taxi': url = `${BASE_URL}${GET_TAXIS.url}`; break;
-        default: setError('Invalid transport type'); return;
+        case 'car':
+          url = `${BASE_URL}${GET_CARS.url}`;
+          break;
+        case 'bike':
+          url = `${BASE_URL}${GET_BIKES.url}`;
+          break;
+        case 'parcel':
+          url = `${BASE_URL}${GET_CYCLES.url}`;
+          break;
+        case 'taxi':
+          url = `${BASE_URL}${GET_TAXIS.url}`;
+          break;
+        default:
+          setError('Invalid transport type');
+          return;
       }
 
-      const response = await Instance.get(url, {headers: {Authorization: token}});
-      if (response.data.success) {
-        const available = response.data.data.filter(
-          (item: any) => item.availability === 'Available' && item.status === 'InActive',
-        );
-        setVehicles(available);
-      } else {
-        setError('Unable to load vehicles.');
-      }
+      const response = await Instance.get(url, {
+        headers: {Authorization: token},
+      });
+     
+        setVehicles(response.data.data);
+
+      console.log(response.data,"this is respose$$$$$$$$$$$$$$$$$")
     } catch (err: any) {
       setError('Network error. Please try again.');
     } finally {
@@ -264,17 +405,29 @@ const AvailableTransport = () => {
   };
 
   const renderEmpty = () => (
-    <Box flex={1} justifyContent="center" alignItems="center" py={moderateScaleVertical(60)}>
+    <Box
+      flex={1}
+      justifyContent="center"
+      alignItems="center"
+      py={moderateScaleVertical(60)}>
       <LottieView
         source={require('../assets/lotties/loading.json')}
         autoPlay
         loop
         style={{width: moderateScale(160), height: moderateScale(160)}}
       />
-      <Text fontFamily="$poppinsMedium" fontSize={16} color={colors.textSecondary} mt={16}>
+      <Text
+        fontFamily="$poppinsMedium"
+        fontSize={16}
+        color={colors.textSecondary}
+        mt={16}>
         No {activeTab}s available nearby
       </Text>
-      <Text fontFamily="$poppinsRegular" fontSize={13} color={colors.textMuted} mt={4}>
+      <Text
+        fontFamily="$poppinsRegular"
+        fontSize={13}
+        color={colors.textMuted}
+        mt={4}>
         Try changing the vehicle type or check back later
       </Text>
     </Box>
@@ -288,7 +441,10 @@ const AvailableTransport = () => {
         loop
         style={{width: moderateScale(200), height: moderateScale(200)}}
       />
-      <Text fontFamily="$poppinsMedium" fontSize={14} color={colors.textSecondary}>
+      <Text
+        fontFamily="$poppinsMedium"
+        fontSize={14}
+        color={colors.textSecondary}>
         Finding the best rides...
       </Text>
     </Box>
@@ -299,11 +455,13 @@ const AvailableTransport = () => {
       statusBarStyle={isDarkMode ? 'light-content' : 'dark-content'}
       statusBarBackgroundColor={colors.background}
       backgroundColor={colors.background}>
-
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         scrollEventThrottle={16}
-        onScroll={Animated.event([{nativeEvent: {contentOffset: {y: scrollY}}}], {useNativeDriver: false})}
+        onScroll={Animated.event(
+          [{nativeEvent: {contentOffset: {y: scrollY}}}],
+          {useNativeDriver: false},
+        )}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -313,13 +471,16 @@ const AvailableTransport = () => {
           />
         }
         contentContainerStyle={{paddingBottom: moderateScaleVertical(80)}}>
-
         {/* 头部 */}
-        <Box  px={moderateScale(20)}>
+        <Box px={moderateScale(20)}>
           <Text fontFamily="$poppinsBold" fontSize={32} color={colors.text}>
             Ride Now
           </Text>
-          <Text fontFamily="$poppinsRegular" fontSize={16} color={colors.textSecondary} mt={2}>
+          <Text
+            fontFamily="$poppinsRegular"
+            fontSize={16}
+            color={colors.textSecondary}
+            mt={2}>
             Choose your perfect ride
           </Text>
           <Box
@@ -331,10 +492,13 @@ const AvailableTransport = () => {
             flexDirection="row"
             alignItems="center"
             borderWidth={1}
-            borderColor={colors.border}
-          >
+            borderColor={colors.border}>
             <MaterialIcon name="magnify" size={20} color={colors.textMuted} />
-            <Text fontFamily="$poppinsRegular" fontSize={14} color={colors.textMuted} ml={8}>
+            <Text
+              fontFamily="$poppinsRegular"
+              fontSize={14}
+              color={colors.textMuted}
+              ml={8}>
               Where to?
             </Text>
           </Box>
@@ -349,7 +513,7 @@ const AvailableTransport = () => {
               borderRadius: moderateScale(40),
               padding: moderateScale(4),
             }}>
-            {transportTypes.map((type) => {
+            {transportTypes.map(type => {
               const isActive = activeTab === type.id;
               return (
                 <Pressable
@@ -370,10 +534,14 @@ const AvailableTransport = () => {
                     w={moderateScale(16)}
                     h={moderateScale(16)}
                     resizeMode="contain"
-                    style={{tintColor: isActive ? '#FFF' : colors.textSecondary}}
+                    style={{
+                      tintColor: isActive ? '#FFF' : colors.textSecondary,
+                    }}
                   />
                   <Text
-                    fontFamily={isActive ? '$poppinsSemiBold' : '$poppinsMedium'}
+                    fontFamily={
+                      isActive ? '$poppinsSemiBold' : '$poppinsMedium'
+                    }
                     fontSize={13}
                     color={isActive ? '#FFF' : colors.textSecondary}>
                     {type.label}
@@ -386,8 +554,15 @@ const AvailableTransport = () => {
 
         {/* 错误信息 */}
         {error ? (
-          <Box bgColor={isDarkMode ? '#450a0a' : '#FEF2F2'} p={moderateScale(12)} mx={16} borderRadius={12} mt={16}>
-            <Text fontFamily="$poppinsMedium" fontSize={13} color="#EF4444">{error}</Text>
+          <Box
+            bgColor={isDarkMode ? '#450a0a' : '#FEF2F2'}
+            p={moderateScale(12)}
+            mx={16}
+            borderRadius={12}
+            mt={16}>
+            <Text fontFamily="$poppinsMedium" fontSize={13} color="#EF4444">
+              {error}
+            </Text>
           </Box>
         ) : null}
 
@@ -399,7 +574,12 @@ const AvailableTransport = () => {
         ) : (
           <Box px={moderateScale(16)} mt={moderateScaleVertical(8)}>
             {vehicles.map((item, idx) => (
-              <VehicleCard key={item._id} item={item} type={activeTab} index={idx} />
+              <VehicleCard
+                key={item._id}
+                item={item}
+                type={activeTab}
+                index={idx}
+              />
             ))}
           </Box>
         )}

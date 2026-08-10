@@ -15,7 +15,11 @@ import MapView, {
   Marker,
   PROVIDER_GOOGLE,
 } from 'react-native-maps';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {Container} from '../components/Container';
 import {colors as originalColors} from '../constants/colors';
 import {HamburgerIcon, Notification} from '../components/Icons';
@@ -27,14 +31,12 @@ import Icons from '../assets/Icons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useTheme} from '../constants/ThemeContext';
 import {useDispatch} from 'react-redux';
-import {
-  loadUserFromStorage,
-  saveUserToStorage,
-} from '../store/slice/UserSlice';
+import {loadUserFromStorage, saveUserToStorage} from '../store/slice/UserSlice';
 import {
   stopWatchingLocation,
   watchLocationContinuously,
   getCurrentLocationOnce,
+  resetLocationAlertFlags,
 } from '../utils/locationHelper';
 import socketServices from '../utils/socketServices';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -62,6 +64,36 @@ const fontFamily = {
   semiBold: 'Inter-SemiBold',
   medium: 'Inter-Medium',
   regular: 'Inter-Regular',
+};
+
+let locationAlertsShown = { unavailable: false, permission: false };
+
+const showLocationUnavailableAlert = () => {
+  if (!locationAlertsShown.unavailable) {
+    locationAlertsShown.unavailable = true;
+    Alert.alert(
+      'Location Unavailable',
+      'Unable to get location. Please enable GPS and try again.',
+      [{ text: 'OK', onPress: () => { locationAlertsShown.unavailable = false; } }],
+    );
+  }
+};
+
+const showLocationPermissionAlert = () => {
+  if (!locationAlertsShown.permission) {
+    locationAlertsShown.permission = true;
+    Alert.alert(
+      'Location Permission Required',
+      'Please enable location permissions in settings.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Open Settings',
+          onPress: () => Linking.openSettings(),
+        },
+      ],
+    );
+  }
 };
 
 const colors = {
@@ -102,6 +134,7 @@ const Home = () => {
   const {isDarkMode} = useTheme();
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
+  const route = useRoute<any>();
   const mapRef = useRef<MapView>(null);
   const markerRef = useRef<any>(null);
   const locationWatcherRef = useRef<any>(null);
@@ -110,7 +143,10 @@ const Home = () => {
   const [isMapLayoutRendered, setIsMapLayoutRendered] = useState(false);
 
   const initialZoomDoneRef = useRef(false);
-  const latestLocationRef = useRef<{latitude: number; longitude: number} | null>(null);
+  const latestLocationRef = useRef<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
   // Setup state with correct Ranchi coordinates by default
   const [state, setState] = useState<State>({
@@ -134,11 +170,16 @@ const Home = () => {
   const [ongoingRide, setOngoingRide] = useState<any>(null);
   const [showOngoingRideModal, setShowOngoingRideModal] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
-  const [alertType, setAlertType] = useState<'confirmation' | 'rating' | null>(null);
+  const [alertType, setAlertType] = useState<'confirmation' | 'rating' | null>(
+    null,
+  );
   const [completedRideData, setCompletedRideData] = useState<any>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [completedRideForPayment, setCompletedRideForPayment] = useState<any>(null);
-  const [selectedRideType, setSelectedRideType] = useState<'bike' | 'car' | 'auto'>('auto');
+  const [completedRideForPayment, setCompletedRideForPayment] =
+    useState<any>(null);
+  const [selectedRideType, setSelectedRideType] = useState<
+    'bike' | 'car' | 'auto'
+  >('auto');
 
   const [followUser, setFollowUser] = useState(true);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
@@ -147,7 +188,9 @@ const Home = () => {
 
   // ---------- Enforced Camera Controller API ----------
   const forceCameraZoom = useCallback((lat: number, lng: number) => {
-    if (!mapRef.current) {return;}
+    if (!mapRef.current) {
+      return;
+    }
 
     console.log(`🚀 Forcing Zoom Camera to Target: ${lat}, ${lng}`);
     mapRef.current.animateCamera(
@@ -157,7 +200,7 @@ const Home = () => {
         pitch: 0,
         heading: 0,
       },
-      {duration: 1200}
+      {duration: 1200},
     );
   }, []);
 
@@ -198,6 +241,7 @@ const Home = () => {
 
   // ---------- Get live location device once ----------
   const getLocationOnce = async (retry = true): Promise<Location | null> => {
+    resetLocationAlertFlags();
     setIsGettingLocation(true);
     try {
       const locationData = await getCurrentLocationOnce();
@@ -275,10 +319,14 @@ const Home = () => {
 
       const initializeLocation = async () => {
         const freshLocation = await getLocationOnce();
-        if (!isActive) {return;}
+        if (!isActive) {
+          return;
+        }
         if (!freshLocation) {
           retryTimeout = setTimeout(() => {
-            if (isActive) {initializeLocation();}
+            if (isActive) {
+              initializeLocation();
+            }
           }, 3000);
         }
       };
@@ -286,11 +334,15 @@ const Home = () => {
       initializeLocation();
 
       const startWatcher = () => {
-        if (locationWatcherRef.current) {stopWatchingLocation();}
+        if (locationWatcherRef.current) {
+          stopWatchingLocation();
+        }
 
         const watcher = watchLocationContinuously(
           (location: any) => {
-            if (!isActive) {return;}
+            if (!isActive) {
+              return;
+            }
             const {latitude, longitude} = location;
 
             latestLocationRef.current = {latitude, longitude};
@@ -303,7 +355,12 @@ const Home = () => {
             animateMarker(latitude, longitude);
 
             // Dynamically Lock Map View Camera if route is not generated
-            if (followUser && isMapReady && isMapLayoutRendered && !showLocationRoute) {
+            if (
+              followUser &&
+              isMapReady &&
+              isMapLayoutRendered &&
+              !showLocationRoute
+            ) {
               mapRef.current?.animateCamera({
                 center: {latitude, longitude},
               });
@@ -317,11 +374,10 @@ const Home = () => {
             }
           },
           (error: any) => {
-            if (error.code === 2) {
-              Alert.alert('Location Disabled', 'Please enable location.', [
-                {text: 'Cancel', style: 'cancel'},
-                {text: 'Open Settings', onPress: () => Linking.openSettings()},
-              ]);
+            if (error.code === 1) {
+              showLocationPermissionAlert();
+            } else if (error.code === 2 || error.code === 3) {
+              showLocationUnavailableAlert();
             }
           },
         );
@@ -333,12 +389,19 @@ const Home = () => {
       return () => {
         isActive = false;
         clearTimeout(retryTimeout);
+        locationAlertsShown = { unavailable: false, permission: false };
         if (locationWatcherRef.current) {
           stopWatchingLocation();
           locationWatcherRef.current = null;
         }
       };
-    }, [socketInitialized, followUser, isMapReady, isMapLayoutRendered, showLocationRoute])
+    }, [
+      socketInitialized,
+      followUser,
+      isMapReady,
+      isMapLayoutRendered,
+      showLocationRoute,
+    ]),
   );
 
   // ---------- Storage Bootloader Loader ----------
@@ -352,22 +415,64 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    if (!userLocalData?.token) {return;}
+    if (!userLocalData?.token) {
+      return;
+    }
     const initSocket = async () => {
       if (socketServices.isConnected()) {
         setSocketInitialized(true);
         socketServices.on('nearbyDriverList', setNearbyDrivers);
         socketServices.emit('onGoing_booking', {});
         socketServices.on('onGoing_Booking_List', handleOngoingBooking);
-        socketServices.on('driver_booking_response', handleDriverBookingResponse);
+        socketServices.on(
+          'driver_booking_response',
+          handleDriverBookingResponse,
+        );
       }
     };
     initSocket();
     return () => {
-      socketServices.removeListener('onGoing_Booking_List', handleOngoingBooking);
-      socketServices.removeListener('driver_booking_response', handleDriverBookingResponse);
+      socketServices.removeListener(
+        'onGoing_Booking_List',
+        handleOngoingBooking,
+      );
+      socketServices.removeListener(
+        'driver_booking_response',
+        handleDriverBookingResponse,
+      );
     };
   }, [userLocalData]);
+
+  useEffect(() => {
+    const ongoingRideFromNav = route.params?.ongoingRide;
+    if (ongoingRideFromNav) {
+      if (
+        ongoingRideFromNav.bookingStatus === 'ongoing' &&
+        ongoingRideFromNav.rideStatus === 'rideNotPicked'
+      ) {
+        setOngoingRide(ongoingRideFromNav);
+        setShowOngoingRideModal(true);
+      } else if (
+        ongoingRideFromNav.bookingStatus === 'ongoing' &&
+        ongoingRideFromNav.rideStatus === 'ridePicked'
+      ) {
+        setOngoingRide(ongoingRideFromNav);
+        setAlertType('confirmation');
+        setShowAlert(true);
+        setShowOngoingRideModal(false);
+      } else if (
+        ongoingRideFromNav.bookingStatus === 'completed' &&
+        ongoingRideFromNav.rideStatus === 'ridePicked'
+      ) {
+        setCompletedRideForPayment(ongoingRideFromNav);
+        setShowPaymentModal(true);
+        setOngoingRide(null);
+      } else {
+        setOngoingRide(null);
+        setShowOngoingRideModal(false);
+      }
+    }
+  }, [route.params?.ongoingRide]);
 
   const setNearbyDrivers = (data: any) => {};
 
@@ -381,16 +486,27 @@ const Home = () => {
   };
 
   const handleRideStatusChange = (ride: any) => {
-    if (!ride) {return;}
-    if (ride.bookingStatus === 'ongoing' && ride.rideStatus === 'rideNotPicked') {
+    if (!ride) {
+      return;
+    }
+    if (
+      ride.bookingStatus === 'ongoing' &&
+      ride.rideStatus === 'rideNotPicked'
+    ) {
       setOngoingRide(ride);
       setShowOngoingRideModal(true);
-    } else if (ride.bookingStatus === 'ongoing' && ride.rideStatus === 'ridePicked') {
+    } else if (
+      ride.bookingStatus === 'ongoing' &&
+      ride.rideStatus === 'ridePicked'
+    ) {
       setOngoingRide(ride);
       setAlertType('confirmation');
       setShowAlert(true);
       setShowOngoingRideModal(false);
-    } else if (ride.bookingStatus === 'completed' && ride.rideStatus === 'ridePicked') {
+    } else if (
+      ride.bookingStatus === 'completed' &&
+      ride.rideStatus === 'ridePicked'
+    ) {
       setCompletedRideForPayment(ride);
       setShowPaymentModal(true);
       setOngoingRide(null);
@@ -409,8 +525,12 @@ const Home = () => {
 
   const getEstimatedFare = (type?: string) => {
     const distance = state.distance || 0;
-    if (type === 'car') {return 50 + distance * 12;}
-    if (type === 'bike') {return 20 + distance * 5;}
+    if (type === 'car') {
+      return 50 + distance * 12;
+    }
+    if (type === 'bike') {
+      return 20 + distance * 5;
+    }
     return 35 + distance * 8;
   };
 
@@ -436,26 +556,26 @@ const Home = () => {
           width: 56,
           height: 56,
           borderRadius: 28,
-       
-            
           alignItems: 'center',
           justifyContent: 'center',
           marginBottom: 8,
         }}>
         <Image
-          resizeMode="contain"
-          source={
-            type === 'bike'
-              ? require('../assets/images/bike.png')
-              : type === 'auto'
-              ? require('../assets/images/auto.png')
-              : require('../assets/images/car.png')
-          }
-          style={{
-            width: 90,
-            height: 90,
-          }}
-        />
+  resizeMode="contain"
+  source={
+    type === 'car'
+      ? require('../assets/images/car.png')
+      : type === 'auto'
+      ? require('../assets/images/auto.png')
+      : type === 'bike'
+      ? require('../assets/images/bike.png')
+      : require('../assets/images/car.png') // default
+  }
+  style={{
+    width: 90,
+    height: 90,
+  }}
+/>
       </View>
       <Text
         style={{
@@ -487,7 +607,6 @@ const Home = () => {
     <Container
       statusBarStyle={isDarkMode ? 'light-content' : 'dark-content'}
       backgroundColor={isDarkMode ? '#111827' : '#F9FAFB'}>
-
       {/* Header */}
       <LinearGradient
         colors={isDarkMode ? ['#1F2937', '#111827'] : ['#FFF', '#F9FAFB']}
@@ -499,15 +618,18 @@ const Home = () => {
           paddingBottom: 16,
           alignItems: 'center',
         }}>
-        <Pressable
-          onPress={() => navigation.openDrawer()}
-          style={{
-          }}>
+        <Pressable onPress={() => navigation.openDrawer()} style={{}}>
           <HamburgerIcon />
         </Pressable>
         <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
-          
-          <Text style={{fontFamily: fontFamily.bold, fontSize: 20, color: isDarkMode ? '#F9FAFB' : '#111827' ,textTransform: 'uppercase',fontweight: '800'}}>
+          <Text
+            style={{
+              fontFamily: fontFamily.bold,
+              fontSize: 20,
+              color: isDarkMode ? '#F9FAFB' : '#111827',
+              textTransform: 'uppercase',
+              fontweight: '800',
+            }}>
             Dharam Cab
           </Text>
         </View>
@@ -536,7 +658,6 @@ const Home = () => {
         initialRegion={DEFAULT_RANCHI_REGION}
         onLayout={() => setIsMapLayoutRendered(true)}
         onMapReady={() => setIsMapReady(true)}>
-
         <Marker.Animated
           ref={markerRef}
           coordinate={state.coordinate as any}
@@ -568,29 +689,28 @@ const Home = () => {
           </Marker>
         )}
 
-{showLocationRoute && state.destinationCords.latitude !== 0 && (
-           <MapViewDirections
-             origin={state.curLoc}
-             destination={state.destinationCords}
-             apikey={GOOGLE_API_KEY}
-             strokeWidth={10}
-             
-             strokeColor={colors.themePrimary}
-             edgePadding={{top: 50, right: 50, bottom: 300, left: 50}}
-             onReady={result => {
-               setState(prev => ({
-                 ...prev,
-                 distance: result.distance,
-                 routeDuration: result.duration.toString(),
-               }));
-               mapRef.current?.fitToCoordinates(result.coordinates, {
-                 edgePadding: {top: 50, right: 50, bottom: 320, left: 50},
-                 animated: true,
-               });
-             }}
-             onError={err => console.log('Directions error:', err)}
-           />
-         )}
+        {showLocationRoute && state.destinationCords.latitude !== 0 && (
+          <MapViewDirections
+            origin={state.curLoc}
+            destination={state.destinationCords}
+            apikey={GOOGLE_API_KEY}
+            strokeWidth={10}
+            strokeColor={colors.themePrimary}
+            edgePadding={{top: 50, right: 50, bottom: 300, left: 50}}
+            onReady={result => {
+              setState(prev => ({
+                ...prev,
+                distance: result.distance,
+                routeDuration: result.duration.toString(),
+              }));
+              mapRef.current?.fitToCoordinates(result.coordinates, {
+                edgePadding: {top: 50, right: 50, bottom: 320, left: 50},
+                animated: true,
+              });
+            }}
+            onError={err => console.log('Directions error:', err)}
+          />
+        )}
       </MapView>
 
       {/* Bottom Sheet UI Option Panels */}
@@ -653,7 +773,11 @@ const Home = () => {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                <MaterialIcons name="my-location" size={22} color={colors.themePrimary} />
+                <MaterialIcons
+                  name="my-location"
+                  size={22}
+                  color={colors.themePrimary}
+                />
               </View>
               <View style={{flex: 1}}>
                 <Text
@@ -665,11 +789,20 @@ const Home = () => {
                   }}>
                   {state.curLoc.address || 'Select pickup location'}
                 </Text>
-                <Text style={{fontFamily: fontFamily.regular, fontSize: 11, color: isDarkMode ? '#9CA3AF' : '#6B7280'}}>
+                <Text
+                  style={{
+                    fontFamily: fontFamily.regular,
+                    fontSize: 11,
+                    color: isDarkMode ? '#9CA3AF' : '#6B7280',
+                  }}>
                   Current location
                 </Text>
               </View>
-              <MaterialIcons name="keyboard-arrow-right" size={24} color="#9CA3AF" />
+              <MaterialIcons
+                name="keyboard-arrow-right"
+                size={24}
+                color="#9CA3AF"
+              />
             </Pressable>
 
             <Pressable
@@ -700,7 +833,11 @@ const Home = () => {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                <MaterialIcons name="location-on" size={22} color={colors.emeraldGreen} />
+                <MaterialIcons
+                  name="location-on"
+                  size={22}
+                  color={colors.emeraldGreen}
+                />
               </View>
               <View style={{flex: 1}}>
                 <Text
@@ -712,176 +849,37 @@ const Home = () => {
                   }}>
                   {state.destinationCords?.address || 'Where to?'}
                 </Text>
-                <Text style={{fontFamily: fontFamily.regular, fontSize: 11, color: isDarkMode ? '#9CA3AF' : '#6B7280'}}>
-                  {state.destinationCords?.address ? 'Destination set' : 'Enter destination address'}
+                <Text
+                  style={{
+                    fontFamily: fontFamily.regular,
+                    fontSize: 11,
+                    color: isDarkMode ? '#9CA3AF' : '#6B7280',
+                  }}>
+                  {state.destinationCords?.address
+                    ? 'Destination set'
+                    : 'Enter destination address'}
                 </Text>
               </View>
             </Pressable>
 
             <View style={{marginTop: 8, paddingHorizontal: 16}}>
-              <Text style={{fontFamily: fontFamily.semiBold, fontSize: 16, marginBottom: 14, paddingLeft: 4}}>
+              <Text
+                style={{
+                  fontFamily: fontFamily.semiBold,
+                  fontSize: 16,
+                  marginBottom: 14,
+                  paddingLeft: 4,
+                }}>
                 Choose your ride
               </Text>
               <View style={{flexDirection: 'row', gap: 12}}>
+                {renderRideTypeCard('car', 'Car', Icons.Car)}
                 {renderRideTypeCard('auto', 'Auto', Icons.Cycle)}
                 {renderRideTypeCard('bike', 'Bike', Icons.Bike)}
-                {renderRideTypeCard('car', 'Car', Icons.Car)}
               </View>
             </View>
 
-        {!state.destinationCords?.address && (
-  <View
-    style={{
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      alignItems: 'flex-start',
-      paddingHorizontal: 16,
-      paddingVertical: 16,
-      marginTop: 8,
-      backgroundColor: "white",
-      borderRadius: 20,
-      marginHorizontal: 16,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 8,
-      elevation: 3,
-      backdropFilter: 'blur(10px)',
-      
-    }}>
-    {/* Schedule */}
-    <TouchableOpacity
-      activeOpacity={0.7}
-      style={{ alignItems: 'center', flex: 1 }}
-      onPress={() => { /* your schedule action */ }}>
-      <LinearGradient
-        colors={[newTheme.warning, '#FBBF24']}
-        style={{
-          width: 52,
-          height: 52,
-          borderRadius: 26,
-          alignItems: 'center',
-          justifyContent: 'center',
-          shadowColor: '#FBBF24',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 6,
-          elevation: 4,
-        }}>
-        <MaterialIcons name="schedule" size={26} color="#FFF" />
-      </LinearGradient>
-      <Text
-        style={{
-          fontSize: 12,
-          fontWeight: '500',
-          marginTop: 8,
-          color: isDarkMode ? '#E2E8F0' : '#1E293B',
-          letterSpacing: 0.3,
-        }}>
-        Schedule
-      </Text>
-    </TouchableOpacity>
-
-    {/* Offers */}
-    <TouchableOpacity
-      activeOpacity={0.7}
-      style={{ alignItems: 'center', flex: 1 }}
-      onPress={() => { /* your offers action */ }}>
-      <LinearGradient
-        colors={[newTheme.secondary, newTheme.secondaryLight]}
-        style={{
-          width: 52,
-          height: 52,
-          borderRadius: 26,
-          alignItems: 'center',
-          justifyContent: 'center',
-          shadowColor: newTheme.secondary,
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 6,
-          elevation: 4,
-        }}>
-        <MaterialIcons name="local-offer" size={26} color="#FFF" />
-      </LinearGradient>
-      <Text
-        style={{
-          fontSize: 12,
-          fontWeight: '500',
-          marginTop: 8,
-          color: isDarkMode ? '#E2E8F0' : '#1E293B',
-          letterSpacing: 0.3,
-        }}>
-        Offers
-      </Text>
-    </TouchableOpacity>
-
-    {/* Favorites */}
-    <TouchableOpacity
-      activeOpacity={0.7}
-      style={{ alignItems: 'center', flex: 1 }}
-      onPress={() => navigation.navigate(NavigationString.Favourite)}>
-      <LinearGradient
-        colors={[newTheme.accent, newTheme.accentLight]}
-        style={{
-          width: 52,
-          height: 52,
-          borderRadius: 26,
-          alignItems: 'center',
-          justifyContent: 'center',
-          shadowColor: newTheme.accent,
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 6,
-          elevation: 4,
-        }}>
-        <MaterialIcons name="favorite-border" size={26} color="#FFF" />
-      </LinearGradient>
-      <Text
-        style={{
-          fontSize: 12,
-          fontWeight: '500',
-          marginTop: 8,
-          color: isDarkMode ? '#E2E8F0' : '#1E293B',
-          letterSpacing: 0.3,
-        }}>
-        Favorites
-      </Text>
-    </TouchableOpacity>
-
-    {/* History */}
-    <TouchableOpacity
-      activeOpacity={0.7}
-      style={{ alignItems: 'center', flex: 1 }}
-      onPress={() => navigation.navigate(NavigationString.History)}>
-      <LinearGradient
-        colors={['#A78BFA', '#C4B5FD']}
-        style={{
-          width: 52,
-          height: 52,
-          borderRadius: 26,
-          alignItems: 'center',
-          justifyContent: 'center',
-          shadowColor: '#A78BFA',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 6,
-          elevation: 4,
-        }}>
-        <MaterialIcons name="history" size={26} color="#FFF" />
-      </LinearGradient>
-      <Text
-        style={{
-          fontSize: 12,
-          fontWeight: '500',
-          marginTop: 8,
-          color: isDarkMode ? '#E2E8F0' : '#1E293B',
-          letterSpacing: 0.3,
-        }}>
-        History
-      </Text>
-    </TouchableOpacity>
-  </View>
-)}
+            
             {state.destinationCords?.address && (
               <View style={{paddingHorizontal: 20, marginTop: 12}}>
                 <PrimaryButton

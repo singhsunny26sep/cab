@@ -1,8 +1,31 @@
 import {PermissionsAndroid, Platform, Linking, Alert} from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
-import axios from 'axios';
+import axios, {AxiosResponse} from 'axios';
 import {GOOGLE_API_KEY} from '../constants/contants';
+
+let locationAlertsShown = { unavailable: false, permission: false };
+
+const showLocationUnavailableAlert = () => {
+  if (!locationAlertsShown.unavailable) {
+    locationAlertsShown.unavailable = true;
+   
+  }
+};
+
+const showLocationPermissionAlert = () => {
+  if (!locationAlertsShown.permission) {
+    locationAlertsShown.permission = true;
+    Alert.alert(
+      'Location Permission Required',
+      'Please enable location permissions in settings',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Open Settings', onPress: () => Linking.openSettings() },
+      ],
+    );
+  }
+};
 
 // Common location permission types for Android and iOS
 const LOCATION_PERMISSIONS = {
@@ -17,7 +40,7 @@ const fetchAddress = async (latitude: number, longitude: number) => {
   try {
     // Using Google Geocoding API instead of Geoapify
     const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}`;
-    const response = await axios.get(url);
+    const response: AxiosResponse = await axios.get(url, { timeout: 10000 });
 
     if (response.data?.status === 'OK' && response.data?.results?.[0]) {
       const addressData = response.data.results[0];
@@ -57,56 +80,22 @@ export const getCurrentLocationOnce = async () => {
       return null;
     }
 
-    const isLocationEnabled = await checkDeviceLocationServices();
-    if (!isLocationEnabled) {
-      Alert.alert(
-        'Location Services Disabled',
-        'Please enable device location services to get your current location',
-        [
-          {text: 'Cancel', style: 'cancel'},
-          {text: 'Open Settings', onPress: openLocationSettings},
-        ],
-      );
-      return null;
-    }
-
     const position: any = await new Promise((resolve, reject) => {
       Geolocation.getCurrentPosition(
         position => resolve(position),
         error => {
           console.warn('Location error:', error);
-          if (error.code === error.PERMISSION_DENIED) {
-            Alert.alert(
-              'Location Permission Required',
-              'Please enable location permissions in settings',
-              [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Open Settings', onPress: () => Linking.openSettings() },
-              ],
-            );
-          } else if (
-            error.code === error.POSITION_UNAVAILABLE ||
-            error.code === error.TIMEOUT
-          ) {
-            Alert.alert(
-              'Location Taking Too Long',
-              'Your location is taking longer than usual to find. Please ensure you have a clear view of the sky or try moving to an open area.',
-              [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Try Again', onPress: () => getCurrentLocationOnce() },
-              ],
-            );
+          if (error.code === 1) {
+            showLocationPermissionAlert();
+          } else if (error.code === 2 || error.code === 3) {
+            showLocationUnavailableAlert();
           }
           reject(error);
         },
         {
           enableHighAccuracy: true,
-          timeout: 60000,
-          maximumAge: 30000,
-          distanceFilter: 10,
-          interval: 2000,
-          fastestInterval: 1000,
-          useSignificantChanges: false,
+          timeout: 20000,
+          maximumAge: 60000,
         },
       );
     });
@@ -139,16 +128,13 @@ export const checkDeviceLocationServices = async () => {
     Geolocation.getCurrentPosition(
       () => resolve(true),
       (error: any) => {
-        if (
-          error.code === error.PERMISSION_DENIED ||
-          error.code === error.SERVICE_DISABLED
-        ) {
+        if (error.code === 2 || error.code === 3) {
           resolve(false);
         } else {
           resolve(true);
         }
       },
-      {enableHighAccuracy: true, timeout: 500},
+      {enableHighAccuracy: false, timeout: 5000, maximumAge: 10000},
     );
   });
 };
@@ -169,23 +155,16 @@ export const openLocationSettings = () => {
 // Request appropriate location permissions
 export const requestLocationPermissions = async () => {
   try {
-    // First check if device location is enabled
-    const isLocationEnabled = await checkDeviceLocationServices();
-    if (!isLocationEnabled) {
-      Alert.alert(
-        'Location Services Disabled',
-        'Please enable device location services to use this feature',
-        [
-          {text: 'Cancel', style: 'cancel'},
-          {text: 'Open Settings', onPress: openLocationSettings},
-        ],
-      );
-      return false;
-    }
-
     // Handle permissions based on platform
     if (Platform.OS === 'android') {
-      // Request foreground permission first
+      // First check if permission is already granted
+      const foregroundCheck = await check(LOCATION_PERMISSIONS.android.foreground);
+      
+      if (foregroundCheck === RESULTS.GRANTED) {
+        return true;
+      }
+
+      // Request foreground permission first - this is essential for getting location
       const foregroundStatus = await request(
         LOCATION_PERMISSIONS.android.foreground,
       );
@@ -214,18 +193,8 @@ export const requestLocationPermissions = async () => {
         return false;
       }
 
-      // Then request background permission
-      const backgroundStatus = await request(
-        LOCATION_PERMISSIONS.android.background,
-      );
-
-      if (backgroundStatus !== RESULTS.GRANTED) {
-        console.log(
-          'Background location permission denied - app will work with foreground only',
-        );
-        // We still return true because we have foreground permission
-      }
-
+      // Background permission is optional and only needed for Android 10+
+      // Skip background permission for now - foreground is sufficient for current location
       return true;
     } else {
       // iOS - request when-in-use first
@@ -253,7 +222,6 @@ export const requestLocationPermissions = async () => {
         );
         return false;
       } else if (whenInUseStatus === RESULTS.BLOCKED) {
-        // Permission was denied and cannot be requested again without opening settings
         Alert.alert(
           'Location Permission Required',
           'Please enable location permissions in settings to use this feature',
@@ -284,9 +252,8 @@ export const watchLocationContinuously = (
     }
 
     // Start watching with more frequent updates
-    watchId = Geolocation.watchPosition(
+watchId = Geolocation.watchPosition(
       position => {
-        // console.log('New location received at HELPERRRRRRRRR:', position.coords);
         const coords = {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
@@ -305,28 +272,15 @@ export const watchLocationContinuously = (
         }
 
         // Automatically stop watching on permission errors
-        if (error.code === error.PERMISSION_DENIED) {
+        if (error.code === 1) {
           stopWatchingLocation();
         }
       },
       {
-        //   enableHighAccuracy: true,
-        //   // distanceFilter: Platform.OS === 'ios' ? 0 : 5,
-        //   distanceFilter: 1,
-        //   interval: 1000,
-        //   fastestInterval: 3000,
-        //   useSignificantChanges: false,
-        // //   showsBackgroundLocationIndicator: Platform.OS === 'ios',
-        //   // timeout: 20000,
-
         enableHighAccuracy: true,
         timeout: 10000,
         maximumAge: 60000,
-
-        distanceFilter: 0,
-        interval: 1000,
-        fastestInterval: 1000,
-        useSignificantChanges: false,
+        distanceFilter: 5,
       },
     );
 
@@ -371,4 +325,8 @@ export const checkLocationPermissionStatus = async () => {
     console.warn('Error checking permission status:', error);
     return null;
   }
+};
+
+export const resetLocationAlertFlags = () => {
+  locationAlertsShown = { unavailable: false, permission: false };
 };

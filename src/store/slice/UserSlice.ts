@@ -9,6 +9,7 @@ interface Location {
   city?: string;
   state?: string;
   country?: string;
+  routeDurationinMinutes?: number;
 }
 
 // Define the initial state's types for the user slice
@@ -55,6 +56,7 @@ const userSlice = createSlice({
         address: action.payload.address,
         city: action.payload.city,
         distance: action.payload.distance,
+        routeDurationinMinutes: action.payload.routeDurationinMinutes,
       };
     },
     setDestinationByFavorite: (state, action: PayloadAction<boolean>) => {
@@ -64,7 +66,7 @@ const userSlice = createSlice({
       state.favoriteAddresses = action.payload;
     },
     setDropDistance: (state, action: PayloadAction<any>) => {
-      state.dropDetails = action.payload;
+      state.dropDistance = action.payload;
     },
     setProfileData: (state, action: PayloadAction<any>) => {
       state.profileData = action.payload;

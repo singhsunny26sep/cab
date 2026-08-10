@@ -212,6 +212,7 @@ const Profile = () => {
       setLoading(false);
       if (response.data.success) {
         const profileData = response.data.data;
+        console.log('Profile Data+++++++++++++++++++', profileData);
         setSelectedImage(profileData?.imgUrl);
         dispatch(setProfileData({profileData}));
         const currentUserData: any = (await loadUserFromStorage()) || {};
@@ -261,7 +262,7 @@ const Profile = () => {
             await AsyncStorage.clear();
             navigation.reset({
               index: 0,
-              routes: [{name: 'Login'}],
+              routes: [{name: 'SignIn'}],
             });
           },
         },
@@ -461,15 +462,7 @@ const Profile = () => {
                 color={isDarkMode ? colors.white : colors.charcoalGray}>
                 {userLocalData?.profileData?.name || 'User Name'}
               </Text>
-              <Text
-                fontFamily={'$poppinsRegular'}
-                fontSize={14}
-                color={colors.gray4}
-                mt={moderateScaleVertical(4)}>
-                {userLocalData?.profileData?.email || 'user@email.com'}
-              </Text>
             </Box>
-
             {/* Rating & Trips - clean pills */}
             <Box
               flexDirection="row"
